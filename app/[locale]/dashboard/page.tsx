@@ -6,9 +6,7 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { LoginForm } from "@/components/dashboard/LoginForm";
 import { ProspectList } from "@/components/dashboard/ProspectList";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
-import type { ProspectRecord } from "@/lib/agent/types";
-import { readFile } from "fs/promises";
-import { join } from "path";
+import { readProspects } from "@/lib/agent/save-prospect";
 
 export const metadata: Metadata = {
   title: "Dashboard — Roster",
@@ -18,13 +16,8 @@ export const metadata: Metadata = {
 // Force le rendu dynamique (les données changent à chaque requête)
 export const dynamic = "force-dynamic";
 
-async function getProspects(): Promise<ProspectRecord[]> {
-  try {
-    const raw = await readFile(join("/tmp", "roster-data", "prospects.json"), "utf-8");
-    return (JSON.parse(raw) as ProspectRecord[]).reverse();
-  } catch {
-    return [];
-  }
+async function getProspects() {
+  return (await readProspects()).reverse();
 }
 
 export default async function DashboardPage({

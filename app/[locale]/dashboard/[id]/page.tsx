@@ -5,9 +5,7 @@ import { isAuthenticated } from "@/lib/auth";
 import { Container } from "@/components/ui/Container";
 import { LoginForm } from "@/components/dashboard/LoginForm";
 import { ProspectDetail } from "@/components/dashboard/ProspectDetail";
-import type { ProspectRecord } from "@/lib/agent/types";
-import { readFile } from "fs/promises";
-import { join } from "path";
+import { readProspects } from "@/lib/agent/save-prospect";
 
 export const metadata: Metadata = {
   title: "Prospect — Dashboard Roster",
@@ -16,14 +14,9 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-async function getProspect(id: string): Promise<ProspectRecord | null> {
-  try {
-    const raw = await readFile(join("/tmp", "roster-data", "prospects.json"), "utf-8");
-    const prospects = JSON.parse(raw) as ProspectRecord[];
-    return prospects.find((p) => p.id === id) ?? null;
-  } catch {
-    return null;
-  }
+async function getProspect(id: string) {
+  const prospects = await readProspects();
+  return prospects.find((p) => p.id === id) ?? null;
 }
 
 export default async function ProspectPage({

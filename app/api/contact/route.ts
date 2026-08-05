@@ -1,27 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { contactFormSchema } from "@/lib/validations";
 import { sendContactNotification } from "@/lib/email";
-
-// Rate limiting en mémoire, volontairement simple pour un MVP mono-instance.
-// À remplacer par un store partagé (Redis/Upstash) avant un scaling multi-instance.
-const submissionsByIp = new Map<string, number[]>();
-const WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_SUBMISSIONS_PER_WINDOW = 5;
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = (submissionsByIp.get(ip) ?? []).filter(
-    (t) => now - t < WINDOW_MS,
-  );
-  timestamps.push(now);
-  submissionsByIp.set(ip, timestamps);
-  return timestamps.length > MAX_SUBMISSIONS_PER_WINDOW;
-}
+import { rateLimiters } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") ?? "unknown";
 
-  if (isRateLimited(ip)) {
+  if (rateLimiters.contact(ip)) {
     return NextResponse.json(
       { error: "Trop de tentatives. Merci de réessayer plus tard." },
       { status: 429 },

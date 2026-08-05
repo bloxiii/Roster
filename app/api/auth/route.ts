@@ -1,35 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SESSION_TOKEN } from "@/lib/auth";
+import { rateLimiters } from "@/lib/rate-limit";
 
 /**
  * Auth MVP : un mot de passe unique configuré par variable d'environnement.
- *
- * En production, remplacer par :
- * - NextAuth.js avec providers OAuth (Google, email magic link)
- * - Table utilisateurs en DB avec hash bcrypt
- * - Sessions JWT signées
- *
- * Pour le MVP / démo, un cookie signé avec le hash du mot de passe suffit.
+ * Le cookie contient SESSION_SECRET — plus de hash devinable.
  */
 
 const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD ?? "roster-demo-2026";
 const COOKIE_NAME = "roster_session";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 jours
 
-function makeSessionToken(password: string): string {
-  // Hash simple pour le MVP — pas de crypto lourde nécessaire ici
-  // car le mot de passe est vérifié côté serveur, pas côté client.
-  let hash = 0;
-  const str = `roster:${password}:${DASHBOARD_PASSWORD}`;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash + char) | 0;
-  }
-  return `rs_${Math.abs(hash).toString(36)}`;
-}
-
-export const SESSION_TOKEN = makeSessionToken(DASHBOARD_PASSWORD);
-
 export async function POST(request: NextRequest) {
+  // [IMPORTANT-1] Rate limiting — 5 tentatives / 15 min par IP
+  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  if (rateLimiters.auth(ip)) {
+    return NextResponse.json(
+      { error: "Trop de tentatives. Réessayez dans 15 minutes." },
+      { status: 429 },
+    );
+  }
+
   let body: { password: string };
   try {
     body = await request.json();

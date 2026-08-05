@@ -15,3 +15,23 @@ export const contactFormSchema = z.object({
 });
 
 export type ContactFormInput = z.infer<typeof contactFormSchema>;
+
+/**
+ * Schéma de validation des requêtes envoyées à /api/agent/chat.
+ * Empêche les roles arbitraires, les messages géants (coûts tokens),
+ * et les conversations anormalement longues.
+ */
+export const chatRequestSchema = z.object({
+  conversationId: z.string().max(100).optional(),
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().min(1).max(2000),
+      }),
+    )
+    .min(1)
+    .max(50),
+});
+
+export type ChatRequestInput = z.infer<typeof chatRequestSchema>;

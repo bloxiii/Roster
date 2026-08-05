@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AGENT_SYSTEM_PROMPT, AGENT_CONFIG } from "@/lib/agent/system-prompt";
-import type { ChatRequest, ChatResponse, ProspectData, AgentMessage } from "@/lib/agent/types";
+import type { ChatResponse, ProspectData } from "@/lib/agent/types";
 import { randomUUID } from "crypto";
 import { handlePreflight, withCors } from "@/lib/cors";
+import { chatRequestSchema } from "@/lib/validations";
+import { rateLimiters } from "@/lib/rate-limit";
+import { saveProspect } from "@/lib/agent/save-prospect";
 
 /** Pré-flight CORS pour les appels depuis le widget externe. */
 export function OPTIONS() {
@@ -11,12 +14,10 @@ export function OPTIONS() {
 
 /**
  * Extrait les données prospect du bloc <prospect_data> dans la réponse de l'agent.
- * Retourne null si aucun bloc n'est trouvé ou si le JSON est invalide.
  */
 function extractProspectData(text: string): ProspectData | null {
   const match = text.match(/<prospect_data>\s*([\s\S]*?)\s*<\/prospect_data>/);
   if (!match) return null;
-
   try {
     return JSON.parse(match[1]) as ProspectData;
   } catch {
@@ -33,29 +34,38 @@ function cleanReplyForDisplay(text: string): string {
 }
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-
-  if (!apiKey) {
-    return withCors(NextResponse.json(
-      { error: "ANTHROPIC_API_KEY non configurée. L'agent est en mode démo." },
-      { status: 503 },
-    ));
+  // [CRITIQUE-1] Rate limiting — 20 requêtes / 10 min par IP
+  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  if (rateLimiters.agentChat(ip)) {
+    return withCors(
+      NextResponse.json({ error: "Trop de requêtes. Réessayez dans quelques minutes." }, { status: 429 }),
+    );
   }
 
-  let body: ChatRequest;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return withCors(
+      NextResponse.json({ error: "ANTHROPIC_API_KEY non configurée." }, { status: 503 }),
+    );
+  }
+
+  // [CRITIQUE-2] Validation Zod des messages entrants
+  let rawBody: unknown;
   try {
-    body = (await request.json()) as ChatRequest;
+    rawBody = await request.json();
   } catch {
     return withCors(NextResponse.json({ error: "Corps de requête invalide." }, { status: 400 }));
   }
 
-  if (!body.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
-    return withCors(NextResponse.json({ error: "Messages manquants." }, { status: 422 }));
+  const parsed = chatRequestSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return withCors(
+      NextResponse.json({ error: "Données invalides.", issues: parsed.error.flatten() }, { status: 422 }),
+    );
   }
 
-  // Limiter la longueur de la conversation pour éviter les abus
-  const messages = body.messages.slice(-30) as AgentMessage[];
-  const conversationId = body.conversationId ?? randomUUID();
+  const { messages } = parsed.data;
+  const conversationId = parsed.data.conversationId ?? randomUUID();
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -70,30 +80,39 @@ export async function POST(request: NextRequest) {
         max_tokens: AGENT_CONFIG.maxTokens,
         temperature: AGENT_CONFIG.temperature,
         system: AGENT_SYSTEM_PROMPT,
-        messages: messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
+        messages: messages.map((m) => ({ role: m.role, content: m.content })),
       }),
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
       console.error("[agent/chat] Erreur API Anthropic:", response.status, errorBody);
-      return withCors(NextResponse.json(
-        { error: "Erreur de communication avec l'agent." },
-        { status: 502 },
-      ));
+      return withCors(
+        NextResponse.json({ error: "Erreur de communication avec l'agent." }, { status: 502 }),
+      );
     }
 
     const data = await response.json();
-    const rawReply = data.content
-      ?.filter((block: { type: string }) => block.type === "text")
-      .map((block: { text: string }) => block.text)
-      .join("\n") ?? "";
+    const rawReply =
+      data.content
+        ?.filter((block: { type: string }) => block.type === "text")
+        .map((block: { text: string }) => block.text)
+        .join("\n") ?? "";
 
     const prospect = extractProspectData(rawReply);
     const cleanReply = cleanReplyForDisplay(rawReply);
+
+    // [IMPORTANT-2] Sauvegarde prospect côté serveur (plus fiable que côté client)
+    if (prospect) {
+      const assistantMsg = { role: "assistant" as const, content: cleanReply };
+      const fullConversation = [...messages, assistantMsg];
+
+      await saveProspect({
+        data: prospect,
+        conversation: fullConversation,
+        conversationLength: fullConversation.length,
+      }).catch((err) => console.error("[agent/chat] Échec sauvegarde prospect:", err));
+    }
 
     const result: ChatResponse = {
       reply: cleanReply,
