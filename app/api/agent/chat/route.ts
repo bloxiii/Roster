@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { AGENT_SYSTEM_PROMPT, AGENT_CONFIG } from "@/lib/agent/system-prompt";
 import type { ChatRequest, ChatResponse, ProspectData, AgentMessage } from "@/lib/agent/types";
 import { randomUUID } from "crypto";
+import { handlePreflight, withCors } from "@/lib/cors";
+
+/** Pré-flight CORS pour les appels depuis le widget externe. */
+export function OPTIONS() {
+  return handlePreflight();
+}
 
 /**
  * Extrait les données prospect du bloc <prospect_data> dans la réponse de l'agent.
@@ -30,21 +36,21 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json(
+    return withCors(NextResponse.json(
       { error: "ANTHROPIC_API_KEY non configurée. L'agent est en mode démo." },
       { status: 503 },
-    );
+    ));
   }
 
   let body: ChatRequest;
   try {
     body = (await request.json()) as ChatRequest;
   } catch {
-    return NextResponse.json({ error: "Corps de requête invalide." }, { status: 400 });
+    return withCors(NextResponse.json({ error: "Corps de requête invalide." }, { status: 400 }));
   }
 
   if (!body.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
-    return NextResponse.json({ error: "Messages manquants." }, { status: 422 });
+    return withCors(NextResponse.json({ error: "Messages manquants." }, { status: 422 }));
   }
 
   // Limiter la longueur de la conversation pour éviter les abus
@@ -74,10 +80,10 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorBody = await response.text();
       console.error("[agent/chat] Erreur API Anthropic:", response.status, errorBody);
-      return NextResponse.json(
+      return withCors(NextResponse.json(
         { error: "Erreur de communication avec l'agent." },
         { status: 502 },
-      );
+      ));
     }
 
     const data = await response.json();
@@ -95,12 +101,11 @@ export async function POST(request: NextRequest) {
       ...(prospect ? { prospect } : {}),
     };
 
-    return NextResponse.json(result);
+    return withCors(NextResponse.json(result));
   } catch (error) {
     console.error("[agent/chat] Erreur inattendue:", error);
-    return NextResponse.json(
-      { error: "Erreur interne du serveur." },
-      { status: 500 },
+    return withCors(
+      NextResponse.json({ error: "Erreur interne du serveur." }, { status: 500 }),
     );
   }
 }
