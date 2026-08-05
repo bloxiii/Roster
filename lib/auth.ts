@@ -16,11 +16,11 @@ const COOKIE_NAME = "roster_session";
 function getSessionSecret(): string {
   const secret = process.env.SESSION_SECRET;
   if (!secret) {
-    console.warn(
-      "[auth] SESSION_SECRET non défini — utilisation d'un fallback. " +
-      "En production, définir SESSION_SECRET avec : openssl rand -hex 32",
+    throw new Error(
+      "[auth] SESSION_SECRET non défini. " +
+      "Générer avec : openssl rand -hex 32 " +
+      "et ajouter dans les variables d'environnement.",
     );
-    return "__roster_dev_session_not_for_production__";
   }
   return secret;
 }
