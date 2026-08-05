@@ -25,9 +25,15 @@ export type ProspectData = {
 export type ProspectRecord = {
   id: string;
   agentId: string;
+  /** Identifiant du client (agence) — prépare le multi-tenant. */
+  clientId: string;
   createdAt: string;
   data: ProspectData;
+  /** Historique complet de la conversation. */
+  conversation: AgentMessage[];
   conversationLength: number;
+  /** Date d'envoi de la notification email (null si pas encore envoyée). */
+  notifiedAt: string | null;
 };
 
 /** Payload envoyé par le client au endpoint /api/agent/chat. */

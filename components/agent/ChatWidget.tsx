@@ -55,14 +55,16 @@ export function ChatWidget() {
         if (data.prospect) {
           setProspect(data.prospect);
 
-          // Sauvegarder la fiche côté serveur
+          // Sauvegarder la fiche + conversation côté serveur
+          const fullConversation = [...allMessages, assistantMsg];
           fetch("/api/agent/prospects", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               data: data.prospect,
               agentId: "qualification-immobilier",
-              conversationLength: allMessages.length + 1,
+              conversation: fullConversation,
+              conversationLength: fullConversation.length,
             }),
           }).catch(console.error);
         }

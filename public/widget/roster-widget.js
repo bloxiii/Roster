@@ -502,13 +502,14 @@
         if (data.prospect) {
           this.showProspect(data.prospect);
 
-          // Sauvegarder la fiche prospect côté serveur
+          // Sauvegarder la fiche + conversation côté serveur
           fetch(`${CONFIG.apiBase}/api/agent/prospects`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               data: data.prospect,
               agentId: CONFIG.agent,
+              conversation: this.messages,
               conversationLength: this.messages.length,
             }),
           }).catch(() => {});
