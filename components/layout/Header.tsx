@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { LocaleSwitcher } from "./LocaleSwitcher";
+import { MobileMenu } from "./MobileMenu";
 
 export function Header() {
   const t = useTranslations("Nav");
@@ -43,6 +44,7 @@ export function Header() {
           <Button href="#contact" className="hidden sm:inline-flex">
             {t("cta")}
           </Button>
+          <MobileMenu />
         </div>
       </Container>
     </header>

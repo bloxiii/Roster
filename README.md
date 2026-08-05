@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Roster — Site vitrine
 
-## Getting Started
+Site web professionnel pour Roster, startup d'agents IA ("employés numériques").
 
-First, run the development server:
+## Stack technique
+
+| Couche        | Technologie                                   |
+| ------------- | --------------------------------------------- |
+| Framework     | Next.js 16 (App Router, SSG)                  |
+| Langage       | TypeScript (strict)                            |
+| Styling       | Tailwind CSS v4                               |
+| i18n          | next-intl (FR par défaut, EN)                 |
+| Validation    | Zod (client + serveur)                        |
+| Email         | Resend                                        |
+| Hébergement   | Vercel (recommandé)                           |
+
+## Démarrage rapide
 
 ```bash
+# 1. Installer les dépendances
+npm install
+
+# 2. Configurer les variables d'environnement
+cp .env.example .env.local
+# Éditer .env.local avec vos valeurs
+
+# 3. Lancer le serveur de développement
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables d'environnement
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variable              | Obligatoire | Description                                    |
+| --------------------- | ----------- | ---------------------------------------------- |
+| `RESEND_API_KEY`      | Non*        | Clé API Resend pour l'envoi d'emails           |
+| `CONTACT_EMAIL_TO`    | Non         | Email destinataire (défaut: contact@example.com) |
+| `CONTACT_EMAIL_FROM`  | Non         | Email expéditeur (défaut: Roster <onboarding@resend.dev>) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+*Sans `RESEND_API_KEY`, le formulaire de contact fonctionne mais les demandes
+sont uniquement journalisées côté serveur (pas d'email envoyé). Pratique pour
+le développement et les previews.
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+  [locale]/          # Pages par langue (FR/EN)
+    layout.tsx       # Layout racine avec i18n + metadata SEO
+    page.tsx         # Page d'accueil (assemble les sections)
+  api/contact/       # Endpoint formulaire de contact
+  globals.css        # Design system (tokens, palette, typographie)
+components/
+  layout/            # Header, Footer, MobileMenu, LocaleSwitcher
+  sections/          # Sections de la page d'accueil
+  ui/                # Composants réutilisables (Button, Container, Eyebrow, StatusBadge)
+i18n/                # Configuration des locales et routing
+lib/                 # Logique métier (validation, email)
+messages/            # Fichiers de traduction FR/EN
+types/               # Types TypeScript partagés
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Design system
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Palette** : fond encre `#0B0F1A`, accent laiton `#C9A66B`, texte crème `#F5F3EE`
+- **Typographie** : pile de polices système (Söhne > Inter > system-ui pour display/body, IBM Plex Mono pour les données/statuts)
+- **Signature visuelle** : chaque agent IA est présenté comme une fiche employé avec badge de statut animé
 
-## Deploy on Vercel
+> Pour brancher une police de marque (ex: Inter via Google Fonts), modifier
+> `--font-display` et `--font-body` dans `globals.css` et ajouter le chargement
+> dans `layout.tsx`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Commandes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev       # Serveur de développement
+npm run build     # Build de production
+npm run start     # Serveur de production
+npm run lint      # Vérification ESLint
+```
+
+## Déploiement sur Vercel
+
+1. Connecter le repo Git sur [vercel.com](https://vercel.com)
+2. Le framework Next.js est détecté automatiquement
+3. Ajouter les variables d'environnement dans les settings du projet
+4. Configurer le domaine personnalisé
+5. Chaque push sur `main` déclenche un déploiement automatique
+
+## Prochaines étapes (post-MVP)
+
+- [ ] Brancher une police de marque (Söhne, Inter Pro, ou personnalisée)
+- [ ] Ajouter un logo SVG personnalisé
+- [ ] Connecter Resend avec un domaine d'envoi vérifié
+- [ ] Ajouter des animations au scroll (Framer Motion, optionnel)
+- [ ] Ajouter une page `/mentions-legales` et `/politique-de-confidentialite`
+- [ ] Brancher un CMS (Sanity/Contentful) si le volume de contenu augmente
+- [ ] Ajouter un blog pour le SEO organique
+- [ ] Intégrer un outil d'analytics (Vercel Analytics, Plausible, PostHog)
