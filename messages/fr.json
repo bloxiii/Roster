@@ -1,0 +1,170 @@
+{
+  "Metadata": {
+    "title": "Roster — Des employés numériques pour votre entreprise",
+    "description": "Roster déploie des agents IA qui qualifient vos prospects, répondent à vos clients et gèrent vos tâches administratives, 24 heures sur 24."
+  },
+  "Nav": {
+    "agents": "Agents",
+    "useCases": "Cas d'usage",
+    "howItWorks": "Comment ça marche",
+    "contact": "Contact",
+    "cta": "Réserver une démo"
+  },
+  "Hero": {
+    "eyebrow": "Employés numériques · Disponibles 24/7",
+    "title": "Embauchez des employés numériques, pas des scripts.",
+    "subtitle": "Roster déploie des agents IA qui qualifient vos prospects, répondent à vos clients et traitent vos tâches administratives — sans recrutement, sans pause, sans erreur de fatigue.",
+    "ctaPrimary": "Réserver une démo",
+    "ctaSecondary": "Voir les agents",
+    "stats": [
+      { "value": "24/7", "label": "Disponibilité" },
+      { "value": "-60%", "label": "Coût par tâche traitée" },
+      { "value": "< 5 min", "label": "Temps de mise en service" }
+    ]
+  },
+  "Problem": {
+    "eyebrow": "Le problème",
+    "title": "Vos équipes passent plus de temps à traiter qu'à vendre.",
+    "description": "Qualifier un lead, répondre à une question support, caler un rendez-vous : ce sont des tâches nécessaires, rarement stratégiques, et elles s'accumulent plus vite que vos équipes ne peuvent les traiter.",
+    "points": [
+      {
+        "title": "Des prospects perdus la nuit",
+        "description": "Un lead qui ne reçoit pas de réponse dans les 5 minutes a beaucoup moins de chances de convertir. Vos commerciaux ne travaillent pas 24 heures sur 24."
+      },
+      {
+        "title": "Un support client saturé",
+        "description": "Les mêmes questions reviennent des dizaines de fois par jour, mobilisant du temps humain sur des réponses répétitives à faible valeur ajoutée."
+      },
+      {
+        "title": "Une automatisation classique limitée",
+        "description": "Les scripts et chatbots suivent un chemin fixe : dès qu'une situation sort du cadre prévu, ils bloquent et transfèrent le problème à un humain."
+      }
+    ]
+  },
+  "Solution": {
+    "eyebrow": "Notre approche",
+    "title": "Un agent Roster n'exécute pas un script. Il fait le travail.",
+    "description": "Contrairement à l'automatisation classique, nos agents comprennent le contexte, prennent des décisions et s'adaptent à chaque conversation — comme le ferait un employé formé, disponible en continu.",
+    "statusLabel": "Statut",
+    "statusValue": "Actif",
+    "skillsLabel": "Compétences"
+  },
+  "Agents": [
+    {
+      "id": "qualification",
+      "role": "Qualification commerciale",
+      "description": "Engage chaque prospect en moins d'une minute, pose les bonnes questions et transmet uniquement les leads qualifiés à vos commerciaux.",
+      "skills": ["Scoring de leads", "Qualification BANT", "Transfert CRM"]
+    },
+    {
+      "id": "support",
+      "role": "Support client",
+      "description": "Répond aux questions de vos clients à toute heure, résout les demandes courantes et escalade les cas complexes à un humain.",
+      "skills": ["Base de connaissance", "Escalade intelligente", "Support multilingue"]
+    },
+    {
+      "id": "rendezvous",
+      "role": "Prise de rendez-vous",
+      "description": "Propose des créneaux, gère les confirmations et relances, et se synchronise directement avec vos calendriers.",
+      "skills": ["Synchronisation agenda", "Rappels automatiques", "Reprogrammation"]
+    },
+    {
+      "id": "administratif",
+      "role": "Automatisation administrative",
+      "description": "Traite la saisie de données, les documents répétitifs et les tâches de suivi qui ralentissent vos équipes.",
+      "skills": ["Extraction de données", "Génération de documents", "Suivi de tâches"]
+    }
+  ],
+  "UseCases": {
+    "eyebrow": "Cas d'usage",
+    "title": "Des résultats concrets, pas des promesses",
+    "challengeLabel": "Défi",
+    "solutionLabel": "Solution",
+    "items": [
+      {
+        "company": "Agence immobilière (12 agents)",
+        "challenge": "70% des demandes entrantes arrivaient en dehors des heures d'ouverture et restaient sans réponse jusqu'au lendemain.",
+        "solution": "Un agent Roster qualifie chaque demande, envoie les biens correspondants et propose une visite.",
+        "result": "Délai de première réponse : de 14 heures à 90 secondes."
+      },
+      {
+        "company": "Cabinet de conseil B2B",
+        "challenge": "Les commerciaux perdaient un tiers de leur semaine à trier des leads entrants majoritairement non qualifiés.",
+        "solution": "Un agent Roster filtre et note chaque lead avant transfert au bon commercial.",
+        "result": "Temps commercial réalloué à la vente : +30%."
+      },
+      {
+        "company": "E-commerçant (support client)",
+        "challenge": "Le service client traitait plus de 200 tickets par jour, dont 80% de questions récurrentes sur les commandes.",
+        "solution": "Un agent Roster répond instantanément aux questions courantes et escalade les cas particuliers.",
+        "result": "Tickets résolus sans intervention humaine : 78%."
+      }
+    ]
+  },
+  "HowItWorks": {
+    "eyebrow": "Comment ça marche",
+    "title": "Opérationnel en trois étapes",
+    "steps": [
+      {
+        "title": "On cartographie vos tâches",
+        "description": "Un audit rapide identifie les tâches répétitives à fort volume dans vos équipes commerciales, support ou administratives."
+      },
+      {
+        "title": "On configure votre agent",
+        "description": "L'agent est entraîné sur vos process, votre ton et vos outils existants — CRM, calendrier, messagerie, helpdesk."
+      },
+      {
+        "title": "Il rejoint votre équipe",
+        "description": "L'agent est actif 24 heures sur 24, avec un reporting continu et des ajustements réguliers selon vos retours."
+      }
+    ]
+  },
+  "Benefits": {
+    "eyebrow": "Pourquoi Roster",
+    "title": "Pensé pour des dirigeants exigeants",
+    "items": [
+      {
+        "title": "Gain de temps",
+        "description": "Vos équipes se recentrent sur les tâches à forte valeur ajoutée pendant que l'agent traite le volume."
+      },
+      {
+        "title": "Réduction des coûts",
+        "description": "Un agent traite un volume de demandes équivalent à plusieurs postes à temps plein, à une fraction du coût."
+      },
+      {
+        "title": "Augmentation des ventes",
+        "description": "Chaque lead est traité en quelques secondes, jour et nuit, ce qui améliore directement votre taux de conversion."
+      },
+      {
+        "title": "Disponibilité 24/7",
+        "description": "Pas de nuits, pas de week-ends, pas de congés : vos clients obtiennent une réponse à toute heure."
+      },
+      {
+        "title": "Intégration simple",
+        "description": "Connexion directe à vos outils existants — CRM, calendrier, helpdesk — sans changer vos process."
+      }
+    ]
+  },
+  "Contact": {
+    "eyebrow": "Contact",
+    "title": "Parlons de vos process",
+    "subtitle": "Décrivez votre besoin en quelques mots. Nous vous montrons concrètement comment un agent Roster peut s'en charger.",
+    "form": {
+      "name": "Nom complet",
+      "email": "Email professionnel",
+      "company": "Entreprise",
+      "message": "Quel process aimeriez-vous automatiser ?",
+      "submit": "Envoyer la demande",
+      "sending": "Envoi en cours…",
+      "success": "Merci ! Votre demande a bien été envoyée, nous revenons vers vous sous 24 heures.",
+      "error": "Une erreur est survenue. Merci de réessayer ou de nous écrire directement."
+    },
+    "direct": "Vous pouvez aussi nous écrire directement à"
+  },
+  "Footer": {
+    "tagline": "Des employés numériques, disponibles 24 heures sur 24.",
+    "navTitle": "Navigation",
+    "contactTitle": "Contact",
+    "rights": "Tous droits réservés."
+  }
+}

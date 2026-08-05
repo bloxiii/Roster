@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+/*
+ * Design system Roster
+ * Palette "employé numérique premium" : encre profonde + accent laiton,
+ * volontairement à l'écart des dégradés violet/cyan devenus un cliché IA.
+ */
+:root {
+  --color-ink: #0b0f1a;
+  --color-ink-soft: #10141f;
+  --color-surface: #131826;
+  --color-surface-hover: #171d2d;
+  --color-border: #232b3d;
+
+  --color-paper: #f5f3ee;
+  --color-paper-dim: #b7bccb;
+
+  --color-brass: #c9a66b;
+  --color-brass-bright: #ddc08a;
+  --color-slate: #3d5a6c;
+  --color-status: #4ade80;
+
+  --font-display:
+    "Söhne", "Inter", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-body:
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono:
+    "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
+    monospace;
+}
+
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-surface: var(--color-surface);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-border: var(--color-border);
+  --color-paper: var(--color-paper);
+  --color-paper-dim: var(--color-paper-dim);
+  --color-brass: var(--color-brass);
+  --color-brass-bright: var(--color-brass-bright);
+  --color-slate: var(--color-slate);
+  --color-status: var(--color-status);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Respect des préférences de réduction de mouvement */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus clavier visible partout, sans casser l'esthétique */
+:focus-visible {
+  outline: 2px solid var(--color-brass);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(245, 243, 238, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245, 243, 238, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+}

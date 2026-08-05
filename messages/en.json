@@ -1,0 +1,170 @@
+{
+  "Metadata": {
+    "title": "Roster — Digital employees for your business",
+    "description": "Roster deploys AI agents that qualify your leads, answer your customers, and handle your admin work, around the clock."
+  },
+  "Nav": {
+    "agents": "Agents",
+    "useCases": "Use cases",
+    "howItWorks": "How it works",
+    "contact": "Contact",
+    "cta": "Book a demo"
+  },
+  "Hero": {
+    "eyebrow": "Digital employees · Available 24/7",
+    "title": "Hire digital employees, not scripts.",
+    "subtitle": "Roster deploys AI agents that qualify your leads, answer your customers, and handle your admin work — no hiring, no breaks, no fatigue-driven mistakes.",
+    "ctaPrimary": "Book a demo",
+    "ctaSecondary": "See the agents",
+    "stats": [
+      { "value": "24/7", "label": "Availability" },
+      { "value": "-60%", "label": "Cost per task handled" },
+      { "value": "< 5 min", "label": "Time to deploy" }
+    ]
+  },
+  "Problem": {
+    "eyebrow": "The problem",
+    "title": "Your teams spend more time processing than selling.",
+    "description": "Qualifying a lead, answering a support question, booking a meeting: necessary work, rarely strategic, and it piles up faster than your teams can clear it.",
+    "points": [
+      {
+        "title": "Leads lost overnight",
+        "description": "A lead that doesn't get a response within 5 minutes is far less likely to convert. Your sales reps aren't working around the clock."
+      },
+      {
+        "title": "An overloaded support team",
+        "description": "The same questions come up dozens of times a day, tying up human time on repetitive, low-value answers."
+      },
+      {
+        "title": "Classic automation hits a wall",
+        "description": "Scripts and chatbots follow a fixed path: the moment a situation falls outside it, they stall and hand the problem to a human."
+      }
+    ]
+  },
+  "Solution": {
+    "eyebrow": "Our approach",
+    "title": "A Roster agent doesn't run a script. It does the work.",
+    "description": "Unlike classic automation, our agents understand context, make decisions, and adapt to every conversation — the way a trained employee would, available around the clock.",
+    "statusLabel": "Status",
+    "statusValue": "Active",
+    "skillsLabel": "Skills"
+  },
+  "Agents": [
+    {
+      "id": "qualification",
+      "role": "Sales qualification",
+      "description": "Engages every prospect in under a minute, asks the right questions, and passes only qualified leads to your sales reps.",
+      "skills": ["Lead scoring", "BANT qualification", "CRM handoff"]
+    },
+    {
+      "id": "support",
+      "role": "Customer support",
+      "description": "Answers customer questions around the clock, resolves common requests, and escalates complex cases to a human.",
+      "skills": ["Knowledge base", "Smart escalation", "Multilingual support"]
+    },
+    {
+      "id": "scheduling",
+      "role": "Meeting scheduling",
+      "description": "Offers time slots, handles confirmations and reminders, and syncs directly with your calendars.",
+      "skills": ["Calendar sync", "Automatic reminders", "Rescheduling"]
+    },
+    {
+      "id": "admin",
+      "role": "Admin automation",
+      "description": "Handles data entry, repetitive documents, and the follow-up tasks that slow your teams down.",
+      "skills": ["Data extraction", "Document generation", "Task tracking"]
+    }
+  ],
+  "UseCases": {
+    "eyebrow": "Use cases",
+    "title": "Real results, not promises",
+    "challengeLabel": "Challenge",
+    "solutionLabel": "Solution",
+    "items": [
+      {
+        "company": "Real estate agency (12 agents)",
+        "challenge": "70% of inbound requests arrived outside business hours and went unanswered until the next day.",
+        "solution": "A Roster agent qualifies every request, sends matching listings, and offers a viewing.",
+        "result": "First response time: from 14 hours to 90 seconds."
+      },
+      {
+        "company": "B2B consulting firm",
+        "challenge": "Sales reps lost a third of their week sorting through mostly unqualified inbound leads.",
+        "solution": "A Roster agent filters and scores every lead before routing it to the right rep.",
+        "result": "Sales time reallocated to selling: +30%."
+      },
+      {
+        "company": "E-commerce (customer support)",
+        "challenge": "The support team handled over 200 tickets a day, 80% of them recurring order questions.",
+        "solution": "A Roster agent answers common questions instantly and escalates edge cases.",
+        "result": "Tickets resolved without human involvement: 78%."
+      }
+    ]
+  },
+  "HowItWorks": {
+    "eyebrow": "How it works",
+    "title": "Live in three steps",
+    "steps": [
+      {
+        "title": "We map your tasks",
+        "description": "A quick audit identifies the high-volume repetitive tasks across your sales, support, or admin teams."
+      },
+      {
+        "title": "We configure your agent",
+        "description": "The agent is trained on your process, your tone, and your existing tools — CRM, calendar, inbox, helpdesk."
+      },
+      {
+        "title": "It joins your team",
+        "description": "The agent goes live around the clock, with continuous reporting and regular tuning based on your feedback."
+      }
+    ]
+  },
+  "Benefits": {
+    "eyebrow": "Why Roster",
+    "title": "Built for demanding executives",
+    "items": [
+      {
+        "title": "Time saved",
+        "description": "Your teams refocus on high-value work while the agent handles the volume."
+      },
+      {
+        "title": "Lower costs",
+        "description": "One agent handles a volume of requests equivalent to several full-time roles, at a fraction of the cost."
+      },
+      {
+        "title": "More sales",
+        "description": "Every lead is handled within seconds, day and night, which directly improves your conversion rate."
+      },
+      {
+        "title": "24/7 availability",
+        "description": "No nights, no weekends, no time off: your customers get an answer at any hour."
+      },
+      {
+        "title": "Simple integration",
+        "description": "Connects directly to your existing tools — CRM, calendar, helpdesk — without changing your process."
+      }
+    ]
+  },
+  "Contact": {
+    "eyebrow": "Contact",
+    "title": "Let's talk about your process",
+    "subtitle": "Describe what you need in a few words. We'll show you exactly how a Roster agent can take it on.",
+    "form": {
+      "name": "Full name",
+      "email": "Work email",
+      "company": "Company",
+      "message": "What process would you like to automate?",
+      "submit": "Send request",
+      "sending": "Sending…",
+      "success": "Thanks! Your request was sent, we'll get back to you within 24 hours.",
+      "error": "Something went wrong. Please try again or email us directly."
+    },
+    "direct": "You can also email us directly at"
+  },
+  "Footer": {
+    "tagline": "Digital employees, available around the clock.",
+    "navTitle": "Navigation",
+    "contactTitle": "Contact",
+    "rights": "All rights reserved."
+  }
+}
