@@ -5,9 +5,9 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Link } from "@/i18n/navigation";
 
 export const metadata: Metadata = {
-  title: "Intégration du widget — Roster",
+  title: "Intégration du widget — Velin",
   description:
-    "Intégrez l&apos;agent Roster sur votre site en une seule ligne de code.",
+    "Intégrez l&apos;agent Velin sur votre site en une seule ligne de code.",
 };
 
 export default async function EmbedPage({
@@ -19,15 +19,15 @@ export default async function EmbedPage({
   setRequestLocale(locale);
 
   const codeSnippet = `<script
-  src="https://VOTRE-DOMAINE/widget/roster-widget.js"
-  data-roster-agent="qualification-immobilier">
+  src="https://VOTRE-DOMAINE/widget/velin-widget.js"
+  data-velin-agent="qualification-immobilier">
 <\/script>`;
 
   const codeWithOptions = `<script
-  src="https://VOTRE-DOMAINE/widget/roster-widget.js"
-  data-roster-agent="qualification-immobilier"
-  data-roster-color="#c9a66b"
-  data-roster-position="right">
+  src="https://VOTRE-DOMAINE/widget/velin-widget.js"
+  data-velin-agent="qualification-immobilier"
+  data-velin-color="#7a2e26"
+  data-velin-position="right">
 <\/script>`;
 
   return (
@@ -36,7 +36,7 @@ export default async function EmbedPage({
         <Container className="flex h-14 items-center justify-between py-3">
           <Link href="/" className="flex items-center gap-2">
             <span className="font-display text-lg font-semibold tracking-tight text-paper">
-              Roster
+              Velin
             </span>
             <span className="font-mono text-[10px] uppercase tracking-widest text-brass">
               Intégration
@@ -55,7 +55,7 @@ export default async function EmbedPage({
         <div className="mx-auto max-w-2xl">
           <Eyebrow>Guide d&apos;intégration</Eyebrow>
           <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight text-paper sm:text-3xl">
-            Ajoutez Roster à votre site en 30 secondes
+            Ajoutez Velin à votre site en 30 secondes
           </h1>
           <p className="mt-4 text-base leading-relaxed text-paper-dim">
             Copiez une seule ligne de code dans votre site. Le widget apparaît
@@ -123,22 +123,22 @@ export default async function EmbedPage({
                 </thead>
                 <tbody className="text-paper-dim">
                   <tr className="border-b border-border/60">
-                    <td className="px-4 py-3 font-mono text-xs text-brass">data-roster-agent</td>
+                    <td className="px-4 py-3 font-mono text-xs text-brass">data-velin-agent</td>
                     <td className="px-4 py-3 font-mono text-xs">qualification-immobilier</td>
                     <td className="px-4 py-3">Identifiant de l&apos;agent</td>
                   </tr>
                   <tr className="border-b border-border/60">
-                    <td className="px-4 py-3 font-mono text-xs text-brass">data-roster-color</td>
-                    <td className="px-4 py-3 font-mono text-xs">#c9a66b</td>
+                    <td className="px-4 py-3 font-mono text-xs text-brass">data-velin-color</td>
+                    <td className="px-4 py-3 font-mono text-xs">#7a2e26</td>
                     <td className="px-4 py-3">Couleur d&apos;accent du widget</td>
                   </tr>
                   <tr className="border-b border-border/60">
-                    <td className="px-4 py-3 font-mono text-xs text-brass">data-roster-position</td>
+                    <td className="px-4 py-3 font-mono text-xs text-brass">data-velin-position</td>
                     <td className="px-4 py-3 font-mono text-xs">right</td>
                     <td className="px-4 py-3">Position : right ou left</td>
                   </tr>
                   <tr>
-                    <td className="px-4 py-3 font-mono text-xs text-brass">data-roster-api</td>
+                    <td className="px-4 py-3 font-mono text-xs text-brass">data-velin-api</td>
                     <td className="px-4 py-3 font-mono text-xs">auto</td>
                     <td className="px-4 py-3">URL de l&apos;API (détection automatique)</td>
                   </tr>

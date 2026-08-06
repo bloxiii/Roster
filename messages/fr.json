@@ -1,7 +1,7 @@
 {
   "Metadata": {
-    "title": "Roster — Des employés numériques pour votre entreprise",
-    "description": "Roster déploie des agents IA qui qualifient vos prospects, répondent à vos clients et gèrent vos tâches administratives, 24 heures sur 24."
+    "title": "Velin — Des employés numériques pour votre entreprise",
+    "description": "Velin déploie des agents IA qui qualifient vos prospects, répondent à vos clients et gèrent vos tâches administratives, 24 heures sur 24."
   },
   "Nav": {
     "agents": "Agents",
@@ -13,7 +13,7 @@
   "Hero": {
     "eyebrow": "Employés numériques · Disponibles 24/7",
     "title": "Embauchez des employés numériques, pas des scripts.",
-    "subtitle": "Roster déploie des agents IA qui qualifient vos prospects, répondent à vos clients et traitent vos tâches administratives — sans recrutement, sans pause, sans erreur de fatigue.",
+    "subtitle": "Velin déploie des agents IA qui qualifient vos prospects, répondent à vos clients et traitent vos tâches administratives — sans recrutement, sans pause, sans erreur de fatigue.",
     "ctaPrimary": "Réserver une démo",
     "ctaSecondary": "Voir les agents",
     "stats": [
@@ -43,7 +43,7 @@
   },
   "Solution": {
     "eyebrow": "Notre approche",
-    "title": "Un agent Roster n'exécute pas un script. Il fait le travail.",
+    "title": "Un agent Velin n'exécute pas un script. Il fait le travail.",
     "description": "Contrairement à l'automatisation classique, nos agents comprennent le contexte, prennent des décisions et s'adaptent à chaque conversation — comme le ferait un employé formé, disponible en continu.",
     "statusLabel": "Statut",
     "statusValue": "Actif",
@@ -84,19 +84,19 @@
       {
         "company": "Agence immobilière (12 agents)",
         "challenge": "70% des demandes entrantes arrivaient en dehors des heures d'ouverture et restaient sans réponse jusqu'au lendemain.",
-        "solution": "Un agent Roster qualifie chaque demande, envoie les biens correspondants et propose une visite.",
+        "solution": "Un agent Velin qualifie chaque demande, envoie les biens correspondants et propose une visite.",
         "result": "Délai de première réponse : de 14 heures à 90 secondes."
       },
       {
         "company": "Cabinet de conseil B2B",
         "challenge": "Les commerciaux perdaient un tiers de leur semaine à trier des leads entrants majoritairement non qualifiés.",
-        "solution": "Un agent Roster filtre et note chaque lead avant transfert au bon commercial.",
+        "solution": "Un agent Velin filtre et note chaque lead avant transfert au bon commercial.",
         "result": "Temps commercial réalloué à la vente : +30%."
       },
       {
         "company": "E-commerçant (support client)",
         "challenge": "Le service client traitait plus de 200 tickets par jour, dont 80% de questions récurrentes sur les commandes.",
-        "solution": "Un agent Roster répond instantanément aux questions courantes et escalade les cas particuliers.",
+        "solution": "Un agent Velin répond instantanément aux questions courantes et escalade les cas particuliers.",
         "result": "Tickets résolus sans intervention humaine : 78%."
       }
     ]
@@ -120,7 +120,7 @@
     ]
   },
   "Benefits": {
-    "eyebrow": "Pourquoi Roster",
+    "eyebrow": "Pourquoi Velin",
     "title": "Pensé pour des dirigeants exigeants",
     "items": [
       {
@@ -148,7 +148,7 @@
   "Contact": {
     "eyebrow": "Contact",
     "title": "Parlons de vos process",
-    "subtitle": "Décrivez votre besoin en quelques mots. Nous vous montrons concrètement comment un agent Roster peut s'en charger.",
+    "subtitle": "Décrivez votre besoin en quelques mots. Nous vous montrons concrètement comment un agent Velin peut s'en charger.",
     "form": {
       "name": "Nom complet",
       "email": "Email professionnel",

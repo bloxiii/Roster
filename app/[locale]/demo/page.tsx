@@ -13,9 +13,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   return {
-    title: "Agent #001 — Qualification commerciale | Roster",
+    title: "Agent #001 — Qualification commerciale | Velin",
     description:
-      "Démonstration en direct de l'agent de qualification commerciale Roster pour agences immobilières.",
+      "Démonstration en direct de l'agent de qualification commerciale Velin pour agences immobilières.",
   };
 }
 
@@ -34,7 +34,7 @@ export default async function DemoPage({
         <Container className="flex h-14 items-center justify-between py-3">
           <Link href="/" className="flex items-center gap-2">
             <span className="font-display text-lg font-semibold tracking-tight text-paper">
-              Roster
+              Velin
             </span>
             <span className="font-mono text-[10px] uppercase tracking-widest text-brass">
               Demo

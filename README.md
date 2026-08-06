@@ -1,6 +1,6 @@
-# Roster — Site vitrine
+# Velin — Site vitrine
 
-Site web professionnel pour Roster, startup d'agents IA ("employés numériques").
+Site web professionnel pour Velin, startup d'agents IA ("employés numériques").
 
 ## Stack technique
 
@@ -34,7 +34,7 @@ npm run dev
 | --------------------- | ----------- | ---------------------------------------------- |
 | `RESEND_API_KEY`      | Non*        | Clé API Resend pour l'envoi d'emails           |
 | `CONTACT_EMAIL_TO`    | Non         | Email destinataire (défaut: contact@example.com) |
-| `CONTACT_EMAIL_FROM`  | Non         | Email expéditeur (défaut: Roster <onboarding@resend.dev>) |
+| `CONTACT_EMAIL_FROM`  | Non         | Email expéditeur (défaut: Velin <onboarding@resend.dev>) |
 
 *Sans `RESEND_API_KEY`, le formulaire de contact fonctionne mais les demandes
 sont uniquement journalisées côté serveur (pas d'email envoyé). Pratique pour

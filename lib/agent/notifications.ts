@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import type { ProspectData } from "./types";
 
-const SENDER = process.env.CONTACT_EMAIL_FROM ?? "Roster <onboarding@resend.dev>";
+const SENDER = process.env.CONTACT_EMAIL_FROM ?? "Velin <onboarding@resend.dev>";
 
 /**
  * Envoie une notification email quand un prospect est qualifié HOT.

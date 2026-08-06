@@ -1,18 +1,18 @@
 /**
- * Roster Chat Widget v1.0
+ * Velin Chat Widget v1.0
  *
  * Usage :
- *   <script src="https://VOTRE-DOMAINE/widget/roster-widget.js"
- *           data-roster-agent="qualification-immobilier"
- *           data-roster-color="#c9a66b"
- *           data-roster-position="right"></script>
+ *   <script src="https://VOTRE-DOMAINE/widget/velin-widget.js"
+ *           data-velin-agent="qualification-immobilier"
+ *           data-velin-color="#7a2e26"
+ *           data-velin-position="right"></script>
  *
  * Attributs configurables :
- *   data-roster-agent    — ID de l'agent (défaut: "qualification-immobilier")
- *   data-roster-api      — URL de base de l'API (défaut: origine du script)
- *   data-roster-color    — Couleur d'accent (défaut: "#c9a66b")
- *   data-roster-position — "right" ou "left" (défaut: "right")
- *   data-roster-greeting — Message d'accueil personnalisé (optionnel)
+ *   data-velin-agent    — ID de l'agent (défaut: "qualification-immobilier")
+ *   data-velin-api      — URL de base de l'API (défaut: origine du script)
+ *   data-velin-color    — Couleur d'accent (défaut: "#7a2e26")
+ *   data-velin-position — "right" ou "left" (défaut: "right")
+ *   data-velin-greeting — Message d'accueil personnalisé (optionnel)
  */
 (function () {
   "use strict";
@@ -24,11 +24,11 @@
   const scriptOrigin = scriptSrc ? new URL(scriptSrc).origin : "";
 
   const CONFIG = {
-    agent: scriptTag?.getAttribute("data-roster-agent") || "qualification-immobilier",
-    apiBase: scriptTag?.getAttribute("data-roster-api") || scriptOrigin,
-    color: scriptTag?.getAttribute("data-roster-color") || "#c9a66b",
-    position: scriptTag?.getAttribute("data-roster-position") || "right",
-    greeting: scriptTag?.getAttribute("data-roster-greeting") || "",
+    agent: scriptTag?.getAttribute("data-velin-agent") || "qualification-immobilier",
+    apiBase: scriptTag?.getAttribute("data-velin-api") || scriptOrigin,
+    color: scriptTag?.getAttribute("data-velin-color") || "#7a2e26",
+    position: scriptTag?.getAttribute("data-velin-position") || "right",
+    greeting: scriptTag?.getAttribute("data-velin-greeting") || "",
   };
 
   /* ─── Styles (injectés dans le Shadow DOM) ──────────────── */
@@ -37,12 +37,12 @@
     :host {
       --r-color: ${CONFIG.color};
       --r-color-bright: ${adjustBrightness(CONFIG.color, 30)};
-      --r-ink: #0b0f1a;
-      --r-ink-soft: #10141f;
-      --r-surface: #131826;
-      --r-border: #232b3d;
-      --r-paper: #f5f3ee;
-      --r-paper-dim: #b7bccb;
+      --r-ink: #1a110d;
+      --r-ink-soft: #211610;
+      --r-surface: #2d1f17;
+      --r-border: #4a3529;
+      --r-paper: #f5ebe0;
+      --r-paper-dim: #b8a99a;
       --r-status: #4ade80;
       --r-red: #f87171;
 
@@ -184,11 +184,11 @@
       width: 7px; height: 7px; border-radius: 50%;
       background: var(--r-paper-dim);
       opacity: .4;
-      animation: rosterBounce .6s infinite alternate;
+      animation: velinBounce .6s infinite alternate;
     }
     .roster-typing span:nth-child(2) { animation-delay: .15s; }
     .roster-typing span:nth-child(3) { animation-delay: .3s; }
-    @keyframes rosterBounce { to { opacity: 1; transform: translateY(-3px); } }
+    @keyframes velinBounce { to { opacity: 1; transform: translateY(-3px); } }
 
     .roster-input-bar {
       display: flex;
@@ -293,7 +293,7 @@
 
   /* ─── Widget Class ──────────────────────────────────────── */
 
-  class RosterWidget {
+  class VelinWidget {
     constructor() {
       this.messages = [];
       this.conversationId = null;
@@ -359,7 +359,7 @@
 
       // Powered by
       const poweredBy = el("div", { className: "roster-powered" });
-      poweredBy.innerHTML = 'Propulsé par <a href="https://roster.example.com" target="_blank" rel="noopener">Roster</a>';
+      poweredBy.innerHTML = 'Propulsé par <a href="https://velin.ai" target="_blank" rel="noopener">Velin</a>';
 
       this.panel.appendChild(header);
       this.panel.appendChild(this.messagesEl);
@@ -519,8 +519,8 @@
   /* ─── Init ──────────────────────────────────────────────── */
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => new RosterWidget());
+    document.addEventListener("DOMContentLoaded", () => new VelinWidget());
   } else {
-    new RosterWidget();
+    new VelinWidget();
   }
 })();

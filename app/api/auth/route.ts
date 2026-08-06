@@ -7,7 +7,7 @@ import { rateLimiters } from "@/lib/rate-limit";
  * Le cookie contient SESSION_SECRET — plus de hash devinable.
  */
 
-const COOKIE_NAME = "roster_session";
+const COOKIE_NAME = "velin_session";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 jours
 
 export async function POST(request: NextRequest) {

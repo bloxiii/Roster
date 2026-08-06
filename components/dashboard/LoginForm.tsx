@@ -38,7 +38,7 @@ export function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-ink p-6">
       <div className="w-full max-w-sm">
         <div className="text-center">
-          <span className="font-display text-xl font-semibold text-paper">Roster</span>
+          <span className="font-display text-xl font-semibold text-paper">Velin</span>
           <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-brass">
             Dashboard
           </span>

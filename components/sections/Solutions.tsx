@@ -22,7 +22,7 @@ export function Solutions() {
           </p>
         </div>
 
-        {/* Le roster : chaque agent est présenté comme une fiche employé,
+        {/* Chaque agent est présenté comme une fiche employé,
             pas comme une simple "feature card" — ancre visuellement le
             positionnement "employés numériques". */}
         <div className="mt-14 grid gap-5 sm:grid-cols-2">

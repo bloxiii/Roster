@@ -9,7 +9,7 @@ import { LogoutButton } from "@/components/dashboard/LogoutButton";
 import { readProspects } from "@/lib/agent/save-prospect";
 
 export const metadata: Metadata = {
-  title: "Dashboard — Roster",
+  title: "Dashboard — Velin",
   robots: { index: false },
 };
 
@@ -50,7 +50,7 @@ export default async function DashboardPage({
         <Container className="flex h-14 items-center justify-between py-3">
           <div className="flex items-center gap-2">
             <span className="font-display text-lg font-semibold tracking-tight text-paper">
-              Roster
+              Velin
             </span>
             <span className="font-mono text-[10px] uppercase tracking-widest text-brass">
               Dashboard

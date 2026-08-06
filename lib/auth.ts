@@ -11,7 +11,7 @@ import { cookies } from "next/headers";
  * pour un utilisateur unique, sans le hash djb2 devinable.
  */
 
-const COOKIE_NAME = "roster_session";
+const COOKIE_NAME = "velin_session";
 
 function getSessionSecret(): string {
   const secret = process.env.SESSION_SECRET;

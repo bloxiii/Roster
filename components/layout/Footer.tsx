@@ -10,7 +10,10 @@ export function Footer() {
     <footer className="border-t border-border/60 bg-ink-soft">
       <Container className="grid gap-10 py-14 md:grid-cols-3">
         <div>
-          <span className="font-display text-lg font-semibold text-paper">Roster</span>
+          <div className="flex items-center gap-2">
+            <img src="/images/velin-logo.svg" alt="" width={24} height={24} className="h-6 w-6" />
+            <span className="font-display text-lg font-semibold text-paper">Velin</span>
+          </div>
           <p className="mt-3 max-w-xs text-sm text-paper-dim">{t("tagline")}</p>
         </div>
 
@@ -53,7 +56,7 @@ export function Footer() {
 
       <Container className="flex flex-col gap-2 border-t border-border/60 py-6 text-xs text-paper-dim/70 sm:flex-row sm:items-center sm:justify-between">
         <span>
-          © {year} Roster. {t("rights")}
+          © {year} Velin. {t("rights")}
         </span>
       </Container>
     </footer>

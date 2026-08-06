@@ -8,7 +8,7 @@ import { notifyHotProspect } from "./notifications";
  * Stockage fichier simple pour le MVP.
  * TODO CRITIQUE-5 : migrer vers Vercel KV (voir rapport QA).
  */
-const DATA_DIR = join("/tmp", "roster-data");
+const DATA_DIR = join("/tmp", "velin-data");
 const PROSPECTS_FILE = join(DATA_DIR, "prospects.json");
 
 export async function readProspects(): Promise<ProspectRecord[]> {

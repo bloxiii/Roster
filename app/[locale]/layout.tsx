@@ -20,7 +20,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("description"),
-    metadataBase: new URL("https://roster.example.com"),
+    metadataBase: new URL("https://velin.ai"),
     alternates: {
       languages: { fr: "/", en: "/en" },
     },

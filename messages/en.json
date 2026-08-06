@@ -1,7 +1,7 @@
 {
   "Metadata": {
-    "title": "Roster — Digital employees for your business",
-    "description": "Roster deploys AI agents that qualify your leads, answer your customers, and handle your admin work, around the clock."
+    "title": "Velin — Digital employees for your business",
+    "description": "Velin deploys AI agents that qualify your leads, answer your customers, and handle your admin work, around the clock."
   },
   "Nav": {
     "agents": "Agents",
@@ -13,7 +13,7 @@
   "Hero": {
     "eyebrow": "Digital employees · Available 24/7",
     "title": "Hire digital employees, not scripts.",
-    "subtitle": "Roster deploys AI agents that qualify your leads, answer your customers, and handle your admin work — no hiring, no breaks, no fatigue-driven mistakes.",
+    "subtitle": "Velin deploys AI agents that qualify your leads, answer your customers, and handle your admin work — no hiring, no breaks, no fatigue-driven mistakes.",
     "ctaPrimary": "Book a demo",
     "ctaSecondary": "See the agents",
     "stats": [
@@ -43,7 +43,7 @@
   },
   "Solution": {
     "eyebrow": "Our approach",
-    "title": "A Roster agent doesn't run a script. It does the work.",
+    "title": "A Velin agent doesn't run a script. It does the work.",
     "description": "Unlike classic automation, our agents understand context, make decisions, and adapt to every conversation — the way a trained employee would, available around the clock.",
     "statusLabel": "Status",
     "statusValue": "Active",
@@ -84,19 +84,19 @@
       {
         "company": "Real estate agency (12 agents)",
         "challenge": "70% of inbound requests arrived outside business hours and went unanswered until the next day.",
-        "solution": "A Roster agent qualifies every request, sends matching listings, and offers a viewing.",
+        "solution": "A Velin agent qualifies every request, sends matching listings, and offers a viewing.",
         "result": "First response time: from 14 hours to 90 seconds."
       },
       {
         "company": "B2B consulting firm",
         "challenge": "Sales reps lost a third of their week sorting through mostly unqualified inbound leads.",
-        "solution": "A Roster agent filters and scores every lead before routing it to the right rep.",
+        "solution": "A Velin agent filters and scores every lead before routing it to the right rep.",
         "result": "Sales time reallocated to selling: +30%."
       },
       {
         "company": "E-commerce (customer support)",
         "challenge": "The support team handled over 200 tickets a day, 80% of them recurring order questions.",
-        "solution": "A Roster agent answers common questions instantly and escalates edge cases.",
+        "solution": "A Velin agent answers common questions instantly and escalates edge cases.",
         "result": "Tickets resolved without human involvement: 78%."
       }
     ]
@@ -120,7 +120,7 @@
     ]
   },
   "Benefits": {
-    "eyebrow": "Why Roster",
+    "eyebrow": "Why Velin",
     "title": "Built for demanding executives",
     "items": [
       {
@@ -148,7 +148,7 @@
   "Contact": {
     "eyebrow": "Contact",
     "title": "Let's talk about your process",
-    "subtitle": "Describe what you need in a few words. We'll show you exactly how a Roster agent can take it on.",
+    "subtitle": "Describe what you need in a few words. We'll show you exactly how a Velin agent can take it on.",
     "form": {
       "name": "Full name",
       "email": "Work email",
