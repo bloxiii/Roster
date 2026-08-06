@@ -10,7 +10,7 @@ export function Benefits() {
   const items = t.raw("items") as Benefit[];
 
   return (
-    <section className="border-t border-border/60 bg-ink-soft py-32">
+    <section className="section-glow-border relative bg-ink-soft py-36">
       <Container>
         <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">

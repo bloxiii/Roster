@@ -9,7 +9,7 @@ export function UseCases() {
   const items = t.raw("items") as UseCase[];
 
   return (
-    <section id="use-cases" className="border-t border-border/60 py-32">
+    <section id="use-cases" className="section-glow-border relative py-36">
       <Container>
         <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">

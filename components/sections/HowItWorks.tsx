@@ -10,7 +10,7 @@ export function HowItWorks() {
   const steps = t.raw("steps") as Step[];
 
   return (
-    <section id="how-it-works" className="border-t border-border/60 py-32">
+    <section id="how-it-works" className="section-glow-border relative py-36">
       <Container>
         <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">
