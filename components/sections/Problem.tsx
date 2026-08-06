@@ -10,7 +10,7 @@ export function Problem() {
   const points = t.raw("points") as Point[];
 
   return (
-    <section className="py-36">
+    <section className="py-32">
       <Container>
         <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">

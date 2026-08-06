@@ -36,8 +36,6 @@ export async function generateMetadata({
   };
 }
 
-import { ParticleField } from "@/components/ui/ParticleField";
-
 export default async function LocaleLayout({
   children,
   params,
@@ -51,12 +49,12 @@ export default async function LocaleLayout({
     notFound();
   }
 
+  // Permet le rendu statique (SSG) des pages traduites.
   setRequestLocale(locale);
 
   return (
     <html lang={locale} className="h-full">
       <body className="min-h-full flex flex-col bg-ink text-paper antialiased">
-        <ParticleField />
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
