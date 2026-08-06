@@ -21,6 +21,9 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
     metadataBase: new URL("https://velin.ai"),
+    icons: {
+      icon: "/favicon.svg",
+    },
     alternates: {
       languages: { fr: "/", en: "/en" },
     },

@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import type { ContactFormInput } from "./validations";
 
-const CONTACT_RECIPIENT = process.env.CONTACT_EMAIL_TO ?? "contact@example.com";
+const CONTACT_RECIPIENT = process.env.CONTACT_EMAIL_TO ?? "contact@velin.ai";
 const SENDER = process.env.CONTACT_EMAIL_FROM ?? "Velin <onboarding@resend.dev>";
 
 /**

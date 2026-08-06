@@ -69,8 +69,8 @@ export function ContactSection() {
           </p>
           <p className="mt-8 text-sm text-paper-dim">
             {t("direct")}{" "}
-            <a href="mailto:contact@example.com" className="text-brass-bright hover:underline">
-              contact@example.com
+            <a href="mailto:contact@velin.ai" className="text-brass-bright hover:underline">
+              contact@velin.ai
             </a>
           </p>
         </div>

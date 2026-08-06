@@ -46,8 +46,8 @@ export function Footer() {
           </h3>
           <ul className="mt-4 space-y-2 text-sm">
             <li>
-              <a href="mailto:contact@example.com" className="text-paper-dim hover:text-paper">
-                contact@example.com
+              <a href="mailto:contact@velin.ai" className="text-paper-dim hover:text-paper">
+                contact@velin.ai
               </a>
             </li>
           </ul>
