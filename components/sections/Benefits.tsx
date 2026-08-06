@@ -10,27 +10,23 @@ export function Benefits() {
   const items = t.raw("items") as Benefit[];
 
   return (
-    <section className="border-t border-border/60 bg-ink-soft py-24">
+    <section className="border-t border-border/60 bg-ink-soft py-32">
       <Container>
-        <Reveal>
+        <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">
             <Eyebrow>{t("eyebrow")}</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-paper sm:text-4xl">
+            <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight text-paper sm:text-4xl md:text-5xl">
               {t("title")}
             </h2>
           </div>
         </Reveal>
 
-        <Reveal delay={200}>
-          <div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-5">
+        <Reveal animation="fade-blur" delay={300} duration={1100}>
+          <div className="mt-20 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-5">
             {items.map((item) => (
-              <div key={item.title} className="bg-ink-soft p-6 transition-colors hover:bg-surface">
-                <h3 className="font-display text-base font-medium text-brass-bright">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-paper-dim">
-                  {item.description}
-                </p>
+              <div key={item.title} className="bg-ink-soft p-7 transition-all duration-400 hover:bg-surface">
+                <h3 className="font-display text-base font-medium text-brass-bright">{item.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-paper-dim">{item.description}</p>
               </div>
             ))}
           </div>

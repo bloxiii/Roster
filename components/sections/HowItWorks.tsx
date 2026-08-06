@@ -10,28 +10,28 @@ export function HowItWorks() {
   const steps = t.raw("steps") as Step[];
 
   return (
-    <section id="how-it-works" className="border-t border-border/60 py-24">
+    <section id="how-it-works" className="border-t border-border/60 py-32">
       <Container>
-        <Reveal>
+        <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">
             <Eyebrow>{t("eyebrow")}</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-paper sm:text-4xl">
+            <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight text-paper sm:text-4xl md:text-5xl">
               {t("title")}
             </h2>
           </div>
         </Reveal>
 
-        <ol className="mt-14 grid gap-10 md:grid-cols-3">
+        <ol className="mt-20 grid gap-16 md:grid-cols-3">
           {steps.map((step, index) => (
-            <Reveal key={step.title} delay={index * 180}>
-              <li className="relative pl-14">
-                <span className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-full border border-brass/40 font-mono text-sm text-brass-bright transition-colors">
+            <Reveal key={step.title} animation="fade-blur" delay={index * 250} duration={1000}>
+              <li className="relative pl-16">
+                <span className="absolute left-0 top-0 flex h-12 w-12 items-center justify-center rounded-full border border-brass/40 font-mono text-base text-brass-bright transition-all duration-500 hover:bg-brass/10 hover:scale-110">
                   {index + 1}
                 </span>
-                <h3 className="font-display text-lg font-medium text-paper">
+                <h3 className="font-display text-xl font-medium text-paper">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-paper-dim">
+                <p className="mt-3 text-sm leading-relaxed text-paper-dim">
                   {step.description}
                 </p>
               </li>

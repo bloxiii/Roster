@@ -30,7 +30,7 @@ export function Header() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm text-paper-dim transition-colors hover:text-paper"
+              className="nav-link text-sm text-paper-dim transition-colors hover:text-paper"
             >
               {link.label}
             </a>

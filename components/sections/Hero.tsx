@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { Reveal } from "@/components/ui/Reveal";
+import { Reveal, AnimatedCounter } from "@/components/ui/Reveal";
 import type { Stat } from "@/types";
 
 export function Hero() {
@@ -13,78 +13,59 @@ export function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-grid">
-      {/* Glow ambiant */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-brass/8 blur-[140px] animate-pulse-slow"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-20 right-0 h-[300px] w-[400px] rounded-full bg-brass/5 blur-[100px]"
-      />
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-brass/8 blur-[160px] animate-pulse-slow" />
+      <div aria-hidden className="pointer-events-none absolute bottom-0 right-0 h-[300px] w-[500px] rounded-full bg-brass/5 blur-[120px]" />
 
-      <Container className="relative flex flex-col items-start py-24 md:py-36">
-        <Reveal delay={0} direction="up">
+      <Container className="relative flex flex-col items-start py-28 md:py-40">
+        <Reveal animation="fade-blur" delay={0} duration={800}>
           <Eyebrow>{t("eyebrow")}</Eyebrow>
         </Reveal>
 
-        <Reveal delay={100} direction="up">
-          <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-[1.08] tracking-tight text-paper sm:text-5xl md:text-6xl">
+        <Reveal animation="fade-scale" delay={150} duration={1100}>
+          <h1 className="mt-8 max-w-3xl font-display text-4xl font-semibold leading-[1.06] tracking-tight text-paper sm:text-5xl md:text-6xl lg:text-7xl">
             {t("title")}
           </h1>
         </Reveal>
 
-        <Reveal delay={200} direction="up">
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-paper-dim">
+        <Reveal animation="fade-blur" delay={350} duration={900}>
+          <p className="mt-8 max-w-xl text-lg leading-relaxed text-paper-dim md:text-xl">
             {t("subtitle")}
           </p>
         </Reveal>
 
-        <Reveal delay={300} direction="up">
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+        <Reveal animation="fade-up" delay={500} duration={800}>
+          <div className="mt-12 flex flex-col gap-4 sm:flex-row">
             <Button href="#contact" className="btn-glow">{t("ctaPrimary")}</Button>
-            <Button href="#agents" variant="secondary">
-              {t("ctaSecondary")}
-            </Button>
+            <Button href="#agents" variant="secondary">{t("ctaSecondary")}</Button>
           </div>
         </Reveal>
 
-        {/* Mini team preview — effet "OS futuriste" */}
-        <Reveal delay={500} direction="up" duration={900}>
-          <div className="mt-16 flex items-center gap-3">
-            <div className="flex -space-x-2">
-              {["E", "L", "S", "M"].map((letter, i) => (
-                <div
-                  key={letter}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-ink bg-brass/20 font-mono text-xs font-medium text-brass transition-transform hover:scale-110 hover:z-10"
-                  style={{ animationDelay: `${600 + i * 100}ms` }}
-                >
+        <Reveal animation="fade-blur" delay={700} duration={1000}>
+          <div className="mt-20 flex items-center gap-4">
+            <div className="flex -space-x-2.5">
+              {["E", "L", "S", "M"].map((letter) => (
+                <div key={letter} className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-ink bg-brass/20 font-mono text-sm font-medium text-brass transition-all duration-300 hover:scale-110 hover:bg-brass/30 hover:z-10">
                   {letter}
                 </div>
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-status opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-status" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-status" />
               </span>
-              <span className="font-mono text-xs text-status">
-                4 agents en ligne
-              </span>
+              <span className="font-mono text-xs text-status">4 agents en ligne</span>
             </div>
           </div>
         </Reveal>
 
-        {/* Stats */}
-        <div className="mt-16 grid w-full grid-cols-1 gap-8 border-t border-border/60 pt-10 sm:grid-cols-3">
+        <div className="mt-20 grid w-full grid-cols-1 gap-10 border-t border-border/60 pt-12 sm:grid-cols-3">
           {stats.map((stat, i) => (
-            <Reveal key={stat.label} delay={600 + i * 120} direction="up">
+            <Reveal key={stat.label} animation="fade-up" delay={800 + i * 150} duration={900}>
               <div>
-                <dt className="font-mono text-xs uppercase tracking-widest text-paper-dim">
-                  {stat.label}
-                </dt>
-                <dd className="mt-2 font-display text-3xl font-semibold text-brass-bright">
-                  {stat.value}
+                <dt className="font-mono text-xs uppercase tracking-widest text-paper-dim">{stat.label}</dt>
+                <dd className="mt-3 font-display text-4xl font-semibold text-brass-bright">
+                  <AnimatedCounter value={stat.value} duration={1800} />
                 </dd>
               </div>
             </Reveal>

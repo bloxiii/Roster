@@ -119,3 +119,43 @@ body {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+/* ─── Apple-style transitions ─────────────────────────────── */
+
+/* Courbe de timing Apple (ease-out-expo) */
+.ease-apple {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Smooth scroll avec décalage pour le header sticky */
+html {
+  scroll-padding-top: 80px;
+}
+
+/* Hover 3D subtil sur les cartes */
+@media (hover: hover) {
+  .card-3d {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .card-3d:hover {
+    transform: perspective(800px) rotateX(2deg) translateY(-4px);
+  }
+}
+
+/* Underline animé pour les liens de navigation */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-brass);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-link:hover::after {
+  width: 100%;
+}
