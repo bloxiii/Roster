@@ -8,7 +8,8 @@
     "useCases": "Use cases",
     "howItWorks": "How it works",
     "contact": "Contact",
-    "cta": "Book a demo"
+    "cta": "Book a demo",
+    "demo": "See the demo"
   },
   "Hero": {
     "eyebrow": "Digital employees · Available 24/7",
@@ -17,9 +18,18 @@
     "ctaPrimary": "Book a demo",
     "ctaSecondary": "See the agents",
     "stats": [
-      { "value": "24/7", "label": "Availability" },
-      { "value": "-60%", "label": "Cost per task handled" },
-      { "value": "< 5 min", "label": "Time to deploy" }
+      {
+        "value": "24/7",
+        "label": "Availability"
+      },
+      {
+        "value": "-60%",
+        "label": "Cost per task handled"
+      },
+      {
+        "value": "< 5 min",
+        "label": "Time to deploy"
+      }
     ]
   },
   "Problem": {
@@ -54,25 +64,41 @@
       "id": "qualification",
       "role": "Sales qualification",
       "description": "Engages every prospect in under a minute, asks the right questions, and passes only qualified leads to your sales reps.",
-      "skills": ["Lead scoring", "BANT qualification", "CRM handoff"]
+      "skills": [
+        "Lead scoring",
+        "BANT qualification",
+        "CRM handoff"
+      ]
     },
     {
       "id": "support",
       "role": "Customer support",
       "description": "Answers customer questions around the clock, resolves common requests, and escalates complex cases to a human.",
-      "skills": ["Knowledge base", "Smart escalation", "Multilingual support"]
+      "skills": [
+        "Knowledge base",
+        "Smart escalation",
+        "Multilingual support"
+      ]
     },
     {
       "id": "scheduling",
       "role": "Meeting scheduling",
       "description": "Offers time slots, handles confirmations and reminders, and syncs directly with your calendars.",
-      "skills": ["Calendar sync", "Automatic reminders", "Rescheduling"]
+      "skills": [
+        "Calendar sync",
+        "Automatic reminders",
+        "Rescheduling"
+      ]
     },
     {
       "id": "admin",
       "role": "Admin automation",
       "description": "Handles data entry, repetitive documents, and the follow-up tasks that slow your teams down.",
-      "skills": ["Data extraction", "Document generation", "Task tracking"]
+      "skills": [
+        "Data extraction",
+        "Document generation",
+        "Task tracking"
+      ]
     }
   ],
   "UseCases": {

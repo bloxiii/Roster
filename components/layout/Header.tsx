@@ -39,6 +39,12 @@ export function Header() {
 
         <div className="flex items-center gap-3">
           <LocaleSwitcher />
+          <Link
+            href="/demo"
+            className="hidden text-sm text-paper-dim transition-colors hover:text-paper sm:inline"
+          >
+            {t("demo")}
+          </Link>
           <Button href="#contact" className="hidden sm:inline-flex">
             {t("cta")}
           </Button>

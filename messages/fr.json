@@ -8,7 +8,8 @@
     "useCases": "Cas d'usage",
     "howItWorks": "Comment ça marche",
     "contact": "Contact",
-    "cta": "Réserver une démo"
+    "cta": "Réserver une démo",
+    "demo": "Voir la démo"
   },
   "Hero": {
     "eyebrow": "Employés numériques · Disponibles 24/7",
@@ -17,9 +18,18 @@
     "ctaPrimary": "Réserver une démo",
     "ctaSecondary": "Voir les agents",
     "stats": [
-      { "value": "24/7", "label": "Disponibilité" },
-      { "value": "-60%", "label": "Coût par tâche traitée" },
-      { "value": "< 5 min", "label": "Temps de mise en service" }
+      {
+        "value": "24/7",
+        "label": "Disponibilité"
+      },
+      {
+        "value": "-60%",
+        "label": "Coût par tâche traitée"
+      },
+      {
+        "value": "< 5 min",
+        "label": "Temps de mise en service"
+      }
     ]
   },
   "Problem": {
@@ -54,25 +64,41 @@
       "id": "qualification",
       "role": "Qualification commerciale",
       "description": "Engage chaque prospect en moins d'une minute, pose les bonnes questions et transmet uniquement les leads qualifiés à vos commerciaux.",
-      "skills": ["Scoring de leads", "Qualification BANT", "Transfert CRM"]
+      "skills": [
+        "Scoring de leads",
+        "Qualification BANT",
+        "Transfert CRM"
+      ]
     },
     {
       "id": "support",
       "role": "Support client",
       "description": "Répond aux questions de vos clients à toute heure, résout les demandes courantes et escalade les cas complexes à un humain.",
-      "skills": ["Base de connaissance", "Escalade intelligente", "Support multilingue"]
+      "skills": [
+        "Base de connaissance",
+        "Escalade intelligente",
+        "Support multilingue"
+      ]
     },
     {
       "id": "rendezvous",
       "role": "Prise de rendez-vous",
       "description": "Propose des créneaux, gère les confirmations et relances, et se synchronise directement avec vos calendriers.",
-      "skills": ["Synchronisation agenda", "Rappels automatiques", "Reprogrammation"]
+      "skills": [
+        "Synchronisation agenda",
+        "Rappels automatiques",
+        "Reprogrammation"
+      ]
     },
     {
       "id": "administratif",
       "role": "Automatisation administrative",
       "description": "Traite la saisie de données, les documents répétitifs et les tâches de suivi qui ralentissent vos équipes.",
-      "skills": ["Extraction de données", "Génération de documents", "Suivi de tâches"]
+      "skills": [
+        "Extraction de données",
+        "Génération de documents",
+        "Suivi de tâches"
+      ]
     }
   ],
   "UseCases": {

@@ -7,14 +7,10 @@ import { chatRequestSchema } from "@/lib/validations";
 import { rateLimiters } from "@/lib/rate-limit";
 import { saveProspect } from "@/lib/agent/save-prospect";
 
-/** Pré-flight CORS pour les appels depuis le widget externe. */
-export function OPTIONS() {
-  return handlePreflight();
+export function OPTIONS(request: NextRequest) {
+  return handlePreflight(request);
 }
 
-/**
- * Extrait les données prospect du bloc <prospect_data> dans la réponse de l'agent.
- */
 function extractProspectData(text: string): ProspectData | null {
   const match = text.match(/<prospect_data>\s*([\s\S]*?)\s*<\/prospect_data>/);
   if (!match) return null;
@@ -26,41 +22,36 @@ function extractProspectData(text: string): ProspectData | null {
   }
 }
 
-/**
- * Retire le bloc <prospect_data> du message visible pour le prospect.
- */
 function cleanReplyForDisplay(text: string): string {
   return text.replace(/<prospect_data>[\s\S]*?<\/prospect_data>/, "").trim();
 }
 
 export async function POST(request: NextRequest) {
-  // [CRITIQUE-1] Rate limiting — 20 requêtes / 10 min par IP
   const ip = request.headers.get("x-forwarded-for") ?? "unknown";
   if (rateLimiters.agentChat(ip)) {
     return withCors(
-      NextResponse.json({ error: "Trop de requêtes. Réessayez dans quelques minutes." }, { status: 429 }),
+      NextResponse.json({ error: "Trop de requêtes." }, { status: 429 }), request,
     );
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return withCors(
-      NextResponse.json({ error: "ANTHROPIC_API_KEY non configurée." }, { status: 503 }),
+      NextResponse.json({ error: "Agent non configuré." }, { status: 503 }), request,
     );
   }
 
-  // [CRITIQUE-2] Validation Zod des messages entrants
   let rawBody: unknown;
   try {
     rawBody = await request.json();
   } catch {
-    return withCors(NextResponse.json({ error: "Corps de requête invalide." }, { status: 400 }));
+    return withCors(NextResponse.json({ error: "Corps invalide." }, { status: 400 }), request);
   }
 
   const parsed = chatRequestSchema.safeParse(rawBody);
   if (!parsed.success) {
     return withCors(
-      NextResponse.json({ error: "Données invalides.", issues: parsed.error.flatten() }, { status: 422 }),
+      NextResponse.json({ error: "Données invalides.", issues: parsed.error.flatten() }, { status: 422 }), request,
     );
   }
 
@@ -86,9 +77,9 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error("[agent/chat] Erreur API Anthropic:", response.status, errorBody);
+      console.error("[agent/chat] Anthropic error:", response.status, errorBody);
       return withCors(
-        NextResponse.json({ error: "Erreur de communication avec l'agent." }, { status: 502 }),
+        NextResponse.json({ error: "Erreur de communication avec l'agent." }, { status: 502 }), request,
       );
     }
 
@@ -102,16 +93,14 @@ export async function POST(request: NextRequest) {
     const prospect = extractProspectData(rawReply);
     const cleanReply = cleanReplyForDisplay(rawReply);
 
-    // [IMPORTANT-2] Sauvegarde prospect côté serveur (plus fiable que côté client)
     if (prospect) {
       const assistantMsg = { role: "assistant" as const, content: cleanReply };
       const fullConversation = [...messages, assistantMsg];
-
       await saveProspect({
         data: prospect,
         conversation: fullConversation,
         conversationLength: fullConversation.length,
-      }).catch((err) => console.error("[agent/chat] Échec sauvegarde prospect:", err));
+      }).catch((err) => console.error("[agent/chat] Save failed:", err));
     }
 
     const result: ChatResponse = {
@@ -120,11 +109,11 @@ export async function POST(request: NextRequest) {
       ...(prospect ? { prospect } : {}),
     };
 
-    return withCors(NextResponse.json(result));
+    return withCors(NextResponse.json(result), request);
   } catch (error) {
-    console.error("[agent/chat] Erreur inattendue:", error);
+    console.error("[agent/chat] Unexpected error:", error);
     return withCors(
-      NextResponse.json({ error: "Erreur interne du serveur." }, { status: 500 }),
+      NextResponse.json({ error: "Erreur interne." }, { status: 500 }), request,
     );
   }
 }

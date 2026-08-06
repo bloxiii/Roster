@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_TOKEN } from "@/lib/auth";
+import { getSessionToken } from "@/lib/auth";
 import { rateLimiters } from "@/lib/rate-limit";
 
 /**
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
   const response = NextResponse.json({ success: true });
 
-  response.cookies.set(COOKIE_NAME, SESSION_TOKEN, {
+  response.cookies.set(COOKIE_NAME, getSessionToken(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
