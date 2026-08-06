@@ -1,8 +1,10 @@
 export type Agent = {
   id: string;
+  name: string;
   role: string;
   description: string;
   skills: string[];
+  avatar: string;
 };
 
 export type UseCase = {

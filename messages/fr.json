@@ -61,44 +61,52 @@
   },
   "Agents": [
     {
-      "id": "qualification",
-      "role": "Qualification commerciale",
+      "id": "emma",
+      "name": "Emma",
+      "role": "Assistante commerciale IA",
       "description": "Engage chaque prospect en moins d'une minute, pose les bonnes questions et transmet uniquement les leads qualifiés à vos commerciaux.",
       "skills": [
-        "Scoring de leads",
-        "Qualification BANT",
-        "Transfert CRM"
-      ]
+        "Qualification de prospects",
+        "Scoring automatique",
+        "Transmission CRM"
+      ],
+      "avatar": "E"
     },
     {
-      "id": "support",
-      "role": "Support client",
+      "id": "lucas",
+      "name": "Lucas",
+      "role": "Assistant support IA",
       "description": "Répond aux questions de vos clients à toute heure, résout les demandes courantes et escalade les cas complexes à un humain.",
       "skills": [
-        "Base de connaissance",
-        "Escalade intelligente",
-        "Support multilingue"
-      ]
+        "Réponses clients",
+        "Résolution automatique",
+        "Escalade intelligente"
+      ],
+      "avatar": "L"
     },
     {
-      "id": "rendezvous",
-      "role": "Prise de rendez-vous",
+      "id": "sofia",
+      "name": "Sofia",
+      "role": "Assistante rendez-vous IA",
       "description": "Propose des créneaux, gère les confirmations et relances, et se synchronise directement avec vos calendriers.",
       "skills": [
-        "Synchronisation agenda",
-        "Rappels automatiques",
-        "Reprogrammation"
-      ]
+        "Gestion agenda",
+        "Relances automatiques",
+        "Confirmations"
+      ],
+      "avatar": "S"
     },
     {
-      "id": "administratif",
-      "role": "Automatisation administrative",
+      "id": "marc",
+      "name": "Marc",
+      "role": "Assistant administratif IA",
       "description": "Traite la saisie de données, les documents répétitifs et les tâches de suivi qui ralentissent vos équipes.",
       "skills": [
         "Extraction de données",
         "Génération de documents",
         "Suivi de tâches"
-      ]
+      ],
+      "avatar": "M"
     }
   ],
   "UseCases": {

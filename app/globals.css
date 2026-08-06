@@ -92,3 +92,30 @@ body {
     linear-gradient(to bottom, rgba(245, 243, 238, 0.04) 1px, transparent 1px);
   background-size: 64px 64px;
 }
+
+/* ─── Micro-interactions premium ──────────────────────────── */
+
+/* Glow subtil sur le bouton CTA principal */
+.btn-glow {
+  box-shadow: 0 0 20px rgba(122, 46, 38, 0.3);
+  transition: box-shadow 0.3s, background 0.2s, transform 0.2s;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 30px rgba(122, 46, 38, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Pulse lent pour les glows ambiants */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+
+/* Smooth gradient border pour les cartes en hover */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
