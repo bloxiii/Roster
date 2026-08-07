@@ -82,13 +82,13 @@ export function LoginForm({ locale }: { locale: string }) {
         </form>
 
         <p className="mt-6 text-center text-sm text-paper-dim">
-          Pas encore de compte ?{" "}
-          <Link
-            href={`/${locale}/signup`}
+          Vous souhaitez un accès ?{" "}
+          <a
+            href="mailto:contact@velin.ai"
             className="text-brass-bright hover:underline"
           >
-            Créer un compte
-          </Link>
+            Contactez-nous
+          </a>
         </p>
       </div>
     </div>

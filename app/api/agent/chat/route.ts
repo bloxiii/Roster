@@ -37,12 +37,18 @@ async function resolveAgent(request: NextRequest, body: { widgetKey?: string }) 
   if (body.widgetKey) {
     const { data: wk } = await supabase
       .from("widget_keys")
-      .select("company_id, agent_id, allowed_domains, is_active, agents(system_prompt)")
+      .select("company_id, agent_id, allowed_domains, is_active, agents(system_prompt), companies(status)")
       .eq("key", body.widgetKey)
       .single();
 
     if (!wk || !wk.is_active) {
       return { error: "Widget key invalide." };
+    }
+
+    // Vérifier que la company est active (empêche les comptes pending/suspended)
+    const companyData = wk.companies as unknown as { status: string } | null;
+    if (companyData?.status !== "active") {
+      return { error: "Compte non actif." };
     }
 
     // Vérifier le domaine d'origine

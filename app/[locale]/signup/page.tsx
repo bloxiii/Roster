@@ -1,12 +1,11 @@
+import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
-import type { Metadata } from "next";
-import { SignupForm } from "./SignupForm";
 
-export const metadata: Metadata = {
-  title: "Créer un compte — Velin",
-  robots: { index: false },
-};
-
+/**
+ * Le signup public est désactivé.
+ * Les comptes sont créés par l'équipe Velin après vente.
+ * Redirige vers la page d'accueil.
+ */
 export default async function SignupPage({
   params,
 }: {
@@ -14,6 +13,5 @@ export default async function SignupPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-
-  return <SignupForm locale={locale} />;
+  redirect(`/${locale}`);
 }

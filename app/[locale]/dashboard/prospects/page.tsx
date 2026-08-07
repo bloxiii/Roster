@@ -1,6 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { getUserContext } from "@/lib/supabase/context";
 import { createClient } from "@/lib/supabase/server";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ProspectList } from "@/components/dashboard/ProspectList";
@@ -17,7 +16,6 @@ export default async function ProspectsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await getUserContext(locale);
 
   const supabase = await createClient();
   const { data: prospects } = await supabase
