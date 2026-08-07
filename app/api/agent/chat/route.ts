@@ -78,6 +78,13 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorBody = await response.text();
       console.error("[agent/chat] Anthropic error:", response.status, errorBody);
+      console.error("[agent/chat] Request body was:", JSON.stringify({
+        model: AGENT_CONFIG.model,
+        max_tokens: AGENT_CONFIG.maxTokens,
+        temperature: AGENT_CONFIG.temperature,
+        system: "...(truncated)...",
+        messages: messages.map((m) => ({ role: m.role, content: m.content.slice(0, 50) })),
+      }));
       return withCors(
         NextResponse.json({ error: "Erreur de communication avec l'agent." }, { status: 502 }), request,
       );
