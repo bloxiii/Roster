@@ -48,12 +48,12 @@ create table public.widget_keys (
   created_at      timestamptz not null default now()
 );
 
--- PROSPECTS
+-- PROSPECTS (créé AVANT conversations pour éviter l'erreur de référence circulaire)
 create table public.prospects (
   id              uuid primary key default gen_random_uuid(),
   company_id      uuid not null references public.companies(id) on delete cascade,
   agent_id        uuid not null references public.agents(id),
-  conversation_id uuid,
+  conversation_id uuid,  -- FK ajoutée après création de conversations
   qualification   text not null,
   data            jsonb not null,
   summary         text,
@@ -74,7 +74,7 @@ create table public.conversations (
   ended_at    timestamptz
 );
 
--- Ajouter la FK conversation_id sur prospects maintenant que conversations existe
+-- FK croisée : prospects.conversation_id → conversations.id
 alter table public.prospects
   add constraint fk_prospect_conversation
   foreign key (conversation_id) references public.conversations(id);
@@ -106,7 +106,6 @@ create index idx_prospects_agent on public.prospects(agent_id);
 -- ROW LEVEL SECURITY
 -- ═══════════════════════════════════════════════════════════════
 
--- Fonction helper : retourne les company_ids de l'utilisateur connecté
 create or replace function public.user_company_ids()
 returns setof uuid
 language sql
@@ -157,8 +156,7 @@ create policy "settings_update" on public.company_settings
   for update using (company_id in (select public.user_company_ids()));
 
 -- ═══════════════════════════════════════════════════════════════
--- FONCTION : Setup automatique après signup
--- Crée la company, le membership, l'agent par défaut et la widget key
+-- TRIGGER : Setup automatique après signup
 -- ═══════════════════════════════════════════════════════════════
 create or replace function public.handle_new_user()
 returns trigger
@@ -172,7 +170,6 @@ declare
   company_slug text;
   widget_key_value text;
 begin
-  -- Récupérer le nom d'entreprise depuis les metadata du signup
   company_name := coalesce(
     new.raw_user_meta_data->>'company_name',
     'Mon entreprise'
@@ -180,26 +177,21 @@ begin
   company_slug := lower(regexp_replace(company_name, '[^a-zA-Z0-9]', '-', 'g'))
     || '-' || substr(gen_random_uuid()::text, 1, 8);
 
-  -- Créer la company
   insert into public.companies (name, slug)
   values (company_name, company_slug)
   returning id into new_company_id;
 
-  -- Créer le membership admin
   insert into public.memberships (user_id, company_id, role)
   values (new.id, new_company_id, 'admin');
 
-  -- Créer l'agent par défaut (Emma)
   insert into public.agents (company_id, name, role, type, avatar)
   values (new_company_id, 'Emma', 'Assistante commerciale IA', 'qualification', 'E')
   returning id into new_agent_id;
 
-  -- Générer une widget key
   widget_key_value := 'wk_' || encode(gen_random_bytes(24), 'hex');
   insert into public.widget_keys (key, company_id, agent_id)
   values (widget_key_value, new_company_id, new_agent_id);
 
-  -- Créer les settings par défaut
   insert into public.company_settings (company_id)
   values (new_company_id);
 
@@ -207,7 +199,6 @@ begin
 end;
 $$;
 
--- Déclencher après chaque nouveau signup
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
