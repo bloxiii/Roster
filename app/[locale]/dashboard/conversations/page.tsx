@@ -26,12 +26,43 @@ export default async function ConversationsPage({
   setRequestLocale(locale);
 
   const supabase = await createClient();
+
+  // Requête simple sans jointure complexe
   const { data: conversations } = await supabase
     .from("conversations")
-    .select("*, agents(name, avatar), prospects(id, qualification, data)")
+    .select("id, company_id, agent_id, prospect_id, status, messages, started_at")
     .order("started_at", { ascending: false });
 
   const all = conversations ?? [];
+
+  // Récupérer les agents et prospects séparément pour éviter les erreurs de jointure
+  const agentIds = [...new Set(all.map((c) => c.agent_id).filter(Boolean))];
+  const prospectIds = [...new Set(all.map((c) => c.prospect_id).filter(Boolean))];
+
+  let agentsMap: Record<string, { name: string; avatar: string }> = {};
+  let prospectsMap: Record<string, { id: string; qualification: string; data: Record<string, string | null> }> = {};
+
+  if (agentIds.length > 0) {
+    const { data: agents } = await supabase
+      .from("agents")
+      .select("id, name, avatar")
+      .in("id", agentIds);
+    if (agents) {
+      agentsMap = Object.fromEntries(agents.map((a) => [a.id, { name: a.name, avatar: a.avatar }]));
+    }
+  }
+
+  if (prospectIds.length > 0) {
+    const { data: prospects } = await supabase
+      .from("prospects")
+      .select("id, qualification, data")
+      .in("id", prospectIds);
+    if (prospects) {
+      prospectsMap = Object.fromEntries(
+        prospects.map((p) => [p.id, { id: p.id, qualification: p.qualification, data: p.data as Record<string, string | null> }]),
+      );
+    }
+  }
 
   return (
     <div className="max-w-5xl">
@@ -48,12 +79,8 @@ export default async function ConversationsPage({
         )}
 
         {all.map((conv) => {
-          const agent = conv.agents as unknown as { name: string; avatar: string } | null;
-          const prospect = conv.prospects as unknown as {
-            id: string;
-            qualification: string;
-            data: Record<string, string | null>;
-          } | null;
+          const agent = agentsMap[conv.agent_id] ?? { name: "Agent", avatar: "?" };
+          const prospect = conv.prospect_id ? prospectsMap[conv.prospect_id] : null;
           const msgCount = Array.isArray(conv.messages) ? conv.messages.length : 0;
           const prenom = prospect?.data?.prenom ?? "Visiteur";
 
@@ -64,14 +91,12 @@ export default async function ConversationsPage({
             >
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brass/15 font-mono text-sm font-medium text-brass">
-                  {agent?.avatar ?? "?"}
+                  {agent.avatar}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-paper">{prenom}</span>
-                    <span className="text-xs text-paper-dim">
-                      → {agent?.name ?? "Agent"}
-                    </span>
+                    <span className="text-xs text-paper-dim">→ {agent.name}</span>
                     {prospect && (
                       <span className={`rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest ${
                         prospect.qualification === "HOT" ? "border-status bg-status/10 text-status" :
