@@ -1,24 +1,18 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { isAuthenticated } from "@/lib/auth";
+import { getUserContext } from "@/lib/supabase/context";
+import { createClient } from "@/lib/supabase/server";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { LoginForm } from "@/components/dashboard/LoginForm";
 import { ProspectList } from "@/components/dashboard/ProspectList";
-import { LogoutButton } from "@/components/dashboard/LogoutButton";
-import { readProspects } from "@/lib/agent/save-prospect";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export const metadata: Metadata = {
   title: "Dashboard — Velin",
   robots: { index: false },
 };
 
-// Force le rendu dynamique (les données changent à chaque requête)
 export const dynamic = "force-dynamic";
-
-async function getProspects() {
-  return (await readProspects()).reverse();
-}
 
 export default async function DashboardPage({
   params,
@@ -30,67 +24,61 @@ export default async function DashboardPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const authed = await isAuthenticated();
-  if (!authed) {
-    return <LoginForm />;
-  }
+  const ctx = await getUserContext(locale);
+  const supabase = await createClient();
 
-  const prospects = await getProspects();
+  // Récupérer les prospects de cette company (RLS appliqué automatiquement)
+  const { data: prospects } = await supabase
+    .from("prospects")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  const allProspects = prospects ?? [];
   const { q } = await searchParams;
   const activeFilter = q && ["HOT", "WARM", "COLD"].includes(q) ? q : null;
 
-  // Stats rapides
-  const total = prospects.length;
-  const hot = prospects.filter((p) => p.data.qualification === "HOT").length;
-  const warm = prospects.filter((p) => p.data.qualification === "WARM").length;
+  const total = allProspects.length;
+  const hot = allProspects.filter((p) => p.qualification === "HOT").length;
+  const warm = allProspects.filter((p) => p.qualification === "WARM").length;
+
+  // Compter les conversations
+  const { count: conversationCount } = await supabase
+    .from("conversations")
+    .select("*", { count: "exact", head: true });
 
   return (
     <div className="min-h-screen bg-ink">
-      <header className="border-b border-border/60 bg-ink/85 backdrop-blur-md">
-        <Container className="flex h-14 items-center justify-between py-3">
-          <div className="flex items-center gap-2">
-            <span className="font-display text-lg font-semibold tracking-tight text-paper">
-              Velin
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-brass">
-              Dashboard
-            </span>
-          </div>
-          <LogoutButton />
-        </Container>
-      </header>
+      <DashboardHeader companyName={ctx.companyName} userName={ctx.userName} />
 
       <Container className="py-10">
-        <Eyebrow>Prospects</Eyebrow>
+        <Eyebrow>Vue d&apos;ensemble</Eyebrow>
         <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight text-paper">
-          Tableau de bord commercial
+          Bonjour {ctx.userName.split(" ")[0]}
         </h1>
 
         {/* Stats */}
-        <div className="mt-8 grid grid-cols-3 gap-4">
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="rounded-xl border border-border bg-surface p-4">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-paper-dim/60">
-              Total
-            </span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-paper-dim/60">Prospects</span>
             <p className="mt-1 font-display text-2xl font-semibold text-paper">{total}</p>
           </div>
           <div className="rounded-xl border border-status/30 bg-status/5 p-4">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-status/60">
-              Hot
-            </span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-status/60">Hot</span>
             <p className="mt-1 font-display text-2xl font-semibold text-status">{hot}</p>
           </div>
           <div className="rounded-xl border border-amber-400/30 bg-amber-400/5 p-4">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400/60">
-              Warm
-            </span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-amber-400/60">Warm</span>
             <p className="mt-1 font-display text-2xl font-semibold text-amber-400">{warm}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-surface p-4">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-paper-dim/60">Conversations</span>
+            <p className="mt-1 font-display text-2xl font-semibold text-paper">{conversationCount ?? 0}</p>
           </div>
         </div>
 
         {/* Liste */}
         <div className="mt-8">
-          <ProspectList prospects={prospects} activeFilter={activeFilter} locale={locale} />
+          <ProspectList prospects={allProspects} activeFilter={activeFilter} locale={locale} />
         </div>
       </Container>
     </div>

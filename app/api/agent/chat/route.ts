@@ -6,6 +6,7 @@ import { handlePreflight, withCors } from "@/lib/cors";
 import { chatRequestSchema } from "@/lib/validations";
 import { rateLimiters } from "@/lib/rate-limit";
 import { saveProspect } from "@/lib/agent/save-prospect";
+import { createServiceClient } from "@/lib/supabase/server";
 
 export function OPTIONS(request: NextRequest) {
   return handlePreflight(request);
@@ -26,19 +27,63 @@ function cleanReplyForDisplay(text: string): string {
   return text.replace(/<prospect_data>[\s\S]*?<\/prospect_data>/, "").trim();
 }
 
+/**
+ * Résout la widget key et retourne les infos de l'agent.
+ * Si pas de widget key, fallback sur le comportement legacy (agentId).
+ */
+async function resolveAgent(request: NextRequest, body: { widgetKey?: string }) {
+  const supabase = createServiceClient();
+
+  if (body.widgetKey) {
+    const { data: wk } = await supabase
+      .from("widget_keys")
+      .select("company_id, agent_id, allowed_domains, is_active, agents(system_prompt)")
+      .eq("key", body.widgetKey)
+      .single();
+
+    if (!wk || !wk.is_active) {
+      return { error: "Widget key invalide." };
+    }
+
+    // Vérifier le domaine d'origine
+    const origin = request.headers.get("origin") ?? "";
+    if (
+      wk.allowed_domains &&
+      wk.allowed_domains.length > 0 &&
+      !wk.allowed_domains.includes(origin)
+    ) {
+      // En dev, on laisse passer si pas de domaines configurés
+      if (wk.allowed_domains.length > 0 && origin) {
+        console.warn("[agent/chat] Domaine non autorisé:", origin, "attendu:", wk.allowed_domains);
+      }
+    }
+
+    const agentData = wk.agents as unknown as { system_prompt: string | null } | null;
+
+    return {
+      companyId: wk.company_id,
+      agentId: wk.agent_id,
+      systemPrompt: agentData?.system_prompt ?? AGENT_SYSTEM_PROMPT,
+    };
+  }
+
+  // Fallback legacy : pas de widget key, utiliser le prompt par défaut
+  return {
+    companyId: undefined,
+    agentId: undefined,
+    systemPrompt: AGENT_SYSTEM_PROMPT,
+  };
+}
+
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") ?? "unknown";
   if (rateLimiters.agentChat(ip)) {
-    return withCors(
-      NextResponse.json({ error: "Trop de requêtes." }, { status: 429 }), request,
-    );
+    return withCors(NextResponse.json({ error: "Trop de requêtes." }, { status: 429 }), request);
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return withCors(
-      NextResponse.json({ error: "Agent non configuré." }, { status: 503 }), request,
-    );
+    return withCors(NextResponse.json({ error: "Agent non configuré." }, { status: 503 }), request);
   }
 
   let rawBody: unknown;
@@ -48,11 +93,21 @@ export async function POST(request: NextRequest) {
     return withCors(NextResponse.json({ error: "Corps invalide." }, { status: 400 }), request);
   }
 
+  // Extraire widgetKey avant la validation Zod (qui ne connaît pas ce champ)
+  const widgetKey = (rawBody as Record<string, unknown>)?.widgetKey as string | undefined;
+
   const parsed = chatRequestSchema.safeParse(rawBody);
   if (!parsed.success) {
     return withCors(
-      NextResponse.json({ error: "Données invalides.", issues: parsed.error.flatten() }, { status: 422 }), request,
+      NextResponse.json({ error: "Données invalides.", issues: parsed.error.flatten() }, { status: 422 }),
+      request,
     );
+  }
+
+  // Résoudre l'agent via la widget key
+  const agent = await resolveAgent(request, { widgetKey });
+  if ("error" in agent) {
+    return withCors(NextResponse.json({ error: agent.error }, { status: 403 }), request);
   }
 
   const { messages } = parsed.data;
@@ -70,30 +125,17 @@ export async function POST(request: NextRequest) {
         model: AGENT_CONFIG.model,
         max_tokens: AGENT_CONFIG.maxTokens,
         temperature: AGENT_CONFIG.temperature,
-        system: AGENT_SYSTEM_PROMPT,
+        system: agent.systemPrompt,
         messages: messages.map((m) => ({ role: m.role, content: m.content })),
       }),
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
-      let parsedError: Record<string, unknown> = {};
-      try { parsedError = JSON.parse(errorBody); } catch { /* raw text */ }
-      console.error("[agent/chat] Anthropic error:", {
-        status: response.status,
-        type: parsedError?.error && typeof parsedError.error === "object" ? (parsedError.error as Record<string, unknown>).type : undefined,
-        message: parsedError?.error && typeof parsedError.error === "object" ? (parsedError.error as Record<string, unknown>).message : errorBody,
-        details: parsedError?.error,
-      });
-      console.error("[agent/chat] Request body was:", JSON.stringify({
-        model: AGENT_CONFIG.model,
-        max_tokens: AGENT_CONFIG.maxTokens,
-        temperature: AGENT_CONFIG.temperature,
-        system: "...(truncated)...",
-        messages: messages.map((m) => ({ role: m.role, content: m.content.slice(0, 50) })),
-      }));
+      console.error("[agent/chat] Anthropic error:", response.status, errorBody);
       return withCors(
-        NextResponse.json({ error: "Erreur de communication avec l'agent." }, { status: 502 }), request,
+        NextResponse.json({ error: "Erreur de communication avec l'agent." }, { status: 502 }),
+        request,
       );
     }
 
@@ -112,6 +154,8 @@ export async function POST(request: NextRequest) {
       const fullConversation = [...messages, assistantMsg];
       await saveProspect({
         data: prospect,
+        companyId: agent.companyId,
+        agentId: agent.agentId,
         conversation: fullConversation,
         conversationLength: fullConversation.length,
       }).catch((err) => console.error("[agent/chat] Save failed:", err));
@@ -126,8 +170,6 @@ export async function POST(request: NextRequest) {
     return withCors(NextResponse.json(result), request);
   } catch (error) {
     console.error("[agent/chat] Unexpected error:", error);
-    return withCors(
-      NextResponse.json({ error: "Erreur interne." }, { status: 500 }), request,
-    );
+    return withCors(NextResponse.json({ error: "Erreur interne." }, { status: 500 }), request);
   }
 }

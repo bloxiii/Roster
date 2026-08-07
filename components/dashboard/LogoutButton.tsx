@@ -1,21 +1,16 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { logout } from "@/lib/supabase/actions";
 
 export function LogoutButton() {
-  const router = useRouter();
-
-  async function handleLogout() {
-    await fetch("/api/auth", { method: "DELETE" });
-    router.refresh();
-  }
-
   return (
-    <button
-      onClick={handleLogout}
-      className="text-sm text-paper-dim transition-colors hover:text-paper"
-    >
-      Déconnexion
-    </button>
+    <form action={logout}>
+      <button
+        type="submit"
+        className="text-sm text-paper-dim transition-colors hover:text-paper"
+      >
+        Déconnexion
+      </button>
+    </form>
   );
 }

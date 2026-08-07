@@ -5,23 +5,19 @@ const SENDER = process.env.CONTACT_EMAIL_FROM ?? "Velin <onboarding@resend.dev>"
 
 /**
  * Envoie une notification email quand un prospect est qualifié HOT.
- *
- * Le destinataire est l'email du client (agence) configuré par variable
- * d'environnement. En production avec multi-tenant, on ira chercher l'email
- * dans la table clients.
+ * L'email destinataire vient des settings de la company (multi-tenant)
+ * ou de la variable d'env en fallback.
  */
 export async function notifyHotProspect(
   data: ProspectData,
   prospectId: string,
+  recipientOverride?: string | null,
 ) {
   const apiKey = process.env.RESEND_API_KEY;
-  const recipient = process.env.NOTIFICATION_EMAIL_TO ?? process.env.CONTACT_EMAIL_TO;
+  const recipient = recipientOverride ?? process.env.CONTACT_EMAIL_TO;
 
   if (!apiKey || !recipient) {
-    console.warn(
-      "[notify] RESEND_API_KEY ou NOTIFICATION_EMAIL_TO absente — notification non envoyée.",
-      { prospectId, qualification: data.qualification },
-    );
+    console.warn("[notify] Clé ou destinataire absent — notification non envoyée.");
     return false;
   }
 
@@ -53,8 +49,6 @@ export async function notifyHotProspect(
     "",
     "— Notes commerciales —",
     data.notes_commerciales,
-    "",
-    `Fiche complète : /dashboard/${prospectId}`,
   ].join("\n");
 
   try {
@@ -67,13 +61,12 @@ export async function notifyHotProspect(
     });
 
     if (error) {
-      console.error("[notify] Échec de l'envoi:", error.message);
+      console.error("[notify] Échec:", error.message);
       return false;
     }
-
     return true;
   } catch (err) {
-    console.error("[notify] Erreur inattendue:", err);
+    console.error("[notify] Erreur:", err);
     return false;
   }
 }

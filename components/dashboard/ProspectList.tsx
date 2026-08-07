@@ -1,17 +1,23 @@
-import type { ProspectRecord } from "@/lib/agent/types";
 import Link from "next/link";
 
-const QUAL_STYLES = {
+type ProspectRow = {
+  id: string;
+  qualification: string;
+  data: Record<string, unknown>;
+  created_at: string;
+};
+
+const QUAL_STYLES: Record<string, string> = {
   HOT: "border-status bg-status/10 text-status",
   WARM: "border-amber-400 bg-amber-400/10 text-amber-400",
   COLD: "border-paper-dim/40 bg-paper-dim/10 text-paper-dim",
-} as const;
+};
 
-const QUAL_LABELS = {
+const QUAL_LABELS: Record<string, string> = {
   HOT: "Hot",
   WARM: "Warm",
   COLD: "Cold",
-} as const;
+};
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -29,7 +35,7 @@ export function ProspectList({
   activeFilter,
   locale,
 }: {
-  prospects: ProspectRecord[];
+  prospects: ProspectRow[];
   activeFilter: string | null;
   locale: string;
 }) {
@@ -37,11 +43,10 @@ export function ProspectList({
     { key: null, label: "Tous", count: prospects.length },
   ];
 
-  // Compter par qualification sur la liste complète (pas filtrée)
   const counts = { HOT: 0, WARM: 0, COLD: 0 };
   prospects.forEach((p) => {
-    if (p.data.qualification in counts) {
-      counts[p.data.qualification as keyof typeof counts]++;
+    if (p.qualification in counts) {
+      counts[p.qualification as keyof typeof counts]++;
     }
   });
   filters.push(
@@ -51,12 +56,11 @@ export function ProspectList({
   );
 
   const filtered = activeFilter
-    ? prospects.filter((p) => p.data.qualification === activeFilter)
+    ? prospects.filter((p) => p.qualification === activeFilter)
     : prospects;
 
   return (
     <div>
-      {/* Filtres */}
       <div className="flex gap-2">
         {filters.map((f) => (
           <Link
@@ -73,7 +77,6 @@ export function ProspectList({
         ))}
       </div>
 
-      {/* Liste */}
       <div className="mt-6 space-y-3">
         {filtered.length === 0 && (
           <p className="py-12 text-center text-sm text-paper-dim">
@@ -81,61 +84,59 @@ export function ProspectList({
           </p>
         )}
 
-        {filtered.map((prospect) => (
-          <Link
-            key={prospect.id}
-            href={`/${locale}/dashboard/${prospect.id}`}
-            className="group flex items-center justify-between rounded-xl border border-border bg-surface p-4 transition-colors hover:border-brass/40 hover:bg-surface-hover"
-          >
-            <div className="flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brass/15 font-mono text-sm font-medium text-brass">
-                {(prospect.data.prenom ?? "?")[0].toUpperCase()}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-paper">
-                    {prospect.data.prenom ?? "Prospect"}
-                  </span>
-                  <span
-                    className={`inline-flex rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest ${
-                      QUAL_STYLES[prospect.data.qualification]
-                    }`}
-                  >
-                    {QUAL_LABELS[prospect.data.qualification]}
-                  </span>
-                </div>
-                <div className="mt-0.5 flex items-center gap-3 text-xs text-paper-dim">
-                  {prospect.data.type_projet && <span>{prospect.data.type_projet}</span>}
-                  {prospect.data.localisation && (
-                    <>
-                      <span className="text-border">·</span>
-                      <span>{prospect.data.localisation}</span>
-                    </>
-                  )}
-                  {prospect.data.budget && (
-                    <>
-                      <span className="text-border">·</span>
-                      <span>{prospect.data.budget}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+        {filtered.map((prospect) => {
+          const data = prospect.data as Record<string, string | null>;
+          const prenom = data?.prenom ?? "Prospect";
+          const initial = prenom[0]?.toUpperCase() ?? "?";
 
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-paper-dim/60">{timeAgo(prospect.createdAt)}</span>
-              <svg
-                className="h-4 w-4 text-paper-dim/40 transition-colors group-hover:text-brass"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M6 3l5 5-5 5" />
-              </svg>
-            </div>
-          </Link>
-        ))}
+          return (
+            <Link
+              key={prospect.id}
+              href={`/${locale}/dashboard/${prospect.id}`}
+              className="group flex items-center justify-between rounded-xl border border-border bg-surface p-4 transition-colors hover:border-brass/40 hover:bg-surface-hover"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brass/15 font-mono text-sm font-medium text-brass">
+                  {initial}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-paper">{prenom}</span>
+                    <span
+                      className={`inline-flex rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest ${
+                        QUAL_STYLES[prospect.qualification] ?? ""
+                      }`}
+                    >
+                      {QUAL_LABELS[prospect.qualification] ?? prospect.qualification}
+                    </span>
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-3 text-xs text-paper-dim">
+                    {data?.type_projet && <span>{data.type_projet}</span>}
+                    {data?.localisation && (
+                      <>
+                        <span className="text-border">·</span>
+                        <span>{data.localisation}</span>
+                      </>
+                    )}
+                    {data?.budget && (
+                      <>
+                        <span className="text-border">·</span>
+                        <span>{data.budget}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-paper-dim/60">{timeAgo(prospect.created_at)}</span>
+                <svg className="h-4 w-4 text-paper-dim/40 group-hover:text-brass" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M6 3l5 5-5 5" />
+                </svg>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

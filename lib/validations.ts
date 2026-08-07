@@ -23,6 +23,7 @@ export type ContactFormInput = z.infer<typeof contactFormSchema>;
  */
 export const chatRequestSchema = z.object({
   conversationId: z.string().max(100).optional(),
+  widgetKey: z.string().max(100).optional(),
   messages: z
     .array(
       z.object({

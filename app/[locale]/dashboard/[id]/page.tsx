@@ -1,23 +1,18 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { isAuthenticated } from "@/lib/auth";
+import { getUserContext } from "@/lib/supabase/context";
+import { createClient } from "@/lib/supabase/server";
 import { Container } from "@/components/ui/Container";
-import { LoginForm } from "@/components/dashboard/LoginForm";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ProspectDetail } from "@/components/dashboard/ProspectDetail";
-import { readProspects } from "@/lib/agent/save-prospect";
 
 export const metadata: Metadata = {
-  title: "Prospect — Dashboard Velin",
+  title: "Prospect — Velin",
   robots: { index: false },
 };
 
 export const dynamic = "force-dynamic";
-
-async function getProspect(id: string) {
-  const prospects = await readProspects();
-  return prospects.find((p) => p.id === id) ?? null;
-}
 
 export default async function ProspectPage({
   params,
@@ -27,33 +22,37 @@ export default async function ProspectPage({
   const { locale, id } = await params;
   setRequestLocale(locale);
 
-  const authed = await isAuthenticated();
-  if (!authed) {
-    return <LoginForm />;
-  }
+  const ctx = await getUserContext(locale);
+  const supabase = await createClient();
 
-  const prospect = await getProspect(id);
+  // RLS garantit l'isolation — un user ne peut voir que les prospects de sa company
+  const { data: prospect } = await supabase
+    .from("prospects")
+    .select("*, conversations(*)")
+    .eq("id", id)
+    .single();
+
   if (!prospect) {
     notFound();
   }
 
+  // Adapter le format pour le composant ProspectDetail existant
+  const record = {
+    id: prospect.id,
+    agentId: prospect.agent_id,
+    clientId: prospect.company_id,
+    createdAt: prospect.created_at,
+    data: prospect.data,
+    conversation: prospect.conversations?.messages ?? [],
+    conversationLength: prospect.conversations?.messages?.length ?? 0,
+    notifiedAt: prospect.notified_at,
+  };
+
   return (
     <div className="min-h-screen bg-ink">
-      <header className="border-b border-border/60 bg-ink/85 backdrop-blur-md">
-        <Container className="flex h-14 items-center justify-between py-3">
-          <div className="flex items-center gap-2">
-            <span className="font-display text-lg font-semibold tracking-tight text-paper">
-              Velin
-            </span>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-brass">
-              Dashboard
-            </span>
-          </div>
-        </Container>
-      </header>
-
+      <DashboardHeader companyName={ctx.companyName} userName={ctx.userName} />
       <Container className="py-10">
-        <ProspectDetail prospect={prospect} locale={locale} />
+        <ProspectDetail prospect={record} locale={locale} />
       </Container>
     </div>
   );
