@@ -92,7 +92,7 @@ export const AGENT_CONFIG = {
   id: "qualification-immobilier",
   name: "Alex",
   role: "Qualification commerciale",
-  model: "claude-haiku-4-5-20251001",
+  model: "claude-3-5-haiku-20241022",
   maxTokens: 512,
   temperature: 0.7,
 } as const;
