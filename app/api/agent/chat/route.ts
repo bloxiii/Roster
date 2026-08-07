@@ -77,7 +77,14 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error("[agent/chat] Anthropic error:", response.status, errorBody);
+      let parsedError: Record<string, unknown> = {};
+      try { parsedError = JSON.parse(errorBody); } catch { /* raw text */ }
+      console.error("[agent/chat] Anthropic error:", {
+        status: response.status,
+        type: parsedError?.error && typeof parsedError.error === "object" ? (parsedError.error as Record<string, unknown>).type : undefined,
+        message: parsedError?.error && typeof parsedError.error === "object" ? (parsedError.error as Record<string, unknown>).message : errorBody,
+        details: parsedError?.error,
+      });
       console.error("[agent/chat] Request body was:", JSON.stringify({
         model: AGENT_CONFIG.model,
         max_tokens: AGENT_CONFIG.maxTokens,
