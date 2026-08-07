@@ -6,7 +6,7 @@ import { ProspectCard } from "./ProspectCard";
 
 type Status = "idle" | "loading" | "error";
 
-export function ChatWidget() {
+export function ChatWidget({ widgetKey }: { widgetKey?: string | null }) {
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState<Status>("idle");
@@ -33,7 +33,7 @@ export function ChatWidget() {
         const response = await fetch("/api/agent/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: allMessages, conversationId }),
+          body: JSON.stringify({ messages: allMessages, conversationId, ...(widgetKey ? { widgetKey } : {}) }),
         });
 
         if (!response.ok) {

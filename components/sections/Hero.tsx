@@ -40,27 +40,6 @@ export function Hero() {
           </div>
         </Reveal>
 
-        {/* Emplacement vidéo de démonstration */}
-        <Reveal animation="fade-scale" delay={600} duration={1100}>
-          <div className="mt-16 w-full max-w-3xl overflow-hidden rounded-2xl border border-border bg-surface/50">
-            <div className="relative aspect-video flex items-center justify-center bg-ink-soft">
-              {/* Remplacer ce placeholder par une vraie vidéo :
-                  <video src="/demo.mp4" controls poster="/demo-poster.jpg" /> 
-                  ou un embed YouTube/Loom */}
-              <div className="text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brass/20">
-                  <svg className="h-6 w-6 text-brass" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-                <p className="mt-4 font-mono text-xs uppercase tracking-widest text-paper-dim/60">
-                  Vidéo de démonstration
-                </p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-
         <Reveal animation="fade-blur" delay={700} duration={1000}>
           <div className="mt-20 flex items-center gap-4">
             <div className="flex -space-x-2.5">
