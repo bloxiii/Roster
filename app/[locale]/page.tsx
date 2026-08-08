@@ -31,7 +31,9 @@ export default async function HomePage({
         <Benefits />
         <ContactSection />
       </main>
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
     </>
   );
 }

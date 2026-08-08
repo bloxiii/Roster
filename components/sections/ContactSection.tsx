@@ -6,7 +6,6 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Button } from "@/components/ui/Button";
 import { contactFormSchema } from "@/lib/validations";
-import { MorphingShape } from "@/components/ui/MorphingShape";
 
 type Status = "idle" | "sending" | "success" | "error";
 
@@ -58,8 +57,7 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" className="relative py-36 overflow-hidden section-glow-border">
-      <MorphingShape />
+    <section id="contact" className="section-glow-border py-36">
       <Container className="relative z-10 grid gap-14 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <Eyebrow>{t("eyebrow")}</Eyebrow>

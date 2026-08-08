@@ -3,7 +3,6 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Reveal } from "@/components/ui/Reveal";
-import { NetworkOrb } from "@/components/ui/NetworkOrb";
 import type { Agent } from "@/types";
 
 export function Solutions() {
@@ -12,8 +11,7 @@ export function Solutions() {
   const agents = root.raw("Agents") as Agent[];
 
   return (
-    <section id="agents" className="relative py-36 overflow-hidden section-glow-border">
-      <NetworkOrb />
+    <section id="agents" className="section-glow-border py-36">
       <Container className="relative z-10">
         <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">
