@@ -1,6 +1,6 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import Link from "next/link";
 
@@ -25,8 +25,7 @@ export default async function ConversationsPage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const supabase = await createClient();
-  await supabase.auth.getUser(); // Nécessaire pour activer le RLS
+  const supabase = await getAuthenticatedClient();
   // Requête simple sans jointure complexe
   const { data: conversations } = await supabase
     .from("conversations")

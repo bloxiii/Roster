@@ -1,5 +1,6 @@
 import { createClient } from "./server";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 export type CompanyStatus = "pending" | "active" | "suspended";
 
@@ -15,15 +16,11 @@ export type UserContext = {
 };
 
 /**
- * Récupère le contexte complet de l'utilisateur connecté.
- * Redirige vers /login si pas de session.
- * Redirige vers /pending si le compte n'est pas actif.
- *
- * Note : cette fonction est le seul point d'accès au contexte user.
- * Elle est appelée une seule fois dans le layout du dashboard,
- * pas dans chaque page (fix performance).
+ * Récupère le contexte utilisateur — CACHED par requête.
+ * Grâce à React.cache(), même si appelé 5 fois dans un même rendu
+ * (layout + page + composants), la requête Supabase n'est faite qu'UNE fois.
  */
-export async function getUserContext(locale: string = "fr"): Promise<UserContext> {
+export const getUserContext = cache(async (locale: string = "fr"): Promise<UserContext> => {
   const supabase = await createClient();
 
   const {
@@ -60,4 +57,14 @@ export async function getUserContext(locale: string = "fr"): Promise<UserContext
     email: user.email ?? "",
     userName: user.user_metadata?.name ?? user.email ?? "",
   };
-}
+});
+
+/**
+ * Crée un client Supabase avec la session déjà chargée.
+ * Utilise le cache pour éviter de re-créer le client à chaque page.
+ */
+export const getAuthenticatedClient = cache(async () => {
+  const supabase = await createClient();
+  await supabase.auth.getUser();
+  return supabase;
+});

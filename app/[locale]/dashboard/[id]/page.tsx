@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import Link from "next/link";
 
@@ -42,8 +42,7 @@ export default async function ProspectPage({
   const { locale, id } = await params;
   setRequestLocale(locale);
 
-  const supabase = await createClient();
-  await supabase.auth.getUser();
+  const supabase = await getAuthenticatedClient();
 
   // Récupérer le prospect
   const { data: prospect, error } = await supabase

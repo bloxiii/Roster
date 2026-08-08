@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { getUserContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ProspectList } from "@/components/dashboard/ProspectList";
 
@@ -23,7 +23,7 @@ export default async function DashboardPage({
   setRequestLocale(locale);
 
   const ctx = await getUserContext(locale);
-  const supabase = await createClient();
+  const supabase = await getAuthenticatedClient();
 
   const { data: prospects } = await supabase
     .from("prospects")

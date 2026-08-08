@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { getUserContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { OnboardingFlow } from "./OnboardingFlow";
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export default async function OnboardingPage({
   setRequestLocale(locale);
 
   const ctx = await getUserContext(locale);
-  const supabase = await createClient();
+  const supabase = await getAuthenticatedClient();
 
   const { data: agents } = await supabase
     .from("agents")

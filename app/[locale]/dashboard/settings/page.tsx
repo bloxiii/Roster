@@ -1,7 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { getUserContext } from "@/lib/supabase/context";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { SettingsForm } from "./SettingsForm";
 
@@ -17,7 +17,7 @@ export default async function SettingsPage({
   setRequestLocale(locale);
 
   const ctx = await getUserContext(locale);
-  const supabase = await createClient();
+  const supabase = await getAuthenticatedClient();
 
   const { data: settings } = await supabase
     .from("company_settings")
