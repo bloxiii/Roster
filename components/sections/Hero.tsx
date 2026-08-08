@@ -5,7 +5,7 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal, AnimatedCounter } from "@/components/ui/Reveal";
-import { HeroOrb } from "@/components/ui/HeroOrb";
+// import { HeroOrb } from "@/components/ui/HeroOrb"; // Remplacé par LaptopScene
 import type { Stat } from "@/types";
 
 export function Hero() {
@@ -17,8 +17,7 @@ export function Hero() {
       {/* Grille de fond subtile */}
       <div aria-hidden className="absolute inset-0 bg-grid opacity-40" />
 
-      {/* Orbe 3D en arrière-plan */}
-      <HeroOrb />
+      {/* 3D gérée par LaptopScene au niveau de la page */}
 
       {/* Contenu texte par-dessus la 3D */}
       <Container className="relative z-10 flex flex-col items-start py-32 md:py-0">

@@ -8,6 +8,7 @@ import { UseCases } from "@/components/sections/UseCases";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Benefits } from "@/components/sections/Benefits";
 import { ContactSection } from "@/components/sections/ContactSection";
+import { LaptopScene } from "@/components/ui/LaptopScene";
 
 export default async function HomePage({
   params,
@@ -19,8 +20,9 @@ export default async function HomePage({
 
   return (
     <>
+      <LaptopScene />
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 relative z-10">
         <Hero />
         <Problem />
         <Solutions />

@@ -11,7 +11,7 @@ export function Benefits() {
   const items = t.raw("items") as Benefit[];
 
   return (
-    <section className="relative bg-ink-soft py-36 overflow-hidden section-glow-border">
+    <section className="relative bg-ink-soft/70 py-36 overflow-hidden section-glow-border">
       <ParticleWave />
       <Container className="relative z-10">
         <Reveal animation="fade-scale" duration={1000}>
