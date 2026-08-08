@@ -58,6 +58,9 @@ export function Footer() {
         <span>
           © {year} Velin. {t("rights")}
         </span>
+        <a href="/legal" className="text-paper-dim/50 hover:text-paper-dim transition-colors">
+          Mentions légales & Confidentialité
+        </a>
       </Container>
     </footer>
   );
