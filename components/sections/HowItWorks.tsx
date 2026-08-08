@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
+import { GlobeConnections } from "@/components/ui/GlobeConnections";
 
 type Step = { title: string; description: string };
 
@@ -10,8 +11,9 @@ export function HowItWorks() {
   const steps = t.raw("steps") as Step[];
 
   return (
-    <section id="how-it-works" className="border-t border-border/60 py-32">
-      <Container>
+    <section id="how-it-works" className="relative py-36 overflow-hidden section-glow-border">
+      <GlobeConnections />
+      <Container className="relative z-10">
         <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">
             <Eyebrow>{t("eyebrow")}</Eyebrow>
