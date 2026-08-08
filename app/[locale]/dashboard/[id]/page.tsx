@@ -43,6 +43,7 @@ export default async function ProspectPage({
   setRequestLocale(locale);
 
   const supabase = await createClient();
+  await supabase.auth.getUser();
 
   // Récupérer le prospect
   const { data: prospect, error } = await supabase

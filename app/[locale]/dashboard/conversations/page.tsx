@@ -26,7 +26,7 @@ export default async function ConversationsPage({
   setRequestLocale(locale);
 
   const supabase = await createClient();
-
+  await supabase.auth.getUser(); // Nécessaire pour activer le RLS
   // Requête simple sans jointure complexe
   const { data: conversations } = await supabase
     .from("conversations")

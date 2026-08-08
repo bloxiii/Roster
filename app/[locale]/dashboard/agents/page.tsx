@@ -16,6 +16,7 @@ export default async function AgentsPage({
   setRequestLocale(locale);
 
   const supabase = await createClient();
+  await supabase.auth.getUser();
 
   const { data: agents } = await supabase
     .from("agents")

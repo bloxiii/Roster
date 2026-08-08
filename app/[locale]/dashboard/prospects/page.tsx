@@ -18,6 +18,7 @@ export default async function ProspectsPage({
   setRequestLocale(locale);
 
   const supabase = await createClient();
+  await supabase.auth.getUser();
   const { data: prospects } = await supabase
     .from("prospects")
     .select("*")
