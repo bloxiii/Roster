@@ -109,6 +109,7 @@ export function SettingsForm({ companyId, company, settings, widgetKeys }: Props
             />
           </div>
 
+          {/* WhatsApp et Notion — masqués pour le MVP, prêts pour V2
           <div className="mt-5">
             <label htmlFor="notification_whatsapp" className="mb-1.5 block text-xs text-paper-dim">
               WhatsApp
@@ -184,6 +185,7 @@ export function SettingsForm({ companyId, company, settings, widgetKeys }: Props
               </div>
             </div>
           </div>
+          */
         </section>
 
         {/* Widget */}
