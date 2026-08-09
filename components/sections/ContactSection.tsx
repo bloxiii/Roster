@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Button } from "@/components/ui/Button";
+import { GlassKnot } from "@/components/ui/GlassKnot";
 import { contactFormSchema } from "@/lib/validations";
 
 type Status = "idle" | "sending" | "success" | "error";
@@ -57,7 +58,8 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" className="section-glow-border py-36">
+    <section id="contact" className="section-glow-border relative overflow-hidden py-36">
+      <GlassKnot />
       <Container className="relative z-10 grid gap-14 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <Eyebrow>{t("eyebrow")}</Eyebrow>

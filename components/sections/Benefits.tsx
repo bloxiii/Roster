@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
+import { GlobeConnections } from "@/components/ui/GlobeConnections";
 
 type Benefit = { title: string; description: string };
 
@@ -10,7 +11,8 @@ export function Benefits() {
   const items = t.raw("items") as Benefit[];
 
   return (
-    <section className="section-glow-border bg-ink-soft py-36">
+    <section className="section-glow-border relative overflow-hidden bg-ink-soft py-36">
+      <GlobeConnections />
       <Container className="relative z-10">
         <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">

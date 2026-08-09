@@ -36,8 +36,8 @@ export function ParticleWave() {
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
 
-    const brandColor = new THREE.Color(0x7a2e26);
-    const creamColor = new THREE.Color(0xf5ebe0);
+    const brandColor = new THREE.Color(0xc9a66b);
+    const creamColor = new THREE.Color(0xf5f3ee);
 
     for (let i = 0; i < cols; i++) {
       for (let j = 0; j < rows; j++) {
@@ -74,9 +74,18 @@ export function ParticleWave() {
     const handleScroll = () => { scrollY = window.scrollY; };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
+    // Pause le rendu quand la scène sort du viewport (perf)
+    let isVisible = true;
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => { isVisible = entry.isIntersecting; },
+      { threshold: 0 },
+    );
+    visibilityObserver.observe(container);
+
     let animationId: number;
     function animate() {
       animationId = requestAnimationFrame(animate);
+      if (!isVisible) return;
       time += 0.008;
 
       const pos = geo.attributes.position.array as Float32Array;
@@ -108,6 +117,7 @@ export function ParticleWave() {
 
     return () => {
       cancelAnimationFrame(animationId);
+      visibilityObserver.disconnect();
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
       renderer.dispose();

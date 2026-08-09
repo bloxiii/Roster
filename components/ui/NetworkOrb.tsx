@@ -47,7 +47,7 @@ export function NetworkOrb() {
       const size = 0.04 + Math.random() * 0.06;
       const geo = new THREE.SphereGeometry(size, 8, 8);
       const mat = new THREE.MeshBasicMaterial({
-        color: i < 4 ? 0x7a2e26 : 0xf5ebe0,
+        color: i < 4 ? 0xc9a66b : 0xf5f3ee,
         transparent: true,
         opacity: i < 4 ? 0.9 : 0.4,
       });
@@ -59,7 +59,7 @@ export function NetworkOrb() {
 
     // Créer les connexions
     const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0x7a2e26,
+      color: 0xc9a66b,
       transparent: true,
       opacity: 0.12,
     });
@@ -83,7 +83,7 @@ export function NetworkOrb() {
     agentNodes.forEach((node, i) => {
       const ringGeo = new THREE.RingGeometry(0.12, 0.14, 32);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x7a2e26,
+        color: 0xc9a66b,
         transparent: true,
         opacity: 0.3,
         side: THREE.DoubleSide,
@@ -99,9 +99,18 @@ export function NetworkOrb() {
     const handleScroll = () => { scrollY = window.scrollY; };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
+    // Pause le rendu quand la scène sort du viewport (perf)
+    let isVisible = true;
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => { isVisible = entry.isIntersecting; },
+      { threshold: 0 },
+    );
+    visibilityObserver.observe(container);
+
     let animationId: number;
     function animate() {
       animationId = requestAnimationFrame(animate);
+      if (!isVisible) return;
       time += 0.003;
 
       const scrollFactor = scrollY * 0.0005;
@@ -131,6 +140,7 @@ export function NetworkOrb() {
 
     return () => {
       cancelAnimationFrame(animationId);
+      visibilityObserver.disconnect();
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
       renderer.dispose();

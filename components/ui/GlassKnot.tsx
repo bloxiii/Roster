@@ -29,31 +29,31 @@ export function GlassKnot() {
     container.appendChild(renderer.domElement);
 
     // Lumières multiples pour les reflets
-    scene.add(new THREE.AmbientLight(0xf5ebe0, 0.3));
+    scene.add(new THREE.AmbientLight(0xf5f3ee, 0.3));
 
-    const light1 = new THREE.DirectionalLight(0xf5ebe0, 0.8);
+    const light1 = new THREE.DirectionalLight(0xf5f3ee, 0.8);
     light1.position.set(5, 5, 5);
     scene.add(light1);
 
-    const light2 = new THREE.DirectionalLight(0x7a2e26, 0.5);
+    const light2 = new THREE.DirectionalLight(0xc9a66b, 0.5);
     light2.position.set(-4, -2, 3);
     scene.add(light2);
 
-    const light3 = new THREE.PointLight(0x953830, 2, 12);
+    const light3 = new THREE.PointLight(0xddc08a, 2, 12);
     light3.position.set(2, 3, 4);
     scene.add(light3);
 
-    const light4 = new THREE.PointLight(0xf5ebe0, 1, 10);
+    const light4 = new THREE.PointLight(0xf5f3ee, 1, 10);
     light4.position.set(-3, -1, 2);
     scene.add(light4);
 
     // Torus knot principal — matériau verre fumé
     const knotGeo = new THREE.TorusKnotGeometry(1.1, 0.35, 200, 32, 2, 3);
     const knotMat = new THREE.MeshPhongMaterial({
-      color: 0x1a110d,
-      emissive: 0x7a2e26,
+      color: 0x10141f,
+      emissive: 0xc9a66b,
       emissiveIntensity: 0.08,
-      specular: 0xf5ebe0,
+      specular: 0xf5f3ee,
       shininess: 140,
       transparent: true,
       opacity: 0.65,
@@ -64,7 +64,7 @@ export function GlassKnot() {
     // Wireframe par-dessus — donne l'aspect technique
     const wireGeo = new THREE.TorusKnotGeometry(1.12, 0.36, 100, 16, 2, 3);
     const wireMat = new THREE.MeshBasicMaterial({
-      color: 0x7a2e26,
+      color: 0xc9a66b,
       wireframe: true,
       transparent: true,
       opacity: 0.06,
@@ -75,10 +75,10 @@ export function GlassKnot() {
     // Second knot plus petit à l'intérieur — profondeur
     const innerKnotGeo = new THREE.TorusKnotGeometry(0.6, 0.15, 120, 20, 3, 5);
     const innerKnotMat = new THREE.MeshPhongMaterial({
-      color: 0x2d1f17,
-      emissive: 0x953830,
+      color: 0x131826,
+      emissive: 0xddc08a,
       emissiveIntensity: 0.12,
-      specular: 0xf5ebe0,
+      specular: 0xf5f3ee,
       shininess: 100,
       transparent: true,
       opacity: 0.4,
@@ -89,7 +89,7 @@ export function GlassKnot() {
     // Anneau orbital
     const ringGeo = new THREE.TorusGeometry(2.2, 0.006, 16, 120);
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0x7a2e26,
+      color: 0xc9a66b,
       transparent: true,
       opacity: 0.15,
     });
@@ -112,7 +112,7 @@ export function GlassKnot() {
     pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3));
     const particles = new THREE.Points(
       pGeo,
-      new THREE.PointsMaterial({ color: 0xf5ebe0, size: 0.018, transparent: true, opacity: 0.3 }),
+      new THREE.PointsMaterial({ color: 0xf5f3ee, size: 0.018, transparent: true, opacity: 0.3 }),
     );
     scene.add(particles);
 
@@ -130,9 +130,18 @@ export function GlassKnot() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("mousemove", handleMouse, { passive: true });
 
+    // Pause le rendu quand la scène sort du viewport (perf)
+    let isVisible = true;
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => { isVisible = entry.isIntersecting; },
+      { threshold: 0 },
+    );
+    visibilityObserver.observe(container);
+
     let animationId: number;
     function animate() {
       animationId = requestAnimationFrame(animate);
+      if (!isVisible) return;
       time += 0.004;
 
       const sf = scrollY * 0.0004;
@@ -170,6 +179,7 @@ export function GlassKnot() {
 
     return () => {
       cancelAnimationFrame(animationId);
+      visibilityObserver.disconnect();
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("mousemove", handleMouse);
       window.removeEventListener("resize", handleResize);
