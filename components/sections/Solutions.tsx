@@ -3,7 +3,6 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Reveal } from "@/components/ui/Reveal";
-import { TiltCard } from "@/components/ui/TiltCard";
 import type { Agent } from "@/types";
 
 export function Solutions() {
@@ -53,37 +52,35 @@ export function Solutions() {
         <div className="grid gap-6 sm:grid-cols-2">
           {agents.map((agent, index) => (
             <Reveal key={agent.id} animation="zoom-in" delay={400 + index * 150} duration={1000}>
-              <TiltCard>
-                <article className="group relative h-full overflow-hidden rounded-2xl border border-border bg-surface p-7 transition-colors duration-500 hover:border-brass/40 hover:bg-surface-hover hover:shadow-[0_16px_50px_rgba(0,0,0,0.4)]">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brass/15 font-mono text-lg font-semibold text-brass transition-all duration-500 group-hover:bg-brass/25 group-hover:scale-110">
-                        {agent.avatar}
-                      </div>
-                      <div>
-                        <h3 className="font-display text-xl font-medium text-paper">{agent.name}</h3>
-                        <span className="text-sm text-paper-dim">{agent.role}</span>
-                      </div>
+              <article className="group relative overflow-hidden rounded-2xl border border-border bg-surface p-7 transition-all duration-500 hover:border-brass/40 hover:bg-surface-hover hover:-translate-y-2 hover:shadow-[0_16px_50px_rgba(122,46,38,0.1)]">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brass/15 font-mono text-lg font-semibold text-brass transition-all duration-500 group-hover:bg-brass/25 group-hover:scale-110">
+                      {agent.avatar}
                     </div>
-                    <StatusBadge label={t("statusValue")} />
+                    <div>
+                      <h3 className="font-display text-xl font-medium text-paper">{agent.name}</h3>
+                      <span className="text-sm text-paper-dim">{agent.role}</span>
+                    </div>
                   </div>
+                  <StatusBadge label={t("statusValue")} />
+                </div>
 
-                  <p className="mt-5 text-sm leading-relaxed text-paper-dim">
-                    {agent.description}
-                  </p>
+                <p className="mt-5 text-sm leading-relaxed text-paper-dim">
+                  {agent.description}
+                </p>
 
-                  <div className="mt-6 border-t border-border/60 pt-5">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-paper-dim/50">{t("skillsLabel")}</span>
-                    <ul className="mt-3 flex flex-wrap gap-2">
-                      {agent.skills.map((skill) => (
-                        <li key={skill} className="rounded-full border border-border px-3 py-1.5 font-mono text-[11px] text-paper-dim transition-all duration-300 group-hover:border-brass/30">
-                          {skill}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </article>
-              </TiltCard>
+                <div className="mt-6 border-t border-border/60 pt-5">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-paper-dim/50">{t("skillsLabel")}</span>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {agent.skills.map((skill) => (
+                      <li key={skill} className="rounded-full border border-border px-3 py-1.5 font-mono text-[11px] text-paper-dim transition-all duration-300 group-hover:border-brass/30">
+                        {skill}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </article>
             </Reveal>
           ))}
         </div>

@@ -142,28 +142,6 @@ html {
   }
 }
 
-/* ─── Tilt 3D au survol (TiltCard) ────────────────────────── */
-
-.tilt-card-glare {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(
-    circle at var(--glare-x, 50%) var(--glare-y, 50%),
-    rgba(245, 243, 238, 0.14),
-    transparent 55%
-  );
-  opacity: var(--glare-opacity, 0);
-  transition: opacity 0.4s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tilt-card-glare {
-    display: none;
-  }
-}
-
 /* Underline animé pour les liens de navigation */
 .nav-link {
   position: relative;

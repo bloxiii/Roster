@@ -94,23 +94,10 @@ export function NetworkOrb() {
     });
 
     let time = 0;
+    let scrollY = 0;
 
-    // Caméra qui orbite autour du réseau au fil du scroll de la section
-    // (0 = section qui entre par le bas, 1 = qui sort par le haut).
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-    const ORBIT_RADIUS = 6;
-    let camProgress = 0;
-    let camProgressTarget = 0;
-
-    const handleScroll = () => {
-      const rect = container.getBoundingClientRect();
-      const total = rect.height + window.innerHeight;
-      const passed = window.innerHeight - rect.top;
-      camProgressTarget = clamp01(passed / total);
-    };
+    const handleScroll = () => { scrollY = window.scrollY; };
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
 
     // Pause le rendu quand la scène sort du viewport (perf)
     let isVisible = true;
@@ -126,8 +113,10 @@ export function NetworkOrb() {
       if (!isVisible) return;
       time += 0.003;
 
-      // Rotation lente et continue du réseau
-      scene.rotation.y = time * 0.15;
+      const scrollFactor = scrollY * 0.0005;
+
+      // Rotation lente du réseau
+      scene.rotation.y = time * 0.15 + scrollFactor;
       scene.rotation.x = Math.sin(time * 0.1) * 0.1;
 
       // Pulsation des noeuds principaux
@@ -135,14 +124,6 @@ export function NetworkOrb() {
         const scale = 1 + Math.sin(time * 2 + i * 1.5) * 0.3;
         node.scale.setScalar(scale);
       });
-
-      // Caméra : orbite autour du réseau au fil du scroll de la section
-      camProgress = lerp(camProgress, camProgressTarget, 0.06);
-      const angle = lerp(-0.7, 0.7, camProgress);
-      camera.position.x = Math.sin(angle) * ORBIT_RADIUS;
-      camera.position.z = Math.cos(angle) * ORBIT_RADIUS;
-      camera.position.y = lerp(0.6, -0.6, camProgress);
-      camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
     }
