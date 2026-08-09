@@ -27,7 +27,7 @@ export function Problem() {
         <div className="mt-20 grid gap-6 md:grid-cols-3">
           {points.map((point, index) => (
             <Reveal key={point.title} animation="fade-scale" delay={index * 200} duration={900}>
-              <div className="rounded-2xl border border-border bg-surface p-7 transition-all duration-500 hover:border-brass/30 hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(122,46,38,0.06)]">
+              <div className="rounded-2xl border border-border bg-surface/70 backdrop-blur-sm p-7 transition-all duration-500 hover:border-brass/30 hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(122,46,38,0.06)]">
                 <span className="font-mono text-xs text-paper-dim/30">
                   {String(index + 1).padStart(2, "0")}
                 </span>
