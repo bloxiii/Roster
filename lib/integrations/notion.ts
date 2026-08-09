@@ -3,8 +3,8 @@ import type { ProspectData } from "@/lib/agent/types";
 /**
  * Synchronisation d'un prospect vers une base Notion.
  *
- * Contrairement à l'email/WhatsApp (un seul émetteur Velin), Notion exige
- * les identifiants DE L'ENTREPRISE elle-même : Velin ne peut pas écrire
+ * Contrairement à l'email/WhatsApp (un seul émetteur Velinova), Notion exige
+ * les identifiants DE L'ENTREPRISE elle-même : Velinova ne peut pas écrire
  * dans un espace Notion privé sans que l'entreprise crée sa propre
  * intégration Notion et partage sa base avec elle. Le token et l'ID de
  * base viennent donc de company_settings (par tenant), pas de l'env.

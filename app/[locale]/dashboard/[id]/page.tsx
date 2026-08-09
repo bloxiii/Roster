@@ -6,7 +6,7 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Prospect — Velin",
+  title: "Prospect — Velinova",
   robots: { index: false },
 };
 

@@ -3,7 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 
 /**
  * Le signup public est désactivé.
- * Les comptes sont créés par l'équipe Velin après vente.
+ * Les comptes sont créés par l'équipe Velinova après vente.
  * Redirige vers la page d'accueil.
  */
 export default async function SignupPage({

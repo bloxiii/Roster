@@ -5,7 +5,7 @@ import * as THREE from "three";
 
 /**
  * Torus knot en verre fumé — nœud mathématique avec reflets cuivrés.
- * Représente la complexité rendue élégante par Velin.
+ * Représente la complexité rendue élégante par Velinova.
  */
 export function GlassKnot() {
   const containerRef = useRef<HTMLDivElement>(null);

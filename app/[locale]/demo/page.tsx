@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ChatWidget } from "@/components/agent/ChatWidget";
 
 export const metadata: Metadata = {
-  title: "Démo — Velin",
+  title: "Démo — Velinova",
   robots: { index: false },
 };
 
@@ -68,8 +68,8 @@ export default async function DemoPage({
       <header className="border-b border-border/60 bg-ink/85 backdrop-blur-md">
         <Container className="flex h-14 items-center justify-between py-3">
           <Link href="/" className="flex items-center gap-2.5">
-            <img src="/images/velin-logo.svg" alt="" width={24} height={24} />
-            <span className="font-display text-base font-semibold text-paper">Velin</span>
+            <img src="/images/velinova-logo.svg" alt="" width={24} height={24} />
+            <span className="font-display text-base font-semibold text-paper">Velinova</span>
             <span className="font-mono text-[10px] uppercase tracking-widest text-brass">Demo</span>
           </Link>
           <StatusBadge label="Agent actif" />

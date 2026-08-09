@@ -91,7 +91,7 @@ export function SettingsForm({ companyId, company, settings, widgetKeys }: Props
           <h2 className="font-display text-base font-medium text-paper">Notifications</h2>
           <p className="mt-1.5 text-xs text-paper-dim/60">
             Dès qu&apos;un prospect est qualifié <span className="text-status">HOT</span> ou{" "}
-            <span className="text-amber-400">WARM</span>, Velin le signale sur chaque canal
+            <span className="text-amber-400">WARM</span>, Velinova le signale sur chaque canal
             renseigné ci-dessous. Laissez un champ vide pour désactiver ce canal.
           </p>
 
@@ -160,8 +160,8 @@ export function SettingsForm({ companyId, company, settings, widgetKeys }: Props
           </div>
           <pre className="mt-4 rounded-lg bg-ink p-4 font-mono text-xs text-paper-dim overflow-x-auto">
 {`<script
-  src="https://velin.ai/widget/velin-widget.js"
-  data-velin-key="${wk.key}">
+  src="https://velinova.xyz/widget/velinova-widget.js"
+  data-velinova-key="${wk.key}">
 </script>`}
           </pre>
         </section>

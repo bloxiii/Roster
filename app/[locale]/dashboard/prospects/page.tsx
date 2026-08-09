@@ -4,7 +4,7 @@ import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ProspectList } from "@/components/dashboard/ProspectList";
 
-export const metadata: Metadata = { title: "Prospects — Velin", robots: { index: false } };
+export const metadata: Metadata = { title: "Prospects — Velinova", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function ProspectsPage({

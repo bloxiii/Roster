@@ -11,8 +11,8 @@ export function Footer() {
       <Container className="grid gap-10 py-14 md:grid-cols-3">
         <div>
           <div className="flex items-center gap-2">
-            <img src="/images/velin-logo.svg" alt="" width={24} height={24} className="h-6 w-6" />
-            <span className="font-display text-lg font-semibold text-paper">Velin</span>
+            <img src="/images/velinova-logo.svg" alt="" width={24} height={24} className="h-6 w-6" />
+            <span className="font-display text-lg font-semibold text-paper">Velinova</span>
           </div>
           <p className="mt-3 max-w-xs text-sm text-paper-dim">{t("tagline")}</p>
         </div>
@@ -46,8 +46,8 @@ export function Footer() {
           </h3>
           <ul className="mt-4 space-y-2 text-sm">
             <li>
-              <a href="mailto:contact@velin.ai" className="text-paper-dim hover:text-paper">
-                contact@velin.ai
+              <a href="mailto:contact@velinova.xyz" className="text-paper-dim hover:text-paper">
+                contact@velinova.xyz
               </a>
             </li>
           </ul>
@@ -56,7 +56,7 @@ export function Footer() {
 
       <Container className="flex flex-col gap-2 border-t border-border/60 py-6 text-xs text-paper-dim/70 sm:flex-row sm:items-center sm:justify-between">
         <span>
-          © {year} Velin. {t("rights")}
+          © {year} Velinova. {t("rights")}
         </span>
         <a href="/legal" className="text-paper-dim/50 hover:text-paper-dim transition-colors">
           Mentions légales & Confidentialité

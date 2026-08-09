@@ -4,7 +4,7 @@ import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-export const metadata: Metadata = { title: "Agents IA — Velin", robots: { index: false } };
+export const metadata: Metadata = { title: "Agents IA — Velinova", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AgentsPage({

@@ -35,7 +35,7 @@ export function OnboardingFlow({
   }
 
   function handleCopy() {
-    const code = `<script src="https://velin.ai/widget/velin-widget.js" data-velin-key="${widgetKey}"></script>`;
+    const code = `<script src="https://velinova.xyz/widget/velinova-widget.js" data-velinova-key="${widgetKey}"></script>`;
     navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
@@ -67,7 +67,7 @@ export function OnboardingFlow({
               Étape 1 / {totalSteps}
             </span>
             <h1 className="mt-4 font-display text-3xl font-semibold text-paper">
-              Bienvenue chez Velin 👋
+              Bienvenue chez Velinova 👋
             </h1>
             <p className="mt-4 text-sm text-paper-dim">
               Votre espace est prêt. Vérifions que tout est en ordre.
@@ -182,8 +182,8 @@ export function OnboardingFlow({
             <div className="mt-8 rounded-2xl border border-border bg-surface p-5 text-left">
               <pre className="overflow-x-auto font-mono text-xs leading-relaxed text-paper-dim">
 {`<script
-  src="https://velin.ai/widget/velin-widget.js"
-  data-velin-key="${widgetKey}">
+  src="https://velinova.xyz/widget/velinova-widget.js"
+  data-velinova-key="${widgetKey}">
 </script>`}
               </pre>
             </div>

@@ -5,7 +5,7 @@ import * as THREE from "three";
 
 /**
  * Globe terrestre transparent avec arcs lumineux entre villes.
- * Représente les agents Velin qui travaillent dans le monde entier, 24/7.
+ * Représente les agents Velinova qui travaillent dans le monde entier, 24/7.
  */
 export function GlobeConnections() {
   const containerRef = useRef<HTMLDivElement>(null);

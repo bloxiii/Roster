@@ -1,18 +1,18 @@
 /**
- * Velin Chat Widget v1.0
+ * Velinova Chat Widget v1.0
  *
  * Usage :
- *   <script src="https://VOTRE-DOMAINE/widget/velin-widget.js"
- *           data-velin-agent="qualification-immobilier"
- *           data-velin-color="#7a2e26"
- *           data-velin-position="right"></script>
+ *   <script src="https://VOTRE-DOMAINE/widget/velinova-widget.js"
+ *           data-velinova-agent="qualification-immobilier"
+ *           data-velinova-color="#7a2e26"
+ *           data-velinova-position="right"></script>
  *
  * Attributs configurables :
- *   data-velin-agent    — ID de l'agent (défaut: "qualification-immobilier")
- *   data-velin-api      — URL de base de l'API (défaut: origine du script)
- *   data-velin-color    — Couleur d'accent (défaut: "#7a2e26")
- *   data-velin-position — "right" ou "left" (défaut: "right")
- *   data-velin-greeting — Message d'accueil personnalisé (optionnel)
+ *   data-velinova-agent    — ID de l'agent (défaut: "qualification-immobilier")
+ *   data-velinova-api      — URL de base de l'API (défaut: origine du script)
+ *   data-velinova-color    — Couleur d'accent (défaut: "#7a2e26")
+ *   data-velinova-position — "right" ou "left" (défaut: "right")
+ *   data-velinova-greeting — Message d'accueil personnalisé (optionnel)
  */
 (function () {
   "use strict";
@@ -24,11 +24,11 @@
   const scriptOrigin = scriptSrc ? new URL(scriptSrc).origin : "";
 
   const CONFIG = {
-    agent: scriptTag?.getAttribute("data-velin-agent") || "qualification-immobilier",
-    apiBase: scriptTag?.getAttribute("data-velin-api") || scriptOrigin,
-    color: scriptTag?.getAttribute("data-velin-color") || "#7a2e26",
-    position: scriptTag?.getAttribute("data-velin-position") || "right",
-    greeting: scriptTag?.getAttribute("data-velin-greeting") || "",
+    agent: scriptTag?.getAttribute("data-velinova-agent") || "qualification-immobilier",
+    apiBase: scriptTag?.getAttribute("data-velinova-api") || scriptOrigin,
+    color: scriptTag?.getAttribute("data-velinova-color") || "#7a2e26",
+    position: scriptTag?.getAttribute("data-velinova-position") || "right",
+    greeting: scriptTag?.getAttribute("data-velinova-greeting") || "",
   };
 
   /* ─── Styles (injectés dans le Shadow DOM) ──────────────── */
@@ -184,11 +184,11 @@
       width: 7px; height: 7px; border-radius: 50%;
       background: var(--r-paper-dim);
       opacity: .4;
-      animation: velinBounce .6s infinite alternate;
+      animation: velinovaBounce .6s infinite alternate;
     }
     .roster-typing span:nth-child(2) { animation-delay: .15s; }
     .roster-typing span:nth-child(3) { animation-delay: .3s; }
-    @keyframes velinBounce { to { opacity: 1; transform: translateY(-3px); } }
+    @keyframes velinovaBounce { to { opacity: 1; transform: translateY(-3px); } }
 
     .roster-input-bar {
       display: flex;
@@ -293,7 +293,7 @@
 
   /* ─── Widget Class ──────────────────────────────────────── */
 
-  class VelinWidget {
+  class VelinovaWidget {
     constructor() {
       this.messages = [];
       this.conversationId = null;
@@ -359,7 +359,7 @@
 
       // Powered by
       const poweredBy = el("div", { className: "roster-powered" });
-      poweredBy.innerHTML = 'Propulsé par <a href="https://velin.ai" target="_blank" rel="noopener">Velin</a>';
+      poweredBy.innerHTML = 'Propulsé par <a href="https://velinova.ai" target="_blank" rel="noopener">Velinova</a>';
 
       this.panel.appendChild(header);
       this.panel.appendChild(this.messagesEl);
@@ -519,8 +519,8 @@
   /* ─── Init ──────────────────────────────────────────────── */
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => new VelinWidget());
+    document.addEventListener("DOMContentLoaded", () => new VelinovaWidget());
   } else {
-    new VelinWidget();
+    new VelinovaWidget();
   }
 })();

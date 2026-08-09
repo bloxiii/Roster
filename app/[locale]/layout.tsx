@@ -20,7 +20,7 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("description"),
-    metadataBase: new URL("https://velin.ai"),
+    metadataBase: new URL("https://velinova.xyz"),
     icons: {
       icon: "/favicon.svg",
     },

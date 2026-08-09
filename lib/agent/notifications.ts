@@ -3,7 +3,7 @@ import type { ProspectData } from "./types";
 import { sendWhatsAppMessage } from "@/lib/integrations/whatsapp";
 import { syncProspectToNotion } from "@/lib/integrations/notion";
 
-const SENDER = process.env.CONTACT_EMAIL_FROM ?? "Velin <onboarding@resend.dev>";
+const SENDER = process.env.CONTACT_EMAIL_FROM ?? "Velinova <onboarding@resend.dev>";
 
 /** Paramètres de notification d'une entreprise (sous-ensemble de company_settings). */
 export type NotificationSettings = {

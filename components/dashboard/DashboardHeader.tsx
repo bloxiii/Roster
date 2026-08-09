@@ -14,8 +14,8 @@ export function DashboardHeader({
       <Container className="flex h-14 items-center justify-between py-3">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/images/velin-logo.svg" alt="" width={24} height={24} />
-            <span className="font-display text-base font-semibold text-paper">Velin</span>
+            <img src="/images/velinova-logo.svg" alt="" width={24} height={24} />
+            <span className="font-display text-base font-semibold text-paper">Velinova</span>
           </Link>
           <span className="text-border">/</span>
           <span className="text-sm text-paper-dim">{companyName}</span>

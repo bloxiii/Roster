@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
-  title: "Connexion — Velin",
+  title: "Connexion — Velinova",
   robots: { index: false },
 };
 

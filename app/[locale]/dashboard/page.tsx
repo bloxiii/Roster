@@ -6,7 +6,7 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { ProspectList } from "@/components/dashboard/ProspectList";
 
 export const metadata: Metadata = {
-  title: "Dashboard — Velin",
+  title: "Dashboard — Velinova",
   robots: { index: false },
 };
 

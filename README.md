@@ -1,6 +1,6 @@
-# Velin — Site vitrine
+# Velinova — Site vitrine
 
-Site web professionnel pour Velin, startup d'agents IA ("employés numériques").
+Site web professionnel pour Velinova, startup d'agents IA ("employés numériques").
 
 ## Stack technique
 
@@ -34,7 +34,7 @@ npm run dev
 | --------------------- | ----------- | ---------------------------------------------- |
 | `RESEND_API_KEY`      | Non*        | Clé API Resend pour l'envoi d'emails           |
 | `CONTACT_EMAIL_TO`    | Non         | Email destinataire (défaut: contact@example.com) |
-| `CONTACT_EMAIL_FROM`  | Non         | Email expéditeur (défaut: Velin <onboarding@resend.dev>) |
+| `CONTACT_EMAIL_FROM`  | Non         | Email expéditeur (défaut: Velinova <onboarding@resend.dev>) |
 | `TWILIO_ACCOUNT_SID`  | Non         | SID du compte Twilio (notifications WhatsApp prospects) |
 | `TWILIO_AUTH_TOKEN`   | Non         | Token d'authentification Twilio                |
 | `TWILIO_WHATSAPP_FROM`| Non         | Numéro WhatsApp expéditeur (ex: `whatsapp:+14155238886`) |

@@ -1,7 +1,7 @@
 /**
  * Envoi de messages WhatsApp via l'API Twilio.
  *
- * Un seul expéditeur "plateforme" (le numéro WhatsApp Velin, configuré via
+ * Un seul expéditeur "plateforme" (le numéro WhatsApp Velinova, configuré via
  * les variables d'env), qui envoie vers le numéro WhatsApp que chaque
  * entreprise renseigne dans ses paramètres — même logique que l'email
  * (lib/agent/notifications.ts) : un émetteur, un destinataire par tenant.

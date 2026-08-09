@@ -5,7 +5,7 @@ import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { SettingsForm } from "./SettingsForm";
 
-export const metadata: Metadata = { title: "Paramètres — Velin", robots: { index: false } };
+export const metadata: Metadata = { title: "Paramètres — Velinova", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage({

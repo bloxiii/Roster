@@ -5,7 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  title: "Mentions légales — Velin",
+  title: "Mentions légales — Velinova",
   robots: { index: true },
 };
 
@@ -32,9 +32,9 @@ export default async function LegalPage({
                 Éditeur du site
               </h2>
               <div className="mt-4 space-y-1">
-                <p>Velin</p>
+                <p>Velinova</p>
                 <p>Société en cours d&apos;immatriculation</p>
-                <p>Email : contact@velin.ai</p>
+                <p>Email : contact@velinova.xyz</p>
                 <p>Directeur de la publication : Enzo Duval</p>
               </div>
             </section>
@@ -56,7 +56,7 @@ export default async function LegalPage({
               </h2>
               <p className="mt-4">
                 L&apos;ensemble du contenu de ce site (textes, images, graphismes, logo,
-                icônes, logiciels, code source) est la propriété exclusive de Velin,
+                icônes, logiciels, code source) est la propriété exclusive de Velinova,
                 sauf mention contraire. Toute reproduction, représentation, modification,
                 publication ou adaptation de tout ou partie des éléments du site est
                 interdite sans autorisation écrite préalable.
@@ -68,10 +68,10 @@ export default async function LegalPage({
                 Limitation de responsabilité
               </h2>
               <p className="mt-4">
-                Velin ne saurait être tenu responsable des dommages directs ou indirects
-                causés au matériel de l&apos;utilisateur lors de l&apos;accès au site. Velin ne
+                Velinova ne saurait être tenu responsable des dommages directs ou indirects
+                causés au matériel de l&apos;utilisateur lors de l&apos;accès au site. Velinova ne
                 saurait également être tenu responsable des dommages indirects consécutifs
-                à l&apos;utilisation du site. Velin se réserve le droit de modifier, corriger
+                à l&apos;utilisation du site. Velinova se réserve le droit de modifier, corriger
                 ou supprimer le contenu du site à tout moment sans préavis.
               </p>
             </section>
@@ -92,8 +92,8 @@ export default async function LegalPage({
               </h2>
               <p className="mt-4">
                 Le responsable du traitement des données personnelles collectées sur ce
-                site est Velin, représenté par Enzo Duval. Pour toute question relative
-                à vos données personnelles, vous pouvez nous contacter à : contact@velin.ai
+                site est Velinova, représenté par Enzo Duval. Pour toute question relative
+                à vos données personnelles, vous pouvez nous contacter à : contact@velinova.xyz
               </p>
             </section>
 
@@ -139,7 +139,7 @@ export default async function LegalPage({
                 4. Base légale
               </h2>
               <p className="mt-4">
-                Le traitement des données est fondé sur l&apos;intérêt légitime de Velin et
+                Le traitement des données est fondé sur l&apos;intérêt légitime de Velinova et
                 de ses clients (qualification commerciale), ainsi que sur le consentement
                 de l&apos;utilisateur lorsqu&apos;il engage une conversation avec l&apos;agent IA ou
                 soumet le formulaire de contact.
@@ -191,7 +191,7 @@ export default async function LegalPage({
                 <p>— Droit à la portabilité de vos données</p>
                 <p>— Droit d&apos;opposition</p>
                 <p className="mt-3">
-                  Pour exercer ces droits, contactez-nous à : contact@velin.ai
+                  Pour exercer ces droits, contactez-nous à : contact@velinova.xyz
                 </p>
                 <p>
                   Si vous estimez que le traitement de vos données constitue une violation

@@ -34,8 +34,8 @@ couvre maintenant HOT + WARM.
 
 Contrairement à l'email, il n'y a pas d'expéditeur "gratuit" : il faut un
 compte Twilio avec un numéro WhatsApp actif. Un seul numéro Twilio pour
-toute la plateforme Velin (chaque entreprise reçoit sur SON numéro perso,
-mais l'envoi part toujours du numéro Velin).
+toute la plateforme Velinova (chaque entreprise reçoit sur SON numéro perso,
+mais l'envoi part toujours du numéro Velinova).
 
 1. Créer un compte sur [twilio.com](https://www.twilio.com/try-twilio)
 2. Dans la console Twilio, section **Messaging → Try it out → Send a WhatsApp message** :
@@ -60,14 +60,14 @@ Chaque entreprise renseigne ensuite **son propre numéro WhatsApp** (celui qui d
 ## 4. Notion
 
 Ici c'est l'inverse de l'email/WhatsApp : chaque entreprise doit créer SA
-PROPRE intégration Notion et nous donner l'accès — Velin ne peut pas
+PROPRE intégration Notion et nous donner l'accès — Velinova ne peut pas
 écrire dans un espace Notion sans autorisation explicite. C'est donc à
-faire **par l'entreprise cliente elle-même**, pas par Velin.
+faire **par l'entreprise cliente elle-même**, pas par Velinova.
 
 Étapes à suivre côté client (à mettre dans votre doc d'onboarding) :
 
 1. Aller sur [notion.so/my-integrations](https://www.notion.so/my-integrations) → **New integration**
-2. Lui donner un nom (ex: "Velin"), l'associer au bon workspace, sauvegarder
+2. Lui donner un nom (ex: "Velinova"), l'associer au bon workspace, sauvegarder
 3. Copier le **token d'intégration** généré (commence par `secret_` ou `ntn_`)
 4. Créer (ou choisir) une base Notion de type **base de données** (table) qui recevra les prospects. Elle doit avoir exactement ces colonnes (nom ET type comptent) :
 
@@ -96,5 +96,5 @@ faire **par l'entreprise cliente elle-même**, pas par Velin.
 | Canal    | Qui configure quoi                                                  |
 | -------- | --------------------------------------------------------------------- |
 | Email    | Déjà en place (RESEND_API_KEY, une fois pour toute la plateforme)   |
-| WhatsApp | Vous (Velin) : compte Twilio, une fois pour toute la plateforme. Chaque client renseigne juste son numéro. |
+| WhatsApp | Vous (Velinova) : compte Twilio, une fois pour toute la plateforme. Chaque client renseigne juste son numéro. |
 | Notion   | Chaque client crée sa propre intégration + colle token/ID dans ses paramètres. |

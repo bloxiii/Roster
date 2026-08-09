@@ -26,8 +26,8 @@ export function LoginForm({ locale }: { locale: string }) {
       <div className="w-full max-w-sm">
         <div className="text-center">
           <Link href={`/${locale}`} className="inline-flex items-center gap-2.5">
-            <img src="/images/velin-logo.svg" alt="" width={32} height={32} />
-            <span className="font-display text-xl font-semibold text-paper">Velin</span>
+            <img src="/images/velinova-logo.svg" alt="" width={32} height={32} />
+            <span className="font-display text-xl font-semibold text-paper">Velinova</span>
           </Link>
           <p className="mt-3 text-sm text-paper-dim">
             Connectez-vous à votre espace
@@ -84,7 +84,7 @@ export function LoginForm({ locale }: { locale: string }) {
         <p className="mt-6 text-center text-sm text-paper-dim">
           Vous souhaitez un accès ?{" "}
           <a
-            href="mailto:contact@velin.ai"
+            href="mailto:contact@velinova.xyz"
             className="text-brass-bright hover:underline"
           >
             Contactez-nous

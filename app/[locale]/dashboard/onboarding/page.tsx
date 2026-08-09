@@ -5,7 +5,7 @@ import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { OnboardingFlow } from "./OnboardingFlow";
 
 export const metadata: Metadata = {
-  title: "Bienvenue — Velin",
+  title: "Bienvenue — Velinova",
   robots: { index: false },
 };
 

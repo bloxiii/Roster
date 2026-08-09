@@ -19,9 +19,9 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-ink/85 backdrop-blur-md">
       <Container className="flex h-18 items-center justify-between py-4">
         <Link href="/" className="flex items-center gap-2.5">
-          <img src="/images/velin-logo.svg" alt="" width={28} height={28} className="h-7 w-7" />
+          <img src="/images/velinova-logo.svg" alt="" width={28} height={28} className="h-7 w-7" />
           <span className="font-display text-lg font-semibold tracking-tight text-paper">
-            Velin
+            Velinova
           </span>
         </Link>
 

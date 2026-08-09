@@ -4,7 +4,7 @@ import { getAuthenticatedClient } from "@/lib/supabase/context";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Conversations — Velin", robots: { index: false } };
+export const metadata: Metadata = { title: "Conversations — Velinova", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 function timeAgo(dateStr: string): string {

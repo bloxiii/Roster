@@ -19,7 +19,7 @@ const ENV_VARS: EnvVar[] = [
   { name: "CORS_ALLOWED_ORIGINS", required: false, description: "Domaines autorisés pour le widget (CSV)" },
   { name: "TWILIO_ACCOUNT_SID", required: false, description: "SID du compte Twilio (notifications WhatsApp)" },
   { name: "TWILIO_AUTH_TOKEN", required: false, description: "Token d'authentification Twilio" },
-  { name: "TWILIO_WHATSAPP_FROM", required: false, description: "Numéro WhatsApp expéditeur Velin (ex: whatsapp:+14155238886)" },
+  { name: "TWILIO_WHATSAPP_FROM", required: false, description: "Numéro WhatsApp expéditeur Velinova (ex: whatsapp:+14155238886)" },
 ];
 
 export function validateEnv() {

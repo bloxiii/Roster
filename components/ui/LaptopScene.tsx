@@ -7,7 +7,7 @@ import * as THREE from "three";
  * LaptopScene — scène 3D continue pilotée par le scroll (Apple × igloo.inc).
  *
  * Un laptop s'ouvre au fil du scroll, son écran s'allume (mini interface
- * Velin animée en shader : les tâches se cochent seules), la caméra
+ * Velinova animée en shader : les tâches se cochent seules), la caméra
  * orbite autour puis plonge dans l'écran, pendant que le décor change
  * d'ambiance (encre → ardoise → laiton chaud).
  *
