@@ -71,8 +71,22 @@ export function ParticleWave() {
     let time = 0;
     let scrollY = 0;
 
-    const handleScroll = () => { scrollY = window.scrollY; };
+    // Caméra qui survole la vague de particules au fil du scroll de la
+    // section (0 = section qui entre par le bas, 1 = qui sort par le haut).
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+    let camProgress = 0;
+    let camProgressTarget = 0;
+
+    const handleScroll = () => {
+      scrollY = window.scrollY;
+      const rect = container.getBoundingClientRect();
+      const total = rect.height + window.innerHeight;
+      const passed = window.innerHeight - rect.top;
+      camProgressTarget = clamp01(passed / total);
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
 
     // Pause le rendu quand la scène sort du viewport (perf)
     let isVisible = true;
@@ -101,6 +115,11 @@ export function ParticleWave() {
 
       const scrollFactor = scrollY * 0.0003;
       points.rotation.y = time * 0.05 + scrollFactor;
+
+      // Caméra : survol latéral de la vague au fil du scroll de la section
+      camProgress = lerp(camProgress, camProgressTarget, 0.06);
+      camera.position.x = lerp(-3.5, 3.5, camProgress);
+      camera.lookAt(camera.position.x * 0.4, 0, 0);
 
       renderer.render(scene, camera);
     }

@@ -3,6 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { ParticleWave } from "@/components/ui/ParticleWave";
+import { TiltCard } from "@/components/ui/TiltCard";
 
 type Point = { title: string; description: string };
 
@@ -29,17 +30,19 @@ export function Problem() {
         <div className="mt-20 grid gap-6 md:grid-cols-3">
           {points.map((point, index) => (
             <Reveal key={point.title} animation="fade-scale" delay={index * 200} duration={900}>
-              <div className="rounded-2xl border border-border bg-surface p-7 transition-all duration-500 hover:border-brass/30 hover:-translate-y-2 hover:shadow-[0_12px_40px_rgba(122,46,38,0.06)]">
-                <span className="font-mono text-xs text-paper-dim/30">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <h3 className="mt-5 font-display text-xl font-medium text-paper">
-                  {point.title}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-paper-dim">
-                  {point.description}
-                </p>
-              </div>
+              <TiltCard>
+                <div className="h-full rounded-2xl border border-border bg-surface p-7 transition-colors duration-500 hover:border-brass/30 hover:shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+                  <span className="font-mono text-xs text-paper-dim/30">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="mt-5 font-display text-xl font-medium text-paper">
+                    {point.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-paper-dim">
+                    {point.description}
+                  </p>
+                </div>
+              </TiltCard>
             </Reveal>
           ))}
         </div>

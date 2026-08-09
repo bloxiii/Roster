@@ -122,13 +122,29 @@ export function GlassKnot() {
     let mouseX = 0;
     let mouseY = 0;
 
-    const handleScroll = () => { scrollY = window.scrollY; };
+    // Caméra qui plonge vers le nœud au fil du scroll de la section
+    // (0 = section qui entre par le bas, 1 = qui sort par le haut).
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+    const CAM_START = new THREE.Vector3(0, 1.2, 7.5);
+    const CAM_END = new THREE.Vector3(0, -0.6, 4.3);
+    let camProgress = 0;
+    let camProgressTarget = 0;
+
+    const handleScroll = () => {
+      scrollY = window.scrollY;
+      const rect = container.getBoundingClientRect();
+      const total = rect.height + window.innerHeight;
+      const passed = window.innerHeight - rect.top;
+      camProgressTarget = clamp01(passed / total);
+    };
     const handleMouse = (e: MouseEvent) => {
       mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
       mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("mousemove", handleMouse, { passive: true });
+    handleScroll();
 
     // Pause le rendu quand la scène sort du viewport (perf)
     let isVisible = true;
@@ -163,6 +179,11 @@ export function GlassKnot() {
       light3.position.z = Math.cos(time * 0.6) * 4;
       light4.position.x = Math.cos(time * 0.4) * 3;
       light4.position.y = Math.sin(time * 0.4) * 3;
+
+      // Caméra : plongée vers le nœud au fil du scroll de la section
+      camProgress = lerp(camProgress, camProgressTarget, 0.06);
+      camera.position.lerpVectors(CAM_START, CAM_END, camProgress);
+      camera.lookAt(0, 0, 0);
 
       renderer.render(scene, camera);
     }
