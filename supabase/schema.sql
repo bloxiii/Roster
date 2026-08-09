@@ -81,11 +81,16 @@ alter table public.prospects
 
 -- COMPANY SETTINGS
 create table public.company_settings (
-  company_id         uuid primary key references public.companies(id) on delete cascade,
-  notification_email text,
-  widget_color       text default '#7a2e26',
-  widget_greeting    text,
-  updated_at         timestamptz not null default now()
+  company_id           uuid primary key references public.companies(id) on delete cascade,
+  notification_email   text,
+  -- Canaux de notification additionnels — voir
+  -- supabase/migrations/2026-08-09-notification-channels.sql pour le détail.
+  notification_whatsapp text, -- numéro E.164, ex: +33612345678 (envoi via Twilio, expéditeur Velin)
+  notion_token          text, -- token d'intégration Notion propre à l'entreprise
+  notion_database_id    text, -- ID de la base Notion cible
+  widget_color         text default '#7a2e26',
+  widget_greeting      text,
+  updated_at           timestamptz not null default now()
 );
 
 -- ═══════════════════════════════════════════════════════════════

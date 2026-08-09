@@ -142,7 +142,7 @@ export function OnboardingFlow({
             <div className="mt-10 space-y-4 text-left">
               <div className="rounded-2xl border border-border bg-surface p-6">
                 <label className="mb-1.5 block text-xs text-paper-dim">
-                  Email de notification (prospects HOT)
+                  Email de notification (prospects HOT / WARM)
                 </label>
                 <input
                   type="email"
@@ -150,7 +150,8 @@ export function OnboardingFlow({
                   className={FIELD}
                 />
                 <p className="mt-1.5 text-xs text-paper-dim/60">
-                  Recevez un email à chaque prospect qualifié HOT.
+                  Recevez un email à chaque prospect qualifié HOT ou WARM. WhatsApp et Notion
+                  sont configurables ensuite dans les paramètres.
                 </p>
               </div>
             </div>

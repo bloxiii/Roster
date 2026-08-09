@@ -1,6 +1,9 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import type { ProspectData, AgentMessage } from "./types";
-import { notifyHotProspect } from "./notifications";
+import { dispatchProspectNotifications } from "./notifications";
+
+/** Niveaux de qualification qui déclenchent une notification (email/WhatsApp/Notion). */
+const NOTIFY_QUALIFICATIONS = ["HOT", "WARM"];
 
 /**
  * Enregistre un prospect en base de données Supabase.
@@ -67,22 +70,21 @@ export async function saveProspect(params: {
       .eq("id", conversation.id);
   }
 
-  // 4. Notification email si HOT
-  if (params.data.qualification === "HOT") {
-    // Récupérer l'email de notification depuis les settings de la company
-    let notificationEmail: string | null = null;
+  // 4. Notifications multi-canal (email + WhatsApp + Notion) si HOT ou WARM
+  if (NOTIFY_QUALIFICATIONS.includes(params.data.qualification)) {
+    let notificationSettings = null;
 
     if (params.companyId) {
       const { data: settings } = await supabase
         .from("company_settings")
-        .select("notification_email")
+        .select("notification_email, notification_whatsapp, notion_token, notion_database_id")
         .eq("company_id", params.companyId)
         .single();
 
-      notificationEmail = settings?.notification_email ?? null;
+      notificationSettings = settings;
     }
 
-    const sent = await notifyHotProspect(params.data, prospect.id, notificationEmail);
+    const sent = await dispatchProspectNotifications(params.data, notificationSettings);
 
     if (sent) {
       await supabase
