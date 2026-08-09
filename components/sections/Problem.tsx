@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
-import { ParticleWave } from "@/components/ui/ParticleWave";
 
 type Point = { title: string; description: string };
 
@@ -11,9 +10,8 @@ export function Problem() {
   const points = t.raw("points") as Point[];
 
   return (
-    <section className="relative overflow-hidden py-32">
-      <ParticleWave />
-      <Container className="relative z-10">
+    <section className="py-32">
+      <Container>
         <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">
             <Eyebrow>{t("eyebrow")}</Eyebrow>

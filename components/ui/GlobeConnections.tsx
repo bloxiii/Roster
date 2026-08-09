@@ -29,15 +29,15 @@ export function GlobeConnections() {
     container.appendChild(renderer.domElement);
 
     // Lumières
-    scene.add(new THREE.AmbientLight(0xf5f3ee, 0.2));
-    const dirLight = new THREE.DirectionalLight(0xf5f3ee, 0.5);
+    scene.add(new THREE.AmbientLight(0xf5ebe0, 0.2));
+    const dirLight = new THREE.DirectionalLight(0xf5ebe0, 0.5);
     dirLight.position.set(5, 3, 5);
     scene.add(dirLight);
 
     // Sphère globe — wireframe transparent
     const globeGeo = new THREE.SphereGeometry(1.5, 32, 32);
     const globeMat = new THREE.MeshBasicMaterial({
-      color: 0xc9a66b,
+      color: 0x7a2e26,
       wireframe: true,
       transparent: true,
       opacity: 0.08,
@@ -52,7 +52,7 @@ export function GlobeConnections() {
       if (r <= 0) return;
       const circleGeo = new THREE.RingGeometry(r - 0.003, r + 0.003, 64);
       const circleMat = new THREE.MeshBasicMaterial({
-        color: 0x3d5a6c,
+        color: 0x4a3529,
         transparent: true,
         opacity: 0.15,
         side: THREE.DoubleSide,
@@ -92,7 +92,7 @@ export function GlobeConnections() {
       const pos = latLonToVec3(city.lat, city.lon, 1.52);
       const dotGeo = new THREE.SphereGeometry(0.025, 8, 8);
       const dotMat = new THREE.MeshBasicMaterial({
-        color: 0xc9a66b,
+        color: 0x7a2e26,
         transparent: true,
         opacity: 0.9,
       });
@@ -104,7 +104,7 @@ export function GlobeConnections() {
       // Halo autour du point
       const haloGeo = new THREE.SphereGeometry(0.05, 8, 8);
       const haloMat = new THREE.MeshBasicMaterial({
-        color: 0xc9a66b,
+        color: 0x7a2e26,
         transparent: true,
         opacity: 0.15,
       });
@@ -141,7 +141,7 @@ export function GlobeConnections() {
       const points = curve.getPoints(30);
       const arcGeo = new THREE.BufferGeometry().setFromPoints(points);
       const arcMat = new THREE.LineBasicMaterial({
-        color: 0xddc08a,
+        color: 0x953830,
         transparent: true,
         opacity: 0.35,
       });
@@ -163,7 +163,7 @@ export function GlobeConnections() {
     const orbitGeo = new THREE.BufferGeometry();
     orbitGeo.setAttribute("position", new THREE.BufferAttribute(orbitPos, 3));
     const orbitMat = new THREE.PointsMaterial({
-      color: 0xf5f3ee,
+      color: 0xf5ebe0,
       size: 0.015,
       transparent: true,
       opacity: 0.3,
@@ -183,18 +183,9 @@ export function GlobeConnections() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("mousemove", handleMouse, { passive: true });
 
-    // Pause le rendu quand la scène sort du viewport (perf)
-    let isVisible = true;
-    const visibilityObserver = new IntersectionObserver(
-      ([entry]) => { isVisible = entry.isIntersecting; },
-      { threshold: 0 },
-    );
-    visibilityObserver.observe(container);
-
     let animationId: number;
     function animate() {
       animationId = requestAnimationFrame(animate);
-      if (!isVisible) return;
       time += 0.003;
 
       const scrollFactor = scrollY * 0.0004;
@@ -228,7 +219,6 @@ export function GlobeConnections() {
 
     return () => {
       cancelAnimationFrame(animationId);
-      visibilityObserver.disconnect();
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("mousemove", handleMouse);
       window.removeEventListener("resize", handleResize);

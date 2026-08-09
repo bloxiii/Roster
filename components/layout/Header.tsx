@@ -39,9 +39,9 @@ export function Header() {
 
         <div className="flex items-center gap-3">
           <LocaleSwitcher />
-          <div className="hidden sm:inline-flex">
-            <Button href="#contact">{t("cta")}</Button>
-          </div>
+          <Button href="#contact" className="hidden sm:inline-flex">
+            {t("cta")}
+          </Button>
           <MobileMenu />
         </div>
       </Container>
