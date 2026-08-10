@@ -45,6 +45,11 @@ export const rateLimiters = {
     windowMs: 10 * 60 * 1000,
     maxRequests: 5,
   }),
+  /** /api/agent/widget-config — 60 requêtes par 10 minutes par IP (chargé à chaque page vue). */
+  widgetConfig: createRateLimiter("widget-config", {
+    windowMs: 10 * 60 * 1000,
+    maxRequests: 60,
+  }),
   /** /api/auth — 5 tentatives par 15 minutes par IP. */
   auth: createRateLimiter("auth", {
     windowMs: 15 * 60 * 1000,

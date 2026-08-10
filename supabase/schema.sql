@@ -88,8 +88,11 @@ create table public.company_settings (
   notification_whatsapp text, -- numéro E.164, ex: +33612345678 (envoi via Twilio, expéditeur Velin)
   notion_token          text, -- token d'intégration Notion propre à l'entreprise
   notion_database_id    text, -- ID de la base Notion cible
-  widget_color         text default '#7a2e26',
-  widget_greeting      text,
+  widget_bg_color       text default '#1a110d',  -- fond du panneau du widget
+  widget_bot_color      text default '#2d1f17',  -- bulles du bot
+  widget_user_color     text default '#7a2e26',  -- bulles du visiteur + accent
+  widget_greeting       text,
+  listings_feed_url     text, -- flux XML/CSV de syndication des annonces (Apimo, Netty, Hektor...) — pas encore synchronisé automatiquement
   updated_at           timestamptz not null default now()
 );
 

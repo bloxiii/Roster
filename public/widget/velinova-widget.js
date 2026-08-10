@@ -1,18 +1,34 @@
 /**
- * Velinova Chat Widget v1.0
+ * Velinova Chat Widget v1.1
  *
- * Usage :
+ * Usage recommandé (couleurs pilotées depuis le dashboard Velinova) :
+ *   <script src="https://VOTRE-DOMAINE/widget/velinova-widget.js"
+ *           data-velinova-key="wk_xxx"></script>
+ *
+ * Usage manuel (sans clé, couleurs figées dans le HTML) :
  *   <script src="https://VOTRE-DOMAINE/widget/velinova-widget.js"
  *           data-velinova-agent="qualification-immobilier"
- *           data-velinova-color="#7a2e26"
+ *           data-velinova-bg-color="#1a110d"
+ *           data-velinova-bot-color="#2d1f17"
+ *           data-velinova-user-color="#7a2e26"
  *           data-velinova-position="right"></script>
  *
  * Attributs configurables :
- *   data-velinova-agent    — ID de l'agent (défaut: "qualification-immobilier")
- *   data-velinova-api      — URL de base de l'API (défaut: origine du script)
- *   data-velinova-color    — Couleur d'accent (défaut: "#7a2e26")
- *   data-velinova-position — "right" ou "left" (défaut: "right")
- *   data-velinova-greeting — Message d'accueil personnalisé (optionnel)
+ *   data-velinova-key         — Clé du widget (récupère automatiquement les
+ *                                couleurs configurées dans le dashboard, et
+ *                                associe les conversations à l'entreprise)
+ *   data-velinova-agent       — ID de l'agent, mode legacy sans clé
+ *                                (défaut: "qualification-immobilier")
+ *   data-velinova-api         — URL de base de l'API (défaut: origine du script)
+ *   data-velinova-bg-color    — Couleur de fond du panneau (défaut: "#1a110d")
+ *   data-velinova-bot-color   — Couleur des bulles du bot (défaut: "#2d1f17")
+ *   data-velinova-user-color  — Couleur des bulles visiteur + accent (défaut: "#7a2e26")
+ *   data-velinova-color       — Alias historique de data-velinova-user-color
+ *   data-velinova-position    — "right" ou "left" (défaut: "right")
+ *   data-velinova-greeting    — Message d'accueil personnalisé (optionnel)
+ *
+ * Un attribut de couleur explicite dans le HTML est toujours prioritaire sur
+ * la config distante — utile pour un aperçu ponctuel différent du dashboard.
  */
 (function () {
   "use strict";
@@ -24,23 +40,58 @@
   const scriptOrigin = scriptSrc ? new URL(scriptSrc).origin : "";
 
   const CONFIG = {
+    key: scriptTag?.getAttribute("data-velinova-key") || "",
     agent: scriptTag?.getAttribute("data-velinova-agent") || "qualification-immobilier",
     apiBase: scriptTag?.getAttribute("data-velinova-api") || scriptOrigin,
-    color: scriptTag?.getAttribute("data-velinova-color") || "#7a2e26",
+    colorBg: scriptTag?.getAttribute("data-velinova-bg-color") || "",
+    colorBot: scriptTag?.getAttribute("data-velinova-bot-color") || "",
+    colorUser:
+      scriptTag?.getAttribute("data-velinova-user-color") ||
+      scriptTag?.getAttribute("data-velinova-color") || // alias historique
+      "",
     position: scriptTag?.getAttribute("data-velinova-position") || "right",
     greeting: scriptTag?.getAttribute("data-velinova-greeting") || "",
   };
 
+  const DEFAULT_COLORS = { bg: "#1a110d", bot: "#2d1f17", user: "#7a2e26" };
+
+  /**
+   * Résout les 3 couleurs du widget : attribut HTML explicite > config
+   * distante (dashboard, via data-velinova-key) > défaut codé en dur.
+   * Ne lève jamais — si le fetch échoue, le widget s'affiche quand même.
+   */
+  async function resolveColors() {
+    let remote = null;
+    if (CONFIG.key) {
+      try {
+        const url = `${CONFIG.apiBase}/api/agent/widget-config?key=${encodeURIComponent(CONFIG.key)}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const body = await res.json();
+          remote = body?.colors || null;
+        }
+      } catch {
+        // Silencieux : pas de config distante, on retombe sur les défauts/attributs.
+      }
+    }
+    return {
+      bg: CONFIG.colorBg || remote?.bg || DEFAULT_COLORS.bg,
+      bot: CONFIG.colorBot || remote?.bot || DEFAULT_COLORS.bot,
+      user: CONFIG.colorUser || remote?.user || DEFAULT_COLORS.user,
+    };
+  }
+
   /* ─── Styles (injectés dans le Shadow DOM) ──────────────── */
 
-  const STYLES = `
+  function buildStyles(colors) {
+    return `
     :host {
-      --r-color: ${CONFIG.color};
-      --r-color-bright: ${adjustBrightness(CONFIG.color, 30)};
-      --r-ink: #1a110d;
-      --r-ink-soft: #211610;
-      --r-surface: #2d1f17;
-      --r-border: #4a3529;
+      --r-color: ${colors.user};
+      --r-color-bright: ${adjustBrightness(colors.user, 30)};
+      --r-ink: ${colors.bg};
+      --r-ink-soft: ${adjustBrightness(colors.bg, 10)};
+      --r-surface: ${colors.bot};
+      --r-border: ${adjustBrightness(colors.bg, 30)};
       --r-paper: #f5ebe0;
       --r-paper-dim: #b8a99a;
       --r-status: #4ade80;
@@ -265,6 +316,7 @@
       .roster-typing span { animation: none; opacity: .6; }
     }
   `;
+  }
 
   /* ─── Helpers ───────────────────────────────────────────── */
 
@@ -294,7 +346,7 @@
   /* ─── Widget Class ──────────────────────────────────────── */
 
   class VelinovaWidget {
-    constructor() {
+    constructor(colors) {
       this.messages = [];
       this.conversationId = null;
       this.isOpen = false;
@@ -305,7 +357,7 @@
       this.shadow = this.host.attachShadow({ mode: "closed" });
 
       const style = el("style");
-      style.textContent = STYLES;
+      style.textContent = buildStyles(colors);
       this.shadow.appendChild(style);
 
       this.buildUI();
@@ -489,7 +541,11 @@
         const res = await fetch(`${CONFIG.apiBase}/api/agent/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages, conversationId: this.conversationId }),
+          body: JSON.stringify({
+            messages,
+            conversationId: this.conversationId,
+            ...(CONFIG.key ? { widgetKey: CONFIG.key } : {}),
+          }),
         });
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -518,9 +574,14 @@
 
   /* ─── Init ──────────────────────────────────────────────── */
 
+  async function init() {
+    const colors = await resolveColors();
+    new VelinovaWidget(colors);
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => new VelinovaWidget());
+    document.addEventListener("DOMContentLoaded", init);
   } else {
-    new VelinovaWidget();
+    init();
   }
 })();

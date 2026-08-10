@@ -20,13 +20,12 @@ export default async function EmbedPage({
 
   const codeSnippet = `<script
   src="https://VOTRE-DOMAINE/widget/velinova-widget.js"
-  data-velinova-agent="qualification-immobilier">
+  data-velinova-key="VOTRE_CLE_WIDGET">
 <\/script>`;
 
   const codeWithOptions = `<script
   src="https://VOTRE-DOMAINE/widget/velinova-widget.js"
-  data-velinova-agent="qualification-immobilier"
-  data-velinova-color="#7a2e26"
+  data-velinova-key="VOTRE_CLE_WIDGET"
   data-velinova-position="right">
 <\/script>`;
 
@@ -91,7 +90,9 @@ export default async function EmbedPage({
               Personnalisation (optionnel)
             </h2>
             <p className="mt-3 text-sm text-paper-dim">
-              Vous pouvez ajuster la couleur et la position du widget :
+              Les 3 couleurs du widget (fond, bulle du bot, bulle du visiteur) se
+              règlent directement depuis <code className="rounded bg-surface px-1.5 py-0.5 font-mono text-xs text-brass">Dashboard → Paramètres</code> —
+              pas besoin de retoucher le code. Seule la position se configure ici :
             </p>
             <pre className="mt-4 overflow-x-auto rounded-xl border border-border bg-surface p-5 font-mono text-sm leading-relaxed text-paper-dim">
               {codeWithOptions}
@@ -123,24 +124,24 @@ export default async function EmbedPage({
                 </thead>
                 <tbody className="text-paper-dim">
                   <tr className="border-b border-border/60">
-                    <td className="px-4 py-3 font-mono text-xs text-brass">data-velinova-agent</td>
-                    <td className="px-4 py-3 font-mono text-xs">qualification-immobilier</td>
-                    <td className="px-4 py-3">Identifiant de l&apos;agent</td>
-                  </tr>
-                  <tr className="border-b border-border/60">
-                    <td className="px-4 py-3 font-mono text-xs text-brass">data-velinova-color</td>
-                    <td className="px-4 py-3 font-mono text-xs">#7a2e26</td>
-                    <td className="px-4 py-3">Couleur d&apos;accent du widget</td>
+                    <td className="px-4 py-3 font-mono text-xs text-brass">data-velinova-key</td>
+                    <td className="px-4 py-3 font-mono text-xs">—</td>
+                    <td className="px-4 py-3">Clé du widget (visible dans Paramètres) — récupère automatiquement vos couleurs</td>
                   </tr>
                   <tr className="border-b border-border/60">
                     <td className="px-4 py-3 font-mono text-xs text-brass">data-velinova-position</td>
                     <td className="px-4 py-3 font-mono text-xs">right</td>
                     <td className="px-4 py-3">Position : right ou left</td>
                   </tr>
-                  <tr>
+                  <tr className="border-b border-border/60">
                     <td className="px-4 py-3 font-mono text-xs text-brass">data-velinova-api</td>
                     <td className="px-4 py-3 font-mono text-xs">auto</td>
                     <td className="px-4 py-3">URL de l&apos;API (détection automatique)</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-mono text-xs text-brass">data-velinova-bg-color / -bot-color / -user-color</td>
+                    <td className="px-4 py-3 font-mono text-xs">voir Paramètres</td>
+                    <td className="px-4 py-3">Surcharge manuelle des 3 couleurs (prioritaire sur le dashboard)</td>
                   </tr>
                 </tbody>
               </table>
