@@ -17,26 +17,30 @@ export const dynamic = "force-dynamic";
 
 export default async function DemoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ token?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const { token } = await searchParams;
+  const demoToken = process.env.DEMO_TOKEN;
 
   const supabase = await createClient();
-
-  // L'utilisateur DOIT être connecté pour accéder à la démo
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
+  // Accès : connecté OU token valide. Sinon → login
+  if (!user && (!demoToken || token !== demoToken)) {
     redirect(`/${locale}/login`);
   }
 
   let widgetKey: string | null = null;
   let agentName = "Emma";
 
-  // Utilisateur connecté → récupérer SA widget key
-  const { data: membership } = await supabase
+  // Si connecté → sa widget key (prospects dans son dashboard)
+  if (user) {
+    const { data: membership } = await supabase
       .from("memberships")
       .select("company_id")
       .eq("user_id", user.id)
@@ -57,6 +61,8 @@ export default async function DemoPage({
         agentName = agent?.name ?? "Emma";
       }
     }
+  }
+  // Si pas connecté mais token valide → démo vitrine (pas de widget key, pas de sauvegarde)
 
   return (
     <div className="min-h-screen bg-ink">
