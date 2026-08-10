@@ -17,27 +17,26 @@ export const dynamic = "force-dynamic";
 
 export default async function DemoPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ token?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const { token } = await searchParams;
-  const demoToken = process.env.DEMO_TOKEN;
   const supabase = await createClient();
 
-  // Vérifier si l'utilisateur est connecté
+  // L'utilisateur DOIT être connecté pour accéder à la démo
   const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/${locale}/login`);
+  }
 
   let widgetKey: string | null = null;
   let agentName = "Emma";
 
-  if (user) {
-    // Utilisateur connecté → récupérer SA widget key
-    const { data: membership } = await supabase
+  // Utilisateur connecté → récupérer SA widget key
+  const { data: membership } = await supabase
       .from("memberships")
       .select("company_id")
       .eq("user_id", user.id)
@@ -58,10 +57,6 @@ export default async function DemoPage({
         agentName = agent?.name ?? "Emma";
       }
     }
-  } else if (demoToken && token !== demoToken) {
-    // Pas connecté et pas de token valide → redirect
-    redirect(`/${locale}`);
-  }
 
   return (
     <div className="min-h-screen bg-ink">
