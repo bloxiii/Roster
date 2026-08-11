@@ -22,7 +22,9 @@ export type ContactFormInput = z.infer<typeof contactFormSchema>;
  * et les conversations anormalement longues.
  */
 export const chatRequestSchema = z.object({
-  conversationId: z.string().max(100).optional(),
+  // .nullable() en plus de .optional() : certains clients (widget embarqué)
+  // peuvent envoyer explicitement `null` avant la 1re réponse serveur.
+  conversationId: z.string().max(100).nullable().optional(),
   widgetKey: z.string().max(100).optional(),
   messages: z
     .array(

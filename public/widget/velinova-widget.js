@@ -543,7 +543,10 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             messages,
-            conversationId: this.conversationId,
+            // this.conversationId vaut `null` avant la 1re réponse serveur — JSON.stringify
+            // ne retire pas les `null` (seulement les `undefined`), donc on ne l'inclut que
+            // s'il est déjà défini, sinon le schéma serveur (string optionnelle) le rejette.
+            ...(this.conversationId ? { conversationId: this.conversationId } : {}),
             ...(CONFIG.key ? { widgetKey: CONFIG.key } : {}),
           }),
         });
