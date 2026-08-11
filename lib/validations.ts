@@ -82,3 +82,30 @@ export const outreachTemplateSchema = z.object({
 });
 
 export type OutreachTemplateInput = z.infer<typeof outreachTemplateSchema>;
+
+/**
+ * Schéma d'une ligne de contact pour l'import CSV en masse (outreach).
+ * city/postal_code/phone/address sont optionnels — colonnes additionnelles
+ * du CSV, absentes du formulaire d'ajout manuel.
+ */
+export const outreachImportRowSchema = z.object({
+  agency_name: z.string().trim().min(1).max(150),
+  email: z.string().trim().email().max(200),
+  city: z.string().trim().max(150).optional().or(z.literal("")),
+  postal_code: z.string().trim().max(20).optional().or(z.literal("")),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
+  address: z.string().trim().max(300).optional().or(z.literal("")),
+});
+
+export type OutreachImportRow = z.infer<typeof outreachImportRowSchema>;
+
+/**
+ * Enveloppe de la requête POST /api/outreach/import. Chaque ligne est
+ * revalidée individuellement côté serveur avec outreachImportRowSchema
+ * (voir la route) afin qu'une ligne invalide n'annule pas tout l'import.
+ */
+export const outreachImportSchema = z.object({
+  contacts: z.array(z.record(z.string(), z.unknown())).min(1).max(2000),
+});
+
+export type OutreachImportInput = z.infer<typeof outreachImportSchema>;

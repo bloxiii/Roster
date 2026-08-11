@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo, type FormEvent } from "react";
+import { useState, useMemo, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { parseOutreachCsv } from "@/lib/outreach/csv";
 
 type OutreachTarget = {
   id: string;
@@ -9,6 +10,10 @@ type OutreachTarget = {
   contact_name: string | null;
   email: string;
   website: string | null;
+  city: string | null;
+  postal_code: string | null;
+  phone: string | null;
+  address: string | null;
   status: "pending" | "sent" | "failed" | "replied";
   error: string | null;
   sent_at: string | null;
@@ -16,6 +21,14 @@ type OutreachTarget = {
 };
 
 type OutreachTemplate = { subject: string; body: string };
+
+type ImportResult = {
+  total: number;
+  inserted: number;
+  invalid: number;
+  duplicatesInFile: number;
+  duplicatesInDb: number;
+};
 
 const FIELD =
   "w-full rounded-lg border border-border bg-ink px-3 py-2.5 text-sm text-paper outline-none transition-colors focus:border-brass placeholder:text-paper-dim/40";
@@ -155,6 +168,11 @@ export function OutreachManager({
   return (
     <div className="mt-8 space-y-8">
       <TemplateEditor initialTemplate={initialTemplate} />
+
+      {/* Recharge la page après import : `targets` est un état client initialisé
+          une seule fois depuis initialTargets, router.refresh() seul ne suffit
+          pas à faire apparaître les centaines de lignes nouvellement créées. */}
+      <ImportCsvSection onImported={() => window.location.reload()} />
 
       {/* Formulaire d'ajout */}
       <form
@@ -307,6 +325,95 @@ export function OutreachManager({
         </table>
       </div>
     </div>
+  );
+}
+
+/**
+ * Import CSV en masse de cibles de prospection. Colonnes reconnues (avec
+ * ou sans accents/majuscules) : NOM Agence, MAIL (obligatoires), VILLE,
+ * CP, TELEPHONE, ADRESSE (optionnelles). Ne déclenche AUCUN envoi d'email —
+ * les contacts sont créés en statut "pending" (À contacter), l'envoi reste
+ * une action manuelle ligne par ligne.
+ */
+function ImportCsvSection({ onImported }: { onImported: () => void }) {
+  const [importing, setImporting] = useState(false);
+  const [result, setResult] = useState<ImportResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // permet de réimporter le même fichier ensuite
+    if (!file) return;
+
+    setError(null);
+    setResult(null);
+
+    const text = await file.text();
+    const { rows, skipped } = parseOutreachCsv(text);
+
+    if (rows.length === 0) {
+      setError(
+        "Aucune ligne valide trouvée. Colonnes attendues : NOM Agence, MAIL (+ optionnel VILLE, CP, TELEPHONE, ADRESSE).",
+      );
+      return;
+    }
+
+    const confirmMsg = `${rows.length} contact(s) détecté(s)${
+      skipped > 0 ? ` (${skipped} ligne(s) ignorée(s), sans nom ou email)` : ""
+    }.\n\nImporter maintenant ? Aucun email ne sera envoyé — les contacts seront créés en statut "À contacter".`;
+    if (!confirm(confirmMsg)) return;
+
+    setImporting(true);
+    try {
+      const res = await fetch("/api/outreach/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contacts: rows }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Échec de l'import.");
+      setResult(data);
+      onImported();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue.");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-surface p-6">
+      <h2 className="font-display text-base font-medium text-paper">Importer un CSV</h2>
+      <p className="mt-1 text-xs text-paper-dim/60">
+        Colonnes attendues :{" "}
+        <code className="rounded bg-ink px-1 py-0.5 font-mono text-[11px]">NOM Agence</code>{" "}
+        <code className="rounded bg-ink px-1 py-0.5 font-mono text-[11px]">MAIL</code> (obligatoires),{" "}
+        <code className="rounded bg-ink px-1 py-0.5 font-mono text-[11px]">VILLE</code>{" "}
+        <code className="rounded bg-ink px-1 py-0.5 font-mono text-[11px]">CP</code>{" "}
+        <code className="rounded bg-ink px-1 py-0.5 font-mono text-[11px]">TELEPHONE</code>{" "}
+        <code className="rounded bg-ink px-1 py-0.5 font-mono text-[11px]">ADRESSE</code> (optionnelles) — crée les
+        contacts en statut « À contacter », <strong className="text-paper">n&apos;envoie aucun email</strong>.
+      </p>
+
+      <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full border border-brass/40 px-4 py-2 text-xs font-medium text-brass-bright transition-colors hover:bg-brass/10 has-[:disabled]:opacity-40">
+        {importing ? "Import en cours..." : "Choisir un fichier CSV"}
+        <input type="file" accept=".csv,text/csv" onChange={handleFile} disabled={importing} className="hidden" />
+      </label>
+
+      {result && (
+        <div className="mt-4 rounded-lg border border-status/30 bg-status/10 px-4 py-3 text-xs text-status">
+          {result.inserted} contact(s) importé(s) sur {result.total}.
+          {result.duplicatesInFile + result.duplicatesInDb > 0 &&
+            ` ${result.duplicatesInFile + result.duplicatesInDb} doublon(s) ignoré(s).`}
+          {result.invalid > 0 && ` ${result.invalid} ligne(s) invalide(s) ignorée(s).`}
+        </div>
+      )}
+      {error && (
+        <div className="mt-4 rounded-lg border border-red-400/30 bg-red-400/10 px-4 py-3 text-xs text-red-400">
+          {error}
+        </div>
+      )}
+    </section>
   );
 }
 

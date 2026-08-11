@@ -105,6 +105,10 @@ create table public.outreach_targets (
   contact_name text,
   email        text not null,
   website      text,
+  city         text, -- import CSV
+  postal_code  text, -- import CSV — texte pour préserver les zéros de tête (ex: "06000")
+  phone        text, -- import CSV
+  address      text, -- import CSV
   status       text not null default 'pending', -- pending | sent | failed | replied
   error        text,
   sent_at      timestamptz,
