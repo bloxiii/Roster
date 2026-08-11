@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
+import { DEFAULT_OUTREACH_TEMPLATE } from "@/lib/outreach/email";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { OutreachManager } from "./OutreachManager";
@@ -41,12 +42,12 @@ export default async function OutreachPage({
     );
   }
 
-  // Table interne, RLS deny-by-default → lecture via le service role.
+  // Tables internes, RLS deny-by-default → lecture via le service role.
   const service = createServiceClient();
-  const { data: targets } = await service
-    .from("outreach_targets")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const [{ data: targets }, { data: template }] = await Promise.all([
+    service.from("outreach_targets").select("*").order("created_at", { ascending: false }),
+    service.from("outreach_email_template").select("subject, body").eq("id", "default").single(),
+  ]);
 
   return (
     <div className="min-h-screen bg-ink">
@@ -61,7 +62,10 @@ export default async function OutreachPage({
           les réponses arrivent dans cette boîte.
         </p>
 
-        <OutreachManager initialTargets={targets ?? []} />
+        <OutreachManager
+          initialTargets={targets ?? []}
+          initialTemplate={template ?? DEFAULT_OUTREACH_TEMPLATE}
+        />
       </Container>
     </div>
   );

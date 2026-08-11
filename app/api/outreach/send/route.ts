@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { outreachSendSchema } from "@/lib/validations";
-import { sendOutreachEmail } from "@/lib/outreach/email";
+import { sendOutreachEmail, DEFAULT_OUTREACH_TEMPLATE } from "@/lib/outreach/email";
 
 /**
  * POST /api/outreach/send — Envoie l'email de prospection pour une cible
@@ -43,7 +43,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Cible introuvable." }, { status: 404 });
   }
 
-  const result = await sendOutreachEmail(target);
+  const { data: templateRow } = await service
+    .from("outreach_email_template")
+    .select("subject, body")
+    .eq("id", "default")
+    .single();
+
+  const result = await sendOutreachEmail(target, templateRow ?? DEFAULT_OUTREACH_TEMPLATE);
 
   const { data: updated, error: updateError } = await service
     .from("outreach_targets")

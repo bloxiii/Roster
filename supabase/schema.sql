@@ -111,6 +111,15 @@ create table public.outreach_targets (
   created_at   timestamptz not null default now()
 );
 
+-- OUTREACH EMAIL TEMPLATE (singleton, éditable depuis /outreach)
+-- Balises substituées à l'envoi : {{contact}}, {{agence}}, {{site}}.
+create table public.outreach_email_template (
+  id         text primary key default 'default',
+  subject    text not null,
+  body       text not null,
+  updated_at timestamptz not null default now()
+);
+
 -- ═══════════════════════════════════════════════════════════════
 -- INDEX
 -- ═══════════════════════════════════════════════════════════════
@@ -180,9 +189,16 @@ create policy "settings_select" on public.company_settings
 create policy "settings_update" on public.company_settings
   for update using (company_id in (select public.user_company_ids()));
 
--- OUTREACH TARGETS — RLS activé, aucune policy (deny-by-default).
+-- OUTREACH TARGETS / TEMPLATE — RLS activé, aucune policy (deny-by-default).
 -- Accès exclusivement via le service role, cf. app/api/outreach/*.
 alter table public.outreach_targets enable row level security;
+alter table public.outreach_email_template enable row level security;
+
+insert into public.outreach_email_template (id, subject, body) values (
+  'default',
+  'Qualifiez vos prospects immobiliers automatiquement — {{agence}}',
+  E'Bonjour {{contact}},\n\nJe me permets de vous contacter au sujet de {{agence}}.\n\nJ''ai vu {{site}} — beau catalogue de biens.\n\nVelinova est un assistant IA qui qualifie automatiquement vos prospects immobiliers 24/7, directement depuis votre site : un visiteur discute avec l''assistant, décrit son projet, et vous recevez une fiche prospect prête à l''emploi (budget, localisation, délai, coordonnées) — sans rien changer à votre site actuel (une seule ligne de code à ajouter).\n\nVous pouvez tester une démo en direct ici : https://velinova.xyz/demo\n\nSi ça vous intéresse, répondez simplement à cet email — je me ferai un plaisir d''en discuter avec vous.\n\nÀ bientôt,\nL''équipe Velinova'
+) on conflict (id) do nothing;
 
 -- ═══════════════════════════════════════════════════════════════
 -- TRIGGER : Setup automatique après signup

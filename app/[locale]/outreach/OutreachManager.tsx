@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useMemo, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 type OutreachTarget = {
@@ -14,6 +14,8 @@ type OutreachTarget = {
   sent_at: string | null;
   created_at: string;
 };
+
+type OutreachTemplate = { subject: string; body: string };
 
 const FIELD =
   "w-full rounded-lg border border-border bg-ink px-3 py-2.5 text-sm text-paper outline-none transition-colors focus:border-brass placeholder:text-paper-dim/40";
@@ -32,12 +34,33 @@ const STATUS_LABEL: Record<OutreachTarget["status"], string> = {
   replied: "A répondu",
 };
 
-export function OutreachManager({ initialTargets }: { initialTargets: OutreachTarget[] }) {
+const FILTERS: { key: OutreachTarget["status"] | "all"; label: string }[] = [
+  { key: "all", label: "Tous" },
+  { key: "pending", label: "À contacter" },
+  { key: "sent", label: "Email envoyé" },
+  { key: "replied", label: "Réponse" },
+  { key: "failed", label: "Échec" },
+];
+
+export function OutreachManager({
+  initialTargets,
+  initialTemplate,
+}: {
+  initialTargets: OutreachTarget[];
+  initialTemplate: OutreachTemplate;
+}) {
   const router = useRouter();
   const [targets, setTargets] = useState(initialTargets);
+  const [filter, setFilter] = useState<OutreachTarget["status"] | "all">("all");
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const filtered = useMemo(
+    () => (filter === "all" ? targets : targets.filter((t) => t.status === filter)),
+    [targets, filter],
+  );
 
   async function handleAdd(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -94,8 +117,45 @@ export function OutreachManager({ initialTargets }: { initialTargets: OutreachTa
     }
   }
 
+  async function handleToggleReplied(t: OutreachTarget) {
+    const nextStatus = t.status === "replied" ? "sent" : "replied";
+    setBusyId(t.id);
+    try {
+      const res = await fetch(`/api/outreach/targets/${t.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const data = await res.json();
+      if (res.ok && data.target) {
+        setTargets((prev) => prev.map((x) => (x.id === t.id ? data.target : x)));
+      }
+    } catch (err) {
+      console.error("[outreach] Erreur réseau:", err);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Supprimer ce contact de la liste ?")) return;
+    setBusyId(id);
+    try {
+      const res = await fetch(`/api/outreach/targets/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setTargets((prev) => prev.filter((t) => t.id !== id));
+      }
+    } catch (err) {
+      console.error("[outreach] Erreur réseau:", err);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   return (
     <div className="mt-8 space-y-8">
+      <TemplateEditor initialTemplate={initialTemplate} />
+
       {/* Formulaire d'ajout */}
       <form
         onSubmit={handleAdd}
@@ -138,6 +198,28 @@ export function OutreachManager({ initialTargets }: { initialTargets: OutreachTa
         </div>
       </form>
 
+      {/* Filtres par statut */}
+      <div className="flex flex-wrap gap-2">
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors ${
+              filter === f.key
+                ? "border-brass bg-brass/10 text-brass-bright"
+                : "border-border text-paper-dim hover:border-border hover:text-paper"
+            }`}
+          >
+            {f.label}
+            {f.key !== "all" && (
+              <span className="ml-1.5 text-paper-dim/50">
+                ({targets.filter((t) => t.status === f.key).length})
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Liste des cibles */}
       <div className="overflow-hidden rounded-2xl border border-border">
         <table className="w-full text-left text-sm">
@@ -146,18 +228,21 @@ export function OutreachManager({ initialTargets }: { initialTargets: OutreachTa
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Agence</th>
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Contact</th>
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Statut</th>
+              <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">A répondu ?</th>
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim" />
             </tr>
           </thead>
           <tbody className="text-paper-dim">
-            {targets.length === 0 && (
+            {filtered.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-paper-dim/50">
-                  Aucune cible pour l&apos;instant — ajoutez-en une ci-dessus.
+                <td colSpan={5} className="px-4 py-8 text-center text-paper-dim/50">
+                  {targets.length === 0
+                    ? "Aucune cible pour l'instant — ajoutez-en une ci-dessus."
+                    : "Aucun contact dans ce filtre."}
                 </td>
               </tr>
             )}
-            {targets.map((t) => (
+            {filtered.map((t) => (
               <tr key={t.id} className="border-b border-border/60 last:border-0">
                 <td className="px-4 py-3">
                   <div className="text-paper">{t.agency_name}</div>
@@ -184,14 +269,37 @@ export function OutreachManager({ initialTargets }: { initialTargets: OutreachTa
                     <div className="mt-1 max-w-[220px] text-xs text-red-400/80">{t.error}</div>
                   )}
                 </td>
+                <td className="px-4 py-3">
+                  <label className="flex items-center gap-2 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={t.status === "replied"}
+                      disabled={busyId === t.id || t.status === "pending" || t.status === "failed"}
+                      onChange={() => handleToggleReplied(t)}
+                      className="h-4 w-4 rounded border-border accent-brass"
+                    />
+                    Répondu
+                  </label>
+                </td>
                 <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => handleSend(t.id)}
-                    disabled={sendingId === t.id}
-                    className="rounded-full border border-brass/40 px-4 py-1.5 text-xs font-medium text-brass-bright transition-colors hover:bg-brass/10 disabled:opacity-40"
-                  >
-                    {sendingId === t.id ? "Envoi..." : t.status === "sent" ? "Renvoyer" : "Envoyer"}
-                  </button>
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => handleSend(t.id)}
+                      disabled={sendingId === t.id}
+                      className="rounded-full border border-brass/40 px-4 py-1.5 text-xs font-medium text-brass-bright transition-colors hover:bg-brass/10 disabled:opacity-40"
+                    >
+                      {sendingId === t.id ? "Envoi..." : t.status === "sent" ? "Renvoyer" : "Envoyer"}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(t.id)}
+                      disabled={busyId === t.id}
+                      aria-label="Supprimer"
+                      title="Supprimer"
+                      className="rounded-full border border-red-400/30 px-3 py-1.5 text-xs text-red-400 transition-colors hover:bg-red-400/10 disabled:opacity-40"
+                    >
+                      🗑
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -199,5 +307,98 @@ export function OutreachManager({ initialTargets }: { initialTargets: OutreachTa
         </table>
       </div>
     </div>
+  );
+}
+
+/** Éditeur du template email (sujet + corps), avec balises {{contact}} / {{agence}} / {{site}}. */
+function TemplateEditor({ initialTemplate }: { initialTemplate: OutreachTemplate }) {
+  const [subject, setSubject] = useState(initialTemplate.subject);
+  const [body, setBody] = useState(initialTemplate.body);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    setSaved(false);
+    setError(null);
+    try {
+      const res = await fetch("/api/outreach/template", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject, body }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Échec de l'enregistrement.");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur inconnue.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-surface p-6">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <div>
+          <h2 className="font-display text-base font-medium text-paper">Template du mail</h2>
+          <p className="mt-1 text-xs text-paper-dim/60">
+            Balises disponibles :{" "}
+            <code className="rounded bg-ink px-1 py-0.5 font-mono text-[11px]">{"{{contact}}"}</code>{" "}
+            <code className="rounded bg-ink px-1 py-0.5 font-mono text-[11px]">{"{{agence}}"}</code>{" "}
+            <code className="rounded bg-ink px-1 py-0.5 font-mono text-[11px]">{"{{site}}"}</code> —
+            remplacées automatiquement à l&apos;envoi.
+          </p>
+        </div>
+        <span className="text-paper-dim">{open ? "▲" : "▼"}</span>
+      </button>
+
+      {open && (
+        <div className="mt-5 space-y-4">
+          <div>
+            <label htmlFor="template_subject" className="mb-1.5 block text-xs text-paper-dim">
+              Sujet
+            </label>
+            <input
+              id="template_subject"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className={FIELD}
+            />
+          </div>
+          <div>
+            <label htmlFor="template_body" className="mb-1.5 block text-xs text-paper-dim">
+              Corps du message
+            </label>
+            <textarea
+              id="template_body"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              rows={12}
+              className={`${FIELD} font-mono text-xs leading-relaxed`}
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-brass-bright disabled:opacity-50"
+            >
+              {saving ? "Enregistrement..." : "Enregistrer le template"}
+            </button>
+            {saved && <span className="text-sm text-status">Template enregistré.</span>}
+            {error && <span className="text-sm text-red-400">{error}</span>}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }

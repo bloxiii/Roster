@@ -59,3 +59,24 @@ export const outreachSendSchema = z.object({
 });
 
 export type OutreachSendInput = z.infer<typeof outreachSendSchema>;
+
+/**
+ * Schéma de validation pour la mise à jour d'une cible (statut manuel,
+ * ex: "marquer comme répondu"). Utilisé par PATCH /api/outreach/targets/[id].
+ */
+export const outreachUpdateSchema = z.object({
+  status: z.enum(["pending", "sent", "failed", "replied"]),
+});
+
+export type OutreachUpdateInput = z.infer<typeof outreachUpdateSchema>;
+
+/**
+ * Schéma de validation pour l'édition du template email d'outreach.
+ * Utilisé par PUT /api/outreach/template.
+ */
+export const outreachTemplateSchema = z.object({
+  subject: z.string().trim().min(3).max(300),
+  body: z.string().trim().min(10).max(5000),
+});
+
+export type OutreachTemplateInput = z.infer<typeof outreachTemplateSchema>;
