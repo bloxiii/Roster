@@ -96,6 +96,21 @@ create table public.company_settings (
   updated_at           timestamptz not null default now()
 );
 
+-- OUTREACH TARGETS (prospection commerciale Velinova → agences immobilières)
+-- Table interne, non multi-tenant. RLS activé SANS policy : accès uniquement
+-- via le service role (routes /api/outreach/*, admin-gated par lib/admin.ts).
+create table public.outreach_targets (
+  id           uuid primary key default gen_random_uuid(),
+  agency_name  text not null,
+  contact_name text,
+  email        text not null,
+  website      text,
+  status       text not null default 'pending', -- pending | sent | failed | replied
+  error        text,
+  sent_at      timestamptz,
+  created_at   timestamptz not null default now()
+);
+
 -- ═══════════════════════════════════════════════════════════════
 -- INDEX
 -- ═══════════════════════════════════════════════════════════════
@@ -109,6 +124,8 @@ create index idx_conversations_agent on public.conversations(agent_id);
 create index idx_prospects_company on public.prospects(company_id);
 create index idx_prospects_qualification on public.prospects(company_id, qualification);
 create index idx_prospects_agent on public.prospects(agent_id);
+create index idx_outreach_targets_status on public.outreach_targets(status);
+create index idx_outreach_targets_created on public.outreach_targets(created_at desc);
 
 -- ═══════════════════════════════════════════════════════════════
 -- ROW LEVEL SECURITY
@@ -162,6 +179,10 @@ create policy "settings_select" on public.company_settings
   for select using (company_id in (select public.user_company_ids()));
 create policy "settings_update" on public.company_settings
   for update using (company_id in (select public.user_company_ids()));
+
+-- OUTREACH TARGETS — RLS activé, aucune policy (deny-by-default).
+-- Accès exclusivement via le service role, cf. app/api/outreach/*.
+alter table public.outreach_targets enable row level security;
 
 -- ═══════════════════════════════════════════════════════════════
 -- TRIGGER : Setup automatique après signup

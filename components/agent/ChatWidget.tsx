@@ -6,16 +6,40 @@ import { ProspectCard } from "./ProspectCard";
 
 type Status = "idle" | "loading" | "error";
 
+type WidgetColors = { bg: string; bot: string; user: string };
+
 export function ChatWidget({ widgetKey }: { widgetKey?: string | null }) {
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [prospect, setProspect] = useState<ProspectData | null>(null);
   const [conversationId, setConversationId] = useState<string | undefined>();
+  // Couleurs configurées dans Dashboard → Paramètres, appliquées en live ici
+  // (même endpoint que le widget public embarqué) — reflète immédiatement
+  // tout changement de couleur sur /demo, sans redéploiement.
+  const [colors, setColors] = useState<WidgetColors | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const initRef = useRef(false);
+
+  useEffect(() => {
+    if (!widgetKey) return;
+    let cancelled = false;
+
+    fetch(`/api/agent/widget-config?key=${encodeURIComponent(widgetKey)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.colors) setColors(data.colors);
+      })
+      .catch(() => {
+        // Silencieux : sans couleurs distantes, le widget garde son look par défaut.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [widgetKey]);
 
   // Scroll vers le bas à chaque nouveau message
   useEffect(() => {
@@ -103,11 +127,14 @@ export function ChatWidget({ widgetKey }: { widgetKey?: string | null }) {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col" style={colors ? { background: colors.bg } : undefined}>
       {/* Header de l'agent */}
       <div className="flex items-center gap-3 border-b border-border/60 px-5 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brass/20">
-          <span className="font-mono text-sm font-medium text-brass">A</span>
+        <div
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-brass/20"
+          style={colors ? { background: `${colors.user}33` } : undefined}
+        >
+          <span className="font-mono text-sm font-medium text-brass" style={colors ? { color: colors.user } : undefined}>A</span>
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
@@ -137,6 +164,13 @@ export function ChatWidget({ widgetKey }: { widgetKey?: string | null }) {
                   ? "rounded-br-md bg-brass text-ink"
                   : "rounded-bl-md border border-border/60 bg-surface text-paper"
               }`}
+              style={
+                colors
+                  ? msg.role === "user"
+                    ? { background: colors.user, color: "#1a110d" }
+                    : { background: colors.bot, color: "#f5ebe0" }
+                  : undefined
+              }
             >
               {msg.content}
             </div>
@@ -145,7 +179,10 @@ export function ChatWidget({ widgetKey }: { widgetKey?: string | null }) {
 
         {status === "loading" && (
           <div className="flex justify-start">
-            <div className="rounded-2xl rounded-bl-md border border-border/60 bg-surface px-4 py-3">
+            <div
+              className="rounded-2xl rounded-bl-md border border-border/60 bg-surface px-4 py-3"
+              style={colors ? { background: colors.bot } : undefined}
+            >
               <div className="flex gap-1">
                 <span className="h-2 w-2 animate-bounce rounded-full bg-paper-dim/40 [animation-delay:0ms]" />
                 <span className="h-2 w-2 animate-bounce rounded-full bg-paper-dim/40 [animation-delay:150ms]" />
@@ -184,6 +221,7 @@ export function ChatWidget({ widgetKey }: { widgetKey?: string | null }) {
             type="submit"
             disabled={!input.trim() || status === "loading"}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-brass text-ink transition-colors hover:bg-brass-bright disabled:opacity-40"
+            style={colors ? { background: colors.user, color: "#1a110d" } : undefined}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path

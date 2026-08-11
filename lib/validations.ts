@@ -36,3 +36,26 @@ export const chatRequestSchema = z.object({
 });
 
 export type ChatRequestInput = z.infer<typeof chatRequestSchema>;
+
+/**
+ * Schéma de validation pour l'ajout d'une cible de prospection (outreach).
+ * Utilisé par POST /api/outreach/targets — route admin-gated.
+ */
+export const outreachTargetSchema = z.object({
+  agency_name: z.string().trim().min(2).max(150),
+  contact_name: z.string().trim().max(150).optional().or(z.literal("")),
+  email: z.string().trim().email().max(200),
+  website: z.string().trim().max(300).optional().or(z.literal("")),
+});
+
+export type OutreachTargetInput = z.infer<typeof outreachTargetSchema>;
+
+/**
+ * Schéma de validation pour l'envoi d'un email de prospection.
+ * Utilisé par POST /api/outreach/send — route admin-gated.
+ */
+export const outreachSendSchema = z.object({
+  targetId: z.string().uuid(),
+});
+
+export type OutreachSendInput = z.infer<typeof outreachSendSchema>;
