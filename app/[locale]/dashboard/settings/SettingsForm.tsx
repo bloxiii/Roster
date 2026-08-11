@@ -224,7 +224,7 @@ export function SettingsForm({ companyId, company, settings, widgetKeys }: Props
           </div>
           <pre className="mt-4 rounded-lg bg-ink p-4 font-mono text-xs text-paper-dim overflow-x-auto">
 {`<script
-  src="https://velinova.xyz/widget/velinova-widget.js"
+  src="https://www.velinova.xyz/widget/velinova-widget.js"
   data-velinova-key="${wk.key}">
 </script>`}
           </pre>

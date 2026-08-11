@@ -35,7 +35,7 @@ export function OnboardingFlow({
   }
 
   function handleCopy() {
-    const code = `<script src="https://velinova.xyz/widget/velinova-widget.js" data-velinova-key="${widgetKey}"></script>`;
+    const code = `<script src="https://www.velinova.xyz/widget/velinova-widget.js" data-velinova-key="${widgetKey}"></script>`;
     navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
@@ -182,7 +182,7 @@ export function OnboardingFlow({
             <div className="mt-8 rounded-2xl border border-border bg-surface p-5 text-left">
               <pre className="overflow-x-auto font-mono text-xs leading-relaxed text-paper-dim">
 {`<script
-  src="https://velinova.xyz/widget/velinova-widget.js"
+  src="https://www.velinova.xyz/widget/velinova-widget.js"
   data-velinova-key="${widgetKey}">
 </script>`}
               </pre>
