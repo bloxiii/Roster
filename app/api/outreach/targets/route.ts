@@ -41,6 +41,10 @@ export async function POST(request: NextRequest) {
       contact_name: parsed.data.contact_name || null,
       email: parsed.data.email,
       website: parsed.data.website || null,
+      city: parsed.data.city || null,
+      postal_code: parsed.data.postal_code || null,
+      phone: parsed.data.phone || null,
+      address: parsed.data.address || null,
     })
     .select()
     .single();

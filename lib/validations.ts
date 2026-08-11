@@ -48,6 +48,12 @@ export const outreachTargetSchema = z.object({
   contact_name: z.string().trim().max(150).optional().or(z.literal("")),
   email: z.string().trim().email().max(200),
   website: z.string().trim().max(300).optional().or(z.literal("")),
+  // Alignés sur les colonnes du CSV d'import, pour permettre l'ajout manuel
+  // d'un contact avec les mêmes informations qu'un import en masse.
+  city: z.string().trim().max(150).optional().or(z.literal("")),
+  postal_code: z.string().trim().max(20).optional().or(z.literal("")),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
+  address: z.string().trim().max(300).optional().or(z.literal("")),
 });
 
 export type OutreachTargetInput = z.infer<typeof outreachTargetSchema>;

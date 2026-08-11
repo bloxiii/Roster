@@ -83,9 +83,12 @@ export function OutreachManager({
     const form = new FormData(e.currentTarget);
     const payload = {
       agency_name: form.get("agency_name") as string,
-      contact_name: (form.get("contact_name") as string) || "",
       email: form.get("email") as string,
-      website: (form.get("website") as string) || "",
+      // Alignés sur les colonnes du CSV d'import (voir ImportCsvSection).
+      city: (form.get("city") as string) || "",
+      postal_code: (form.get("postal_code") as string) || "",
+      phone: (form.get("phone") as string) || "",
+      address: (form.get("address") as string) || "",
     };
 
     try {
@@ -186,22 +189,35 @@ export function OutreachManager({
           <input id="agency_name" name="agency_name" required className={FIELD} placeholder="Agence Dupont Immobilier" />
         </div>
         <div>
-          <label htmlFor="contact_name" className="mb-1.5 block text-xs text-paper-dim">
-            Contact (optionnel)
-          </label>
-          <input id="contact_name" name="contact_name" className={FIELD} placeholder="Jean Dupont" />
-        </div>
-        <div>
           <label htmlFor="email" className="mb-1.5 block text-xs text-paper-dim">
             Email *
           </label>
           <input id="email" name="email" type="email" required className={FIELD} placeholder="contact@agence-dupont.fr" />
         </div>
+        {/* Champs alignés sur les colonnes du CSV d'import (voir ImportCsvSection) */}
         <div>
-          <label htmlFor="website" className="mb-1.5 block text-xs text-paper-dim">
-            Site web (optionnel)
+          <label htmlFor="city" className="mb-1.5 block text-xs text-paper-dim">
+            Ville (optionnel)
           </label>
-          <input id="website" name="website" type="url" className={FIELD} placeholder="https://agence-dupont.fr" />
+          <input id="city" name="city" className={FIELD} placeholder="Manosque" />
+        </div>
+        <div>
+          <label htmlFor="postal_code" className="mb-1.5 block text-xs text-paper-dim">
+            Code postal (optionnel)
+          </label>
+          <input id="postal_code" name="postal_code" className={FIELD} placeholder="04100" />
+        </div>
+        <div>
+          <label htmlFor="phone" className="mb-1.5 block text-xs text-paper-dim">
+            Téléphone (optionnel)
+          </label>
+          <input id="phone" name="phone" className={FIELD} placeholder="04 92 78 99 03" />
+        </div>
+        <div>
+          <label htmlFor="address" className="mb-1.5 block text-xs text-paper-dim">
+            Adresse (optionnel)
+          </label>
+          <input id="address" name="address" className={FIELD} placeholder="12 Place du terroir" />
         </div>
 
         <div className="sm:col-span-2 flex items-center gap-4">
@@ -244,7 +260,7 @@ export function OutreachManager({
           <thead>
             <tr className="border-b border-border bg-surface">
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Agence</th>
-              <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Contact</th>
+              <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Coordonnées</th>
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Statut</th>
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">A répondu ?</th>
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim" />
@@ -276,8 +292,11 @@ export function OutreachManager({
                   )}
                 </td>
                 <td className="px-4 py-3">
-                  <div>{t.contact_name || "—"}</div>
+                  <div>
+                    {t.city ? `${t.city}${t.postal_code ? ` (${t.postal_code})` : ""}` : t.contact_name || "—"}
+                  </div>
                   <div className="text-xs text-paper-dim/60">{t.email}</div>
+                  {t.phone && <div className="text-xs text-paper-dim/60">{t.phone}</div>}
                 </td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest ${STATUS_STYLE[t.status]}`}>
