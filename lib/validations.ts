@@ -115,3 +115,51 @@ export const outreachImportSchema = z.object({
 });
 
 export type OutreachImportInput = z.infer<typeof outreachImportSchema>;
+
+/**
+ * Schéma de validation pour la création d'une visite 3D (Velinova 3D).
+ * Utilisé par POST /api/tours — ne contient pas le fichier vidéo lui-même
+ * (uploadé séparément via URL signée, voir lib/tours/storage.ts).
+ */
+export const createTourSchema = z.object({
+  title: z.string().trim().min(2).max(150),
+  address: z.string().trim().max(300).optional().or(z.literal("")),
+  // Déclarés par le client avant l'upload, revérifiés côté serveur une fois
+  // le fichier reçu — ne jamais faire confiance à une valeur client seule.
+  fileSizeBytes: z.number().int().positive().max(500 * 1024 * 1024),
+  mimeType: z.enum(["video/mp4", "video/quicktime", "video/webm"]),
+});
+
+export type CreateTourInput = z.infer<typeof createTourSchema>;
+
+/**
+ * Schéma de validation du webhook de complétion envoyé par le worker de
+ * reconstruction (interne, cf. lib/tours/provider.ts). Authentification par
+ * secret partagé (en-tête, vérifié dans la route), pas par ce schéma.
+ */
+export const tourWebhookSchema = z.object({
+  tourId: z.string().uuid(),
+  providerJobId: z.string().min(1).max(200),
+  status: z.enum(["ready", "failed"]),
+  sceneUrl: z.string().url().optional(),
+  thumbnailUrl: z.string().url().optional(),
+  waypoints: z
+    .array(
+      z.object({
+        position: z.tuple([z.number(), z.number(), z.number()]),
+        lookAt: z.tuple([z.number(), z.number(), z.number()]),
+      }),
+    )
+    .optional(),
+  quality: z
+    .object({
+      registeredFrameRatio: z.number().min(0).max(1).optional(),
+      weakSegments: z
+        .array(z.object({ startSec: z.number(), endSec: z.number() }))
+        .optional(),
+    })
+    .optional(),
+  error: z.string().max(2000).optional(),
+});
+
+export type TourWebhookInput = z.infer<typeof tourWebhookSchema>;

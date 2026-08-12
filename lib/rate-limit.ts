@@ -64,4 +64,14 @@ export const rateLimiters = {
     windowMs: 15 * 60 * 1000,
     maxRequests: 5,
   }),
+  /** /api/tours — 10 créations de visite par heure par IP (upload + GPU coûteux). */
+  tours: createRateLimiter("tours", {
+    windowMs: 60 * 60 * 1000,
+    maxRequests: 10,
+  }),
+  /** /api/tours/public/[slug] — 120 vues par 10 minutes par IP (visiteurs anonymes). */
+  publicTourView: createRateLimiter("public-tour-view", {
+    windowMs: 10 * 60 * 1000,
+    maxRequests: 120,
+  }),
 };

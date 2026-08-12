@@ -20,6 +20,10 @@ const ENV_VARS: EnvVar[] = [
   { name: "TWILIO_ACCOUNT_SID", required: false, description: "SID du compte Twilio (notifications WhatsApp)" },
   { name: "TWILIO_AUTH_TOKEN", required: false, description: "Token d'authentification Twilio" },
   { name: "TWILIO_WHATSAPP_FROM", required: false, description: "Numéro WhatsApp expéditeur Velinova (ex: whatsapp:+14155238886)" },
+  { name: "SUPABASE_SERVICE_ROLE_KEY", required: false, description: "Clé service role Supabase (buckets storage, webhooks internes)" },
+  { name: "THREED_PROVIDER", required: false, description: "Fournisseur de reconstruction 3D actif (Visites 3D) — défaut: modal" },
+  { name: "THREED_WORKER_URL", required: false, description: "URL du worker de reconstruction 3D déployé sur Modal (voir worker/README.md)" },
+  { name: "THREED_WEBHOOK_SECRET", required: false, description: "Secret partagé pour authentifier le webhook de fin de traitement 3D" },
 ];
 
 export function validateEnv() {

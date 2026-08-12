@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Vue d'ensemble", icon: "grid" },
   { href: "/dashboard/prospects", label: "Prospects", icon: "users" },
   { href: "/dashboard/conversations", label: "Conversations", icon: "chat" },
+  { href: "/dashboard/tours", label: "Visites 3D", icon: "cube" },
   { href: "/dashboard/agents", label: "Agents IA", icon: "bot" },
   { href: "/dashboard/settings", label: "Paramètres", icon: "settings" },
 ];
@@ -25,6 +26,8 @@ function NavIcon({ type }: { type: string }) {
       return <svg className={cls} viewBox="0 0 16 16" strokeWidth="1.5"><rect x="3" y="5" width="10" height="8" rx="2" /><circle cx="6" cy="9" r="1" /><circle cx="10" cy="9" r="1" /><path d="M8 2v3M5 2h6" /></svg>;
     case "settings":
       return <svg className={cls} viewBox="0 0 16 16" strokeWidth="1.5"><circle cx="8" cy="8" r="2" /><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M13 3l-1.5 1.5M4.5 11.5L3 13" /></svg>;
+    case "cube":
+      return <svg className={cls} viewBox="0 0 16 16" strokeWidth="1.5"><path d="M8 1.5l6 3.2v6.6L8 14.5l-6-3.2V4.7z" /><path d="M2 4.7L8 8m0 0l6-3.3M8 8v6.5" /></svg>;
     default:
       return null;
   }

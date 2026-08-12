@@ -38,10 +38,30 @@ npm run dev
 | `TWILIO_ACCOUNT_SID`  | Non         | SID du compte Twilio (notifications WhatsApp prospects) |
 | `TWILIO_AUTH_TOKEN`   | Non         | Token d'authentification Twilio                |
 | `TWILIO_WHATSAPP_FROM`| Non         | Numéro WhatsApp expéditeur (ex: `whatsapp:+14155238886`) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Non   | Clé service role Supabase (buckets storage, webhooks internes) |
+| `THREED_PROVIDER`     | Non         | Fournisseur de reconstruction 3D actif (Visites 3D) — défaut: `modal` |
+| `THREED_WORKER_URL`   | Non         | URL du worker de reconstruction 3D déployé sur Modal — voir `worker/README.md` |
+| `THREED_WEBHOOK_SECRET` | Non       | Secret partagé pour authentifier le webhook de fin de traitement 3D |
+| `NEXT_PUBLIC_APP_URL` | Non         | URL publique de l'app, pour construire l'URL de webhook envoyée au worker |
 
 *Sans `RESEND_API_KEY`, le formulaire de contact fonctionne mais les demandes
 sont uniquement journalisées côté serveur (pas d'email envoyé). Pratique pour
 le développement et les previews.
+
+## Visites 3D (Velinova 3D)
+
+Génère automatiquement une visite virtuelle 3D navigable à partir d'une
+vidéo smartphone (upload → reconstruction → viewer web). Voir
+[`docs/VELINOVA-3D.md`](docs/VELINOVA-3D.md) pour l'analyse complète
+(faisabilité, architecture, coûts, RGPD) et [`worker/README.md`](worker/README.md)
+pour le déploiement du worker de reconstruction (COLMAP + gsplat sur GPU
+serverless Modal — pipeline maison, pas d'API tierce).
+
+Parcours : Dashboard → *Visites 3D* → *Créer une visite 3D* → upload →
+traitement automatique → lien de partage (`/v/[slug]`, page publique non
+indexée). Une scène de démonstration synthétique (pas un vrai bien) est
+disponible sur `/v/demo` pour vérifier que le viewer fonctionne avant
+d'avoir une première reconstruction réelle.
 
 ## Architecture
 
