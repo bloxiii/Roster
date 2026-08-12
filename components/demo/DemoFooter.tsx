@@ -18,15 +18,6 @@ export function DemoFooter({ agency }: { agency: DemoAgencyConfig }) {
             <p className="mt-2 text-sm opacity-80" style={{ color: agency.branding.surface }}>
               {location}
             </p>
-            <a
-              href={agency.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-block text-sm underline underline-offset-2 opacity-80 hover:opacity-100"
-              style={{ color: agency.branding.surface }}
-            >
-              Site officiel de l&apos;agence ↗
-            </a>
           </div>
 
           <div
@@ -43,8 +34,8 @@ export function DemoFooter({ agency }: { agency: DemoAgencyConfig }) {
         </div>
 
         <p className="mt-10 text-[11px] opacity-50" style={{ color: agency.branding.surface }}>
-          Page de démonstration Velinova — non affiliée à {agency.name}. Les informations sur
-          cette page sont fournies à titre illustratif.
+          {agency.name} est une agence fictive créée par Velinova à des fins de démonstration —
+          biens, adresse et informations affichées ici ne sont pas réels.
         </p>
       </div>
     </footer>

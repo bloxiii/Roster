@@ -1,5 +1,5 @@
 /**
- * Velinova Chat Widget v1.1
+ * Velinova Chat Widget v1.2
  *
  * Usage recommandé (couleurs pilotées depuis le dashboard Velinova) :
  *   <script src="https://VOTRE-DOMAINE/widget/velinova-widget.js"
@@ -464,7 +464,7 @@
       if (this.typingEl) { this.typingEl.remove(); this.typingEl = null; }
     }
 
-    showProspect(data) {
+    showProspect(data, saved) {
       this.prospect = data;
 
       const qClass = { HOT: "roster-q-hot", WARM: "roster-q-warm", COLD: "roster-q-cold" }[data.qualification] || "roster-q-cold";
@@ -511,6 +511,18 @@
       }
 
       this.messagesEl.appendChild(card);
+
+      // Confirmation honnête : seulement si la sauvegarde a réellement
+      // réussi côté serveur (voir /api/agent/chat, prospectSaved).
+      if (saved) {
+        const note = el(
+          "div",
+          { className: "roster-msg roster-msg-a" },
+          "✓ Votre conversation et votre demande ont bien été enregistrées. Un conseiller va les consulter.",
+        );
+        note.style.borderColor = "var(--r-status)";
+        this.messagesEl.appendChild(note);
+      }
 
       // Masquer la barre de saisie une fois la qualification terminée
       this.inputBar.style.display = "none";
@@ -560,7 +572,7 @@
 
         if (data.prospect) {
           // Fiche prospect déjà sauvegardée côté serveur dans /api/agent/chat
-          this.showProspect(data.prospect);
+          this.showProspect(data.prospect, data.prospectSaved);
         }
       } catch (err) {
         this.hideTyping();

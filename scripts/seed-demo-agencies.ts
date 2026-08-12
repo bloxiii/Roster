@@ -1,6 +1,6 @@
 /**
- * Crée (ou met à jour) les comptes Velinova des agences de démonstration
- * définies dans lib/demo/agencies.ts.
+ * Crée (ou met à jour) le compte Velinova de la démo publique (/demo),
+ * une agence 100% fictive définie dans lib/demo/agencies.ts.
  *
  * Ce script NE modifie PAS le schéma et ne crée AUCUNE table spéciale : il
  * réutilise exactement le mécanisme multi-tenant existant.
@@ -9,13 +9,16 @@
  *   2. Le trigger public.handle_new_user() (supabase/schema.sql) fait le
  *      reste automatiquement : company + membership + agent "Emma" +
  *      widget_key + company_settings.
- *   3. Ce script personnalise ensuite la company (slug stable, nom, site)
- *      et l'agent (nom "Alex", system_prompt généré depuis la config).
+ *   3. Ce script personnalise ensuite la company (slug stable, nom, site,
+ *      plan = DEMO_COMPANY_PLAN pour le rate limit dédié) et l'agent
+ *      (nom "Alex", system_prompt généré depuis la config).
  *
- * Idempotent : si une company existe déjà pour le slug d'une agence, le
- * script se contente de rafraîchir son system_prompt (utile après une
- * modification de lib/demo/agencies.ts ou lib/demo/system-prompt.ts) sans
- * recréer de compte ni de mot de passe.
+ * Idempotent : si une company existe déjà pour ce slug, le script se
+ * contente de rafraîchir son system_prompt (utile après une modification
+ * de lib/demo/agencies.ts ou lib/demo/system-prompt.ts) sans recréer de
+ * compte ni de mot de passe. DEMO_AGENCIES ne contient qu'une seule entrée
+ * aujourd'hui mais la boucle reste générique si un second profil de démo
+ * devient utile un jour.
  *
  * Usage (variables d'env Supabase requises — PAS commitées, à fournir au
  * moment de l'exécution, typiquement en local ou depuis la CI de déploiement) :
@@ -31,13 +34,13 @@
  * Alternative sans Node local : supabase/seed/demo-agencies.sql (généré par
  * `npm run generate:demo-agencies-sql`) fait la même personnalisation en SQL
  * pur, à coller dans Dashboard → SQL Editor — pratique si vous préférez
- * créer les 5 comptes à la main (Authentication → Users → Add user) plutôt
+ * créer le compte à la main (Authentication → Users → Add user) plutôt
  * que de lancer ce script avec la clé service role. Voir le fichier généré
  * pour le détail des deux étapes.
  */
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "node:crypto";
-import { DEMO_AGENCIES } from "../lib/demo/agencies";
+import { DEMO_AGENCIES, DEMO_COMPANY_PLAN } from "../lib/demo/agencies";
 import { buildDemoAgentSystemPrompt } from "../lib/demo/system-prompt";
 import type { DemoAgencyConfig } from "../lib/demo/types";
 
@@ -82,7 +85,7 @@ async function seedAgency(agency: DemoAgencyConfig) {
       .from("companies")
       // status: "active" — ce compte démo n'est jamais passé par la validation
       // manuelle prévue pour les vrais nouveaux clients (voir plus bas).
-      .update({ name: agency.name, website: agency.website, status: "active" })
+      .update({ name: agency.name, website: agency.website, status: "active", plan: DEMO_COMPANY_PLAN })
       .eq("id", companyId);
   } else {
     const password = generatePassword();
@@ -125,7 +128,7 @@ async function seedAgency(agency: DemoAgencyConfig) {
         slug: agency.slug,
         name: agency.name,
         website: agency.website,
-        plan: "demo",
+        plan: DEMO_COMPANY_PLAN,
         status: "active",
       })
       .eq("id", companyId);
@@ -174,7 +177,7 @@ async function seedAgency(agency: DemoAgencyConfig) {
     .maybeSingle();
 
   console.log(`  ✓ System prompt à jour.`);
-  console.log(`  → URL de démo : https://www.velinova.xyz/demo/${agency.slug}`);
+  console.log(`  → URL de démo : https://www.velinova.xyz/demo`);
   console.log(`  → Widget key  : ${widgetKeyRow?.key ?? "introuvable"}`);
 }
 
