@@ -129,7 +129,15 @@ export default async function DemoPage({
         <DemoProperties agency={agency} />
       </main>
       <DemoFooter agency={agency} />
-      <VelinovaEmbed slug={agency.slug} widgetKey={widgetKey} />
+      <VelinovaEmbed
+        slug={agency.slug}
+        widgetKey={widgetKey}
+        colors={{
+          bg: agency.branding.primaryDark,
+          bot: agency.branding.primary,
+          user: agency.branding.accent,
+        }}
+      />
     </div>
   );
 }
