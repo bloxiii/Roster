@@ -40,6 +40,15 @@ export const rateLimiters = {
     windowMs: 10 * 60 * 1000,
     maxRequests: 20,
   }),
+  /**
+   * /api/agent/chat, uniquement pour la démo publique (companies.plan ===
+   * DEMO_COMPANY_PLAN) — plafond plus strict qui s'ajoute à agentChat
+   * ci-dessus, vu que ce lien est public et sans authentification.
+   */
+  demoChat: createRateLimiter("demo-chat", {
+    windowMs: 10 * 60 * 1000,
+    maxRequests: 8,
+  }),
   /** /api/contact — 5 soumissions par 10 minutes par IP. */
   contact: createRateLimiter("contact", {
     windowMs: 10 * 60 * 1000,

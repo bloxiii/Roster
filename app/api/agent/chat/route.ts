@@ -7,6 +7,7 @@ import { chatRequestSchema } from "@/lib/validations";
 import { rateLimiters } from "@/lib/rate-limit";
 import { saveProspect } from "@/lib/agent/save-prospect";
 import { createServiceClient } from "@/lib/supabase/server";
+import { DEMO_COMPANY_PLAN } from "@/lib/demo/agencies";
 
 export function OPTIONS(request: NextRequest) {
   return handlePreflight(request);
@@ -37,7 +38,7 @@ async function resolveAgent(request: NextRequest, body: { widgetKey?: string }) 
   if (body.widgetKey) {
     const { data: wk } = await supabase
       .from("widget_keys")
-      .select("company_id, agent_id, allowed_domains, is_active, agents(system_prompt), companies(status)")
+      .select("company_id, agent_id, allowed_domains, is_active, agents(system_prompt), companies(status, plan)")
       .eq("key", body.widgetKey)
       .single();
 
@@ -46,7 +47,7 @@ async function resolveAgent(request: NextRequest, body: { widgetKey?: string }) 
     }
 
     // Vérifier que la company est active (empêche les comptes pending/suspended)
-    const companyData = wk.companies as unknown as { status: string } | null;
+    const companyData = wk.companies as unknown as { status: string; plan: string } | null;
     if (companyData?.status !== "active") {
       return { error: "Compte non actif." };
     }
@@ -70,6 +71,7 @@ async function resolveAgent(request: NextRequest, body: { widgetKey?: string }) 
       companyId: wk.company_id,
       agentId: wk.agent_id,
       systemPrompt: agentData?.system_prompt ?? AGENT_SYSTEM_PROMPT,
+      isPublicDemo: companyData?.plan === DEMO_COMPANY_PLAN,
     };
   }
 
@@ -78,6 +80,7 @@ async function resolveAgent(request: NextRequest, body: { widgetKey?: string }) 
     companyId: undefined,
     agentId: undefined,
     systemPrompt: AGENT_SYSTEM_PROMPT,
+    isPublicDemo: false,
   };
 }
 
@@ -114,6 +117,12 @@ export async function POST(request: NextRequest) {
   const agent = await resolveAgent(request, { widgetKey });
   if ("error" in agent) {
     return withCors(NextResponse.json({ error: agent.error }, { status: 403 }), request);
+  }
+
+  // Plafond additionnel pour la démo publique (/demo, sans authentification)
+  // — s'ajoute au rate limit générique déjà appliqué plus haut.
+  if (agent.isPublicDemo && rateLimiters.demoChat(ip)) {
+    return withCors(NextResponse.json({ error: "Trop de requêtes." }, { status: 429 }), request);
   }
 
   const { messages } = parsed.data;
@@ -155,22 +164,28 @@ export async function POST(request: NextRequest) {
     const prospect = extractProspectData(rawReply);
     const cleanReply = cleanReplyForDisplay(rawReply);
 
+    let prospectSaved = false;
     if (prospect) {
       const assistantMsg = { role: "assistant" as const, content: cleanReply };
       const fullConversation = [...messages, assistantMsg];
-      await saveProspect({
+      prospectSaved = await saveProspect({
         data: prospect,
         companyId: agent.companyId,
         agentId: agent.agentId,
         conversation: fullConversation,
         conversationLength: fullConversation.length,
-      }).catch((err) => console.error("[agent/chat] Save failed:", err));
+      })
+        .then(() => true)
+        .catch((err) => {
+          console.error("[agent/chat] Save failed:", err);
+          return false;
+        });
     }
 
     const result: ChatResponse = {
       reply: cleanReply,
       conversationId,
-      ...(prospect ? { prospect } : {}),
+      ...(prospect ? { prospect, prospectSaved } : {}),
     };
 
     return withCors(NextResponse.json(result), request);

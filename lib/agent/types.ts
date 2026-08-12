@@ -46,5 +46,12 @@ export type ChatRequest = {
 export type ChatResponse = {
   reply: string;
   prospect?: ProspectData;
+  /**
+   * Présent uniquement avec `prospect` : true si la fiche a réellement été
+   * persistée en base (voir saveProspect) — permet au widget d'afficher une
+   * confirmation honnête ("conversation enregistrée") plutôt qu'un message
+   * générique qui pourrait mentir en cas d'échec de sauvegarde.
+   */
+  prospectSaved?: boolean;
   conversationId: string;
 };

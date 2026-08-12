@@ -12,17 +12,21 @@
  * colonnes internes...) — ce n'est pas un choix arbitraire, Supabase
  * déconseille officiellement d'insérer dans auth.users à la main. Le flux
  * reste donc en 2 étapes :
- *   1. Créer les 5 utilisateurs à la main (Dashboard → Authentication →
+ *   1. Créer le(s) utilisateur(s) à la main (Dashboard → Authentication →
  *      Users → Add user) avec les emails ci-dessous.
  *   2. Coller/exécuter le SQL généré : il retrouve chaque compte par son
  *      email, personnalise sa company (slug stable, nom, site) et son
  *      agent (nom "Alex", system_prompt complet).
  *
+ * DEMO_AGENCIES ne contient qu'une seule entrée aujourd'hui (la démo
+ * publique /demo) mais ce générateur reste écrit pour boucler sur
+ * plusieurs entrées, au cas où un second profil de démo devienne utile.
+ *
  * Usage : npm run generate:demo-agencies-sql > supabase/seed/demo-agencies.sql
  * (aucun accès Supabase requis pour générer ce fichier — pure génération
  * de texte à partir du registre local.)
  */
-import { DEMO_AGENCIES } from "../lib/demo/agencies";
+import { DEMO_AGENCIES, DEMO_COMPANY_PLAN } from "../lib/demo/agencies";
 import { buildDemoAgentSystemPrompt } from "../lib/demo/system-prompt";
 
 /**
@@ -47,7 +51,7 @@ function buildAgencyBlock(agency: (typeof DEMO_AGENCIES)[number], index: number)
   // contiennent une apostrophe, qui casserait un '...' classique.
   const quotedName = dollarQuote(agency.name, `${tag}nm`);
 
-  return `  -- ${agency.name} — /demo/${agency.slug}
+  return `  -- ${agency.name} — /demo
   select id into v_user_id from auth.users where email = '${email}';
   if v_user_id is null then
     raise notice 'Compte introuvable pour % — créez-le d''abord dans Authentication > Users, puis relancez ce script.', '${email}';
@@ -58,7 +62,8 @@ function buildAgencyBlock(agency: (typeof DEMO_AGENCIES)[number], index: number)
       set slug = '${agency.slug}',
           name = ${quotedName},
           website = '${agency.website}',
-          plan = 'demo'
+          plan = '${DEMO_COMPANY_PLAN}',
+          status = 'active'
       where id = v_company_id;
 
     update public.agents
@@ -80,7 +85,7 @@ function generateSql(): string {
 -- régénérer le fichier après toute modification du registre.
 -- ═══════════════════════════════════════════════════════════════
 --
--- ÉTAPE 1 (obligatoire, une seule fois, à la main) : créer les 5 comptes
+-- ÉTAPE 1 (obligatoire, une seule fois, à la main) : créer le(s) compte(s)
 -- dans Supabase Dashboard → Authentication → Users → "Add user"
 -- (n'importe quel mot de passe, "Auto Confirm User" coché) :
 --
