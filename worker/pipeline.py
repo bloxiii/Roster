@@ -357,6 +357,10 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
             "--strategy.refine_stop_iter", str(refine_stop_iter),
             "--disable_video",
             "--disable_viewer",
+            "--save_ply",  # OFF par défaut dans ce script — sans ça, seul un
+            # checkpoint .pt (format interne PyTorch) est écrit, jamais de
+            # .ply. C'est ce qui manquait depuis le début, indépendamment
+            # du nombre de gaussiennes.
         ],
         label="entraînement gsplat (simple_trainer.py)", watch_dir=output_dir, check=True,
     )
