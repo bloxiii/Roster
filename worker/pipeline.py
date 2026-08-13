@@ -286,7 +286,7 @@ def reconstruct(tour_id: str, video_url: str, webhook_url: str, provider_job_id:
 
 @app.function(image=image, secrets=[modal.Secret.from_name("velinova-3d")])
 @modal.fastapi_endpoint(method="POST")
-def reconstruct_endpoint(payload: dict, request=None):
+def reconstruct_endpoint(payload: dict):
     """POST /reconstruct — appelé par lib/tours/providers/modal.ts.
 
     Ne fait QUE valider et déléguer via `.spawn()` (asynchrone, ne bloque
@@ -294,13 +294,11 @@ def reconstruct_endpoint(payload: dict, request=None):
     prévient l'application via webhook à la fin — jamais de calcul dans le
     chemin de requête HTTP synchrone.
     """
-    from fastapi import Request, HTTPException
-
-    req: Request = request
-    if req.headers.get("x-webhook-secret") != os.environ["THREED_WEBHOOK_SECRET"]:
-        raise HTTPException(status_code=401, detail="Non autorisé.")
-
+    from fastapi import HTTPException
     import uuid
+
+    if payload.get("webhook_secret") != os.environ["THREED_WEBHOOK_SECRET"]:
+        raise HTTPException(status_code=401, detail="Non autorisé.")
 
     tour_id = payload.get("tour_id")
     video_url = payload.get("video_url")
