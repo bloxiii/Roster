@@ -71,8 +71,13 @@ image = (
     # défaut dans un environnement isolé qui ne voit PAS le torch déjà
     # installé ci-dessus ("ModuleNotFoundError: No module named 'torch'").
     # --no-build-isolation force pip à utiliser l'environnement courant
-    # (où torch est déjà présent) plutôt que d'en créer un neuf.
+    # (où torch est déjà présent) plutôt que d'en créer un neuf. Ça implique
+    # aussi que ce même environnement doit fournir wheel/setuptools
+    # lui-même (l'isolation par défaut les apporte gratuitement,
+    # --no-build-isolation non) — d'où le `pip install wheel setuptools`
+    # explicite juste avant, sinon "error: invalid command 'bdist_wheel'".
     .run_commands(
+        "pip install wheel setuptools",
         "pip install --no-build-isolation "
         "git+https://github.com/rahul-goel/fused-ssim@a7c48d6dd7ac6dc39a7958c7c4452e0b10418f38",
         "pip install --no-build-isolation "
