@@ -32,6 +32,14 @@ import modal
 
 app = modal.App("velinova-3d-worker")
 
+# Volume de debug — copie systématique du .ply exporté, indépendamment de
+# la limite de taille Supabase Storage (413 au-delà d'un certain poids).
+# Sert uniquement à pouvoir récupérer un rendu sur sa machine pour
+# inspection pendant qu'on règle les paramètres de qualité/poids ; pas une
+# solution de stockage définitive pour de vraies visites.
+# Téléchargement local : `modal volume get velinova-3d-debug <tour_id>.ply .`
+debug_volume = modal.Volume.from_name("velinova-3d-debug", create_if_missing=True)
+
 # gsplat nécessite un torch compilé CUDA — l'image de base Modal avec CUDA
 # préinstallé simplifie ça largement par rapport à un pip install générique.
 image = (
@@ -331,16 +339,17 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
     output_dir.mkdir(parents=True, exist_ok=True)
     dataset_dir = sparse_model_dir.parent.parent  # attend <root>/images + <root>/sparse/0
 
-    # Pipeline validé de bout en bout (upload → COLMAP → entraînement →
-    # export .ply → Supabase → webhook) avec des réglages ultra-minimaux.
     # refine_stop_iter=2000 (397K gaussiennes) donnait de bonnes métriques
     # (PSNR 28.2, SSIM 0.91) mais un .ply d'environ 90-100 Mo — refusé par
-    # Supabase Storage (413, limite globale du projet ~50 Mo par défaut) et
-    # de toute façon trop lourd pour un chargement fluide dans le viewer
-    # web (surtout mobile). 1300 vise ~160K gaussiennes (~40 Mo, mesuré sur
-    # le run précédent au même step), avec une qualité encore correcte.
+    # Supabase Storage (413, limite globale du projet). Comme le pipeline
+    # écrit maintenant systématiquement une copie sur un Volume Modal (sans
+    # limite de taille, cf. plus bas) le temps de régler la qualité, on
+    # peut se permettre de revenir à ce réglage pour évaluer le rendu —
+    # la limite Supabase ne redeviendra un vrai sujet qu'une fois la
+    # qualité validée (à retravailler alors : degré SH réduit plutôt que
+    # moins de gaussiennes, pour ne pas perdre en géométrie).
     max_steps = 7000
-    refine_stop_iter = 1300
+    refine_stop_iter = 2000
     _log(f"entraînement gsplat démarré ({max_steps} itérations, "
          f"densification coupée à {refine_stop_iter})…")
     _run(
@@ -409,6 +418,7 @@ def notify_webhook(webhook_url: str, secret: str, payload: dict) -> None:
     # boucle infinie non détectée coûterait cher en GPU pour rien.
     timeout=90 * 60,
     secrets=[modal.Secret.from_name("velinova-3d")],
+    volumes={"/debug-output": debug_volume},
 )
 def reconstruct(tour_id: str, video_url: str, webhook_url: str, provider_job_id: str) -> None:
     webhook_secret = os.environ["THREED_WEBHOOK_SECRET"]
@@ -446,9 +456,39 @@ def reconstruct(tour_id: str, video_url: str, webhook_url: str, provider_job_id:
 
             output_dir = root / "trained"
             ply_path = train_gaussian_splats(frames_dir, sparse_model_dir, output_dir)
-            _log("upload de la scène vers Supabase Storage…")
-            scene_url = upload_scene(ply_path, tour_id)
-            _log(f"terminé — scene_url={scene_url}")
+
+            # Copie de debug sur le Volume Modal — toujours faite, quelle
+            # que soit la taille, pour inspection locale pendant qu'on
+            # règle les paramètres. Téléchargement :
+            # `modal volume get velinova-3d-debug {tour_id}.ply .`
+            import shutil
+
+            debug_path = Path("/debug-output") / f"{tour_id}.ply"
+            shutil.copy(ply_path, debug_path)
+            debug_volume.commit()
+            _log(f"copie de debug écrite sur le Volume Modal — "
+                 f"récupérable avec : modal volume get velinova-3d-debug {tour_id}.ply .")
+
+            try:
+                _log("upload de la scène vers Supabase Storage…")
+                scene_url = upload_scene(ply_path, tour_id)
+                _log(f"terminé — scene_url={scene_url}")
+            except Exception as e:
+                # La copie de debug existe déjà sur le Volume Modal même si
+                # l'upload Supabase échoue (ex: 413, fichier trop gros) —
+                # on le signale clairement plutôt que de tout faire échouer
+                # sans piste pour récupérer le résultat.
+                notify_webhook(webhook_url, webhook_secret, {
+                    "tourId": tour_id,
+                    "providerJobId": provider_job_id,
+                    "status": "failed",
+                    "error": (
+                        f"Échec de l'upload vers Supabase Storage : {e}. "
+                        f"Le fichier reste récupérable localement : "
+                        f"modal volume get velinova-3d-debug {tour_id}.ply ."
+                    ),
+                })
+                return
 
             notify_webhook(webhook_url, webhook_secret, {
                 "tourId": tour_id,
