@@ -140,6 +140,31 @@ def _log(msg: str) -> None:
     print(f"[pipeline] {time.strftime('%H:%M:%S')} — {msg}", flush=True)
 
 
+def _run(cmd: list, *, label: str, **kwargs) -> subprocess.CompletedProcess:
+    """subprocess.run() qui affiche un signe de vie toutes les 20s tant que
+    la commande tourne. Sans ça, une étape qui n'imprime rien elle-même
+    (export .ply d'une grosse scène, par exemple) est indiscernable d'un
+    blocage total pendant plusieurs minutes — c'est exactement ce qui nous
+    a fait perdre du temps à essayer de deviner si le pipeline avançait."""
+    import threading
+    import time as _time
+
+    start = _time.time()
+    stop_event = threading.Event()
+
+    def heartbeat():
+        while not stop_event.wait(20):
+            _log(f"… {label} toujours en cours ({int(_time.time() - start)}s écoulées)")
+
+    t = threading.Thread(target=heartbeat, daemon=True)
+    t.start()
+    try:
+        return subprocess.run(cmd, **kwargs)
+    finally:
+        stop_event.set()
+        t.join(timeout=1)
+
+
 def download_video(video_url: str, dest: Path) -> None:
     import requests
 
@@ -155,14 +180,14 @@ def download_video(video_url: str, dest: Path) -> None:
 def extract_frames(video_path: Path, frames_dir: Path) -> int:
     _log("extraction des frames (ffmpeg)…")
     frames_dir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
+    _run(
         [
             "ffmpeg", "-i", str(video_path),
             "-vf", f"fps={FRAME_SAMPLE_FPS}",
             "-q:v", "2",
             str(frames_dir / "frame_%05d.jpg"),
         ],
-        check=True, capture_output=True,
+        label="ffmpeg", check=True, capture_output=True,
     )
     count = len(list(frames_dir.glob("frame_*.jpg")))
     _log(f"{count} frames extraites")
@@ -186,23 +211,23 @@ def run_colmap(frames_dir: Path, workspace: Path) -> Path:
     sparse_dir.mkdir(parents=True, exist_ok=True)
 
     _log("COLMAP — extraction des features (SIFT, CPU)…")
-    subprocess.run(
+    _run(
         ["colmap", "feature_extractor", "--database_path", str(db_path),
          "--image_path", str(frames_dir), "--ImageReader.single_camera", "1",
          "--SiftExtraction.use_gpu", "0"],
-        check=True, capture_output=True,
+        label="colmap feature_extractor", check=True, capture_output=True,
     )
     _log("COLMAP — appariement séquentiel des frames…")
-    subprocess.run(
+    _run(
         ["colmap", "sequential_matcher", "--database_path", str(db_path),
          "--SiftMatching.use_gpu", "0"],
-        check=True, capture_output=True,
+        label="colmap sequential_matcher", check=True, capture_output=True,
     )
     _log("COLMAP — reconstruction (mapper) — étape la plus longue en CPU…")
-    subprocess.run(
+    _run(
         ["colmap", "mapper", "--database_path", str(db_path),
          "--image_path", str(frames_dir), "--output_path", str(sparse_dir)],
-        check=True, capture_output=True,
+        label="colmap mapper", check=True, capture_output=True,
     )
     _log("COLMAP — mapper terminé")
 
@@ -211,10 +236,11 @@ def run_colmap(frames_dir: Path, workspace: Path) -> Path:
         # `mapper` écrit en binaire (images.bin, ...) — on exporte aussi en
         # texte pour que registered_frame_ratio()/read_camera_centers()
         # puissent lire images.txt directement.
-        subprocess.run(
+        _log("COLMAP — export du modèle en texte…")
+        _run(
             ["colmap", "model_converter", "--input_path", str(model_dir),
              "--output_path", str(model_dir), "--output_type", "TXT"],
-            check=True, capture_output=True,
+            label="colmap model_converter", check=True, capture_output=True,
         )
     # Si model_dir n'existe pas : reconstruction réellement infructueuse
     # (aucune image enregistrée) — registered_frame_ratio() le détecte déjà
@@ -295,7 +321,7 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
     # c'est le signal le plus utile pour juger du temps restant. 7000
     # itérations plutôt que 15000 pour un premier run plus court/moins
     # coûteux ; qualité à revoir à la hausse une fois le pipeline validé.
-    subprocess.run(
+    _run(
         [
             "python", "/opt/gsplat-src/examples/simple_trainer.py", "default",
             "--data_dir", str(dataset_dir),
@@ -303,24 +329,34 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
             "--result_dir", str(output_dir),
             "--max_steps", "7000",
         ],
-        check=True,
+        label="entraînement gsplat (simple_trainer.py)", check=True,
     )
-    _log("entraînement gsplat terminé")
+    # Checkpoint séparé de "entraînement terminé" ci-dessus : si ça bloque
+    # ENTRE la fin de la barre de progression et ce point, c'est dans une
+    # étape interne au script (export .ply, sauvegarde de checkpoint...)
+    # non couverte par le heartbeat de _run (le sous-process lui-même est
+    # fini, on est repassés côté Python).
+    _log("commande d'entraînement terminée — recherche du fichier .ply exporté…")
     ply_candidates = list(output_dir.rglob("*.ply"))
     if not ply_candidates:
         raise RuntimeError("Entraînement terminé mais aucun .ply exporté — vérifier result_dir.")
+    size_mb = ply_candidates[-1].stat().st_size / 1e6
+    _log(f"{len(ply_candidates)} fichier(s) .ply trouvé(s), le plus récent fait {size_mb:.1f} Mo")
     return ply_candidates[-1]
 
 
 def upload_scene(local_ply: Path, tour_id: str) -> str:
     from supabase import create_client
 
+    _log(f"connexion à Supabase Storage (bucket tour-scenes)…")
     supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_ROLE_KEY"])
     storage_path = f"{tour_id}/scene.ply"
     with open(local_ply, "rb") as f:
+        _log(f"upload en cours ({local_ply.stat().st_size / 1e6:.1f} Mo)…")
         supabase.storage.from_("tour-scenes").upload(
             storage_path, f, {"content-type": "application/octet-stream", "upsert": "true"},
         )
+    _log("upload terminé")
     return supabase.storage.from_("tour-scenes").get_public_url(storage_path)
 
 
