@@ -297,6 +297,11 @@ def reconstruct_endpoint(payload: dict):
     from fastapi import HTTPException
     import uuid
 
+
+    sent = payload.get("webhook_secret") or ""
+    expected = os.environ.get("THREED_WEBHOOK_SECRET") or ""
+    print(f"[debug] longueur envoyée={len(sent)} longueur attendue={len(expected)} égales={sent == expected}")
+
     if payload.get("webhook_secret") != os.environ["THREED_WEBHOOK_SECRET"]:
         raise HTTPException(status_code=401, detail="Non autorisé.")
 
