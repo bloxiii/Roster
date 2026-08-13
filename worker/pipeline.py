@@ -53,7 +53,14 @@ image = (
     # des fonctions pas encore publiées (ex: gsplat.color_correct),
     # d'où "ModuleNotFoundError: No module named 'gsplat.color_correct'"
     # si on mélange PyPI + examples de main.
-    .run_commands("git clone --depth 1 https://github.com/nerfstudio-project/gsplat.git /opt/gsplat-src")
+    # --recurse-submodules : gsplat embarque GLM (maths C++) en sous-module
+    # git (gsplat/cuda/csrc/third_party/glm) — sans ça, le clone laisse ce
+    # dossier vide et la compilation échoue avec "glm/gtc/type_ptr.hpp: No
+    # such file or directory".
+    .run_commands(
+        "git clone --depth 1 --recurse-submodules --shallow-submodules "
+        "https://github.com/nerfstudio-project/gsplat.git /opt/gsplat-src"
+    )
     # wheel/setuptools d'abord : nécessaire pour les installs
     # --no-build-isolation qui suivent (gsplat, fused-ssim, fused-bilagrid
     # sont tous des extensions CUDA qui font `import torch` dans leur propre
