@@ -333,12 +333,14 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
 
     # Pipeline validé de bout en bout (upload → COLMAP → entraînement →
     # export .ply → Supabase → webhook) avec des réglages ultra-minimaux.
-    # On repasse aux réglages "qualité" testés plus tôt : 397K gaussiennes,
-    # PSNR 28.2 / SSIM 0.91 en ~2 min d'entraînement — la lenteur observée
-    # avant venait de l'absence de --save_ply (aucun export ne se
-    # déclenchait jamais), pas du nombre de gaussiennes en tant que tel.
+    # refine_stop_iter=2000 (397K gaussiennes) donnait de bonnes métriques
+    # (PSNR 28.2, SSIM 0.91) mais un .ply d'environ 90-100 Mo — refusé par
+    # Supabase Storage (413, limite globale du projet ~50 Mo par défaut) et
+    # de toute façon trop lourd pour un chargement fluide dans le viewer
+    # web (surtout mobile). 1300 vise ~160K gaussiennes (~40 Mo, mesuré sur
+    # le run précédent au même step), avec une qualité encore correcte.
     max_steps = 7000
-    refine_stop_iter = 2000
+    refine_stop_iter = 1300
     _log(f"entraînement gsplat démarré ({max_steps} itérations, "
          f"densification coupée à {refine_stop_iter})…")
     _run(
