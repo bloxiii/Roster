@@ -140,21 +140,36 @@ def _log(msg: str) -> None:
     print(f"[pipeline] {time.strftime('%H:%M:%S')} — {msg}", flush=True)
 
 
-def _run(cmd: list, *, label: str, **kwargs) -> subprocess.CompletedProcess:
+def _run(cmd: list, *, label: str, watch_dir: Path | None = None, **kwargs) -> subprocess.CompletedProcess:
     """subprocess.run() qui affiche un signe de vie toutes les 20s tant que
     la commande tourne. Sans ça, une étape qui n'imprime rien elle-même
     (export .ply d'une grosse scène, par exemple) est indiscernable d'un
     blocage total pendant plusieurs minutes — c'est exactement ce qui nous
-    a fait perdre du temps à essayer de deviner si le pipeline avançait."""
+    a fait perdre du temps à essayer de deviner si le pipeline avançait.
+
+    `watch_dir`, si fourni, liste en plus le contenu (fichiers + taille) de
+    ce dossier à chaque heartbeat — pas un vrai pourcentage (le script
+    interne n'en expose pas), mais on voit concrètement si un fichier
+    grossit (ça avance) ou si rien ne change du tout (probablement bloqué)."""
     import threading
     import time as _time
 
     start = _time.time()
     stop_event = threading.Event()
 
+    def snapshot_dir() -> str:
+        if not watch_dir or not watch_dir.exists():
+            return ""
+        files = sorted(watch_dir.rglob("*"))
+        files = [f for f in files if f.is_file()]
+        if not files:
+            return " (dossier de sortie encore vide)"
+        parts = [f"{f.name}={f.stat().st_size / 1e6:.1f}Mo" for f in files[-6:]]
+        return " — contenu actuel : " + ", ".join(parts)
+
     def heartbeat():
         while not stop_event.wait(20):
-            _log(f"… {label} toujours en cours ({int(_time.time() - start)}s écoulées)")
+            _log(f"… {label} toujours en cours ({int(_time.time() - start)}s écoulées){snapshot_dir()}")
 
     t = threading.Thread(target=heartbeat, daemon=True)
     t.start()
@@ -341,7 +356,7 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
             "--max_steps", "7000",
             "--strategy.refine_stop_iter", "2000",
         ],
-        label="entraînement gsplat (simple_trainer.py)", check=True,
+        label="entraînement gsplat (simple_trainer.py)", watch_dir=output_dir, check=True,
     )
     # Checkpoint séparé de "entraînement terminé" ci-dessus : si ça bloque
     # ENTRE la fin de la barre de progression et ce point, c'est dans une
