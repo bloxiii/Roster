@@ -122,7 +122,7 @@ export function TourViewer({
 
         await gsViewer.addSplatScene(sceneUrl, {
           showLoadingUI: false,
-          progressiveLoad: true,
+          progressiveLoad: false,
         });
         if (disposed) return;
 
