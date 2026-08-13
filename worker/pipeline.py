@@ -40,8 +40,15 @@ image = (
     # Le compilateur par défaut de cette image pointe vers clang++, absent
     # (et de toute façon incompatible avec le PyTorch précompilé, qui attend
     # g++ — cf. avertissement "compiler ABI"). On force explicitement gcc/g++,
-    # nécessaires pour compiler fused-ssim/fused-bilagrid plus bas.
-    .env({"CC": "gcc", "CXX": "g++"})
+    # nécessaires pour compiler fused-ssim/fused-bilagrid/gsplat plus bas.
+    #
+    # TORCH_CUDA_ARCH_LIST : sans GPU pendant le build de l'image (normal —
+    # le GPU n'est attaché qu'à l'exécution, cf. `gpu="L4"` sur
+    # `reconstruct` plus bas), PyTorch essaie de détecter l'architecture
+    # CUDA cible automatiquement et plante ("IndexError: list index out of
+    # range" — liste vide). "8.9" = architecture Ada Lovelace du GPU L4
+    # utilisé par ce worker ; à mettre à jour si le GPU change un jour.
+    .env({"CC": "gcc", "CXX": "g++", "TORCH_CUDA_ARCH_LIST": "8.9"})
     # torch/torchvision épinglés en premier — simple_trainer.py (examples/
     # requirements.txt du dépôt gsplat) exige ces versions précises pour
     # éviter qu'une dépendance transitive ne les fasse changer silencieusement.
@@ -53,12 +60,20 @@ image = (
     # des fonctions pas encore publiées (ex: gsplat.color_correct),
     # d'où "ModuleNotFoundError: No module named 'gsplat.color_correct'"
     # si on mélange PyPI + examples de main.
+    #
+    # --branch v1.5.3 (PAS main) : la branche main utilise des fonctions
+    # CUDA plus récentes que ce que notre image CUDA 12.4 supporte (ex:
+    # cuda::ceil_div, "namespace cuda has no member ceil_div" à la
+    # compilation) — v1.5.3 est la version taguée/publiée, figée et cohérente
+    # avec CUDA 12.4, et ses examples/ ne référencent pas color_correct
+    # puisque cette fonction n'existait pas encore à cette version.
+    #
     # --recurse-submodules : gsplat embarque GLM (maths C++) en sous-module
     # git (gsplat/cuda/csrc/third_party/glm) — sans ça, le clone laisse ce
     # dossier vide et la compilation échoue avec "glm/gtc/type_ptr.hpp: No
     # such file or directory".
     .run_commands(
-        "git clone --depth 1 --recurse-submodules --shallow-submodules "
+        "git clone --depth 1 --branch v1.5.3 --recurse-submodules --shallow-submodules "
         "https://github.com/nerfstudio-project/gsplat.git /opt/gsplat-src"
     )
     # wheel/setuptools d'abord : nécessaire pour les installs
@@ -67,32 +82,37 @@ image = (
     # setup.py — l'isolation de build par défaut de pip masque le torch
     # déjà installé ci-dessus, d'où "ModuleNotFoundError: No module named
     # 'torch'" sans --no-build-isolation).
+    # Commits fused-ssim/fused-bilagrid alignés sur ceux listés par
+    # examples/requirements.txt AU TAG v1.5.3 (différents de ceux de main) —
+    # cohérence avec la même version de CUDA que gsplat lui-même.
     .run_commands(
         "pip install wheel setuptools",
         "pip install --no-build-isolation /opt/gsplat-src",  # Apache 2.0, PAS graphdeco-inria/gaussian-splatting
         "pip install --no-build-isolation "
-        "git+https://github.com/rahul-goel/fused-ssim@a7c48d6dd7ac6dc39a7958c7c4452e0b10418f38",
+        "git+https://github.com/rahul-goel/fused-ssim@328dc9836f513d00c4b5bc38fe30478b4435cbb5",
         "pip install --no-build-isolation "
-        "git+https://github.com/harry7557558/fused-bilagrid@49f0ef06c9f81810fb9b5dd9027cf1844950cc16",
+        "git+https://github.com/harry7557558/fused-bilagrid@90f9788e57d3545e3a033c1038bb9986549632fe",
     )
     .pip_install(
         # Dépendances de worker/pipeline.py lui-même.
         "requests", "pillow", "supabase", "fastapi[standard]",
         # Dépendances de examples/simple_trainer.py — liste reprise de
-        # https://github.com/nerfstudio-project/gsplat/blob/main/examples/requirements.txt
+        # https://github.com/nerfstudio-project/gsplat/blob/v1.5.3/examples/requirements.txt
         # (torch/torchvision/gsplat déjà installés ci-dessus, omis ici).
-        "pycolmap>=3.10.0",
+        # pycolmap non épinglé (PyPI standard, wheel prébuilt) plutôt que le
+        # fork git listé pour v1.5.3 — évite une compilation C++ de plus ;
+        # à revoir si simple_trainer.py se plaint d'une API pycolmap absente.
+        "pycolmap",
         "viser",
         "git+https://github.com/nerfstudio-project/nerfview@4538024fe0d15fd1a0e4d760f3695fc44ca72787",
         "imageio[ffmpeg]",
-        "numpy>=2.0,<3.0",
+        "numpy<2.0.0",
         "scipy",
         "scikit-learn",
         "tqdm",
-        "torchmetrics==1.8.2",
+        "torchmetrics[image]",
         "opencv-python-headless",
-        "tyro>=0.8.8,!=1.0.9,!=1.0.10",
-        "piexif",
+        "tyro>=0.8.8",
         "tensorboard",
         "tensorly",
         "pyyaml",
