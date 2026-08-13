@@ -89,6 +89,11 @@ def run_colmap(frames_dir: Path, workspace: Path) -> Path:
     `sequential_matcher` plutôt que `exhaustive_matcher` : les frames d'une
     vidéo sont déjà temporellement ordonnées, l'appariement séquentiel est
     largement plus rapide et tout aussi fiable dans ce cas (cf. analyse §02).
+
+    SIFT en CPU (`use_gpu 0`) : le binaire COLMAP installé via apt utilise
+    Qt/OpenGL pour le SIFT GPU, ce qui nécessite un affichage — absent dans
+    un conteneur headless (erreur "qt.qpa.xcb: could not connect to
+    display"). Plus lent, mais évite complètement le problème.
     """
     db_path = workspace / "database.db"
     sparse_dir = workspace / "sparse"
@@ -96,11 +101,13 @@ def run_colmap(frames_dir: Path, workspace: Path) -> Path:
 
     subprocess.run(
         ["colmap", "feature_extractor", "--database_path", str(db_path),
-         "--image_path", str(frames_dir), "--ImageReader.single_camera", "1"],
+         "--image_path", str(frames_dir), "--ImageReader.single_camera", "1",
+         "--SiftExtraction.use_gpu", "0"],
         check=True, capture_output=True,
     )
     subprocess.run(
-        ["colmap", "sequential_matcher", "--database_path", str(db_path)],
+        ["colmap", "sequential_matcher", "--database_path", str(db_path),
+         "--SiftMatching.use_gpu", "0"],
         check=True, capture_output=True,
     )
     subprocess.run(
