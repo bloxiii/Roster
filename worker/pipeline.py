@@ -46,13 +46,34 @@ image = (
     # requirements.txt du dépôt gsplat) exige ces versions précises pour
     # éviter qu'une dépendance transitive ne les fasse changer silencieusement.
     .pip_install("torch==2.9.1", "torchvision==0.24.1")
-    .pip_install("gsplat")  # nerfstudio-project/gsplat — Apache 2.0, PAS graphdeco-inria/gaussian-splatting
+    # simple_trainer.py n'est pas exposé par le package pip `gsplat` — on
+    # clone le dépôt pour l'obtenir, PUIS on installe `gsplat` lui-même
+    # depuis CE MÊME clone (pas depuis PyPI) juste en dessous : la branche
+    # main du dépôt est en avance sur la dernière release PyPI et utilise
+    # des fonctions pas encore publiées (ex: gsplat.color_correct),
+    # d'où "ModuleNotFoundError: No module named 'gsplat.color_correct'"
+    # si on mélange PyPI + examples de main.
+    .run_commands("git clone --depth 1 https://github.com/nerfstudio-project/gsplat.git /opt/gsplat-src")
+    # wheel/setuptools d'abord : nécessaire pour les installs
+    # --no-build-isolation qui suivent (gsplat, fused-ssim, fused-bilagrid
+    # sont tous des extensions CUDA qui font `import torch` dans leur propre
+    # setup.py — l'isolation de build par défaut de pip masque le torch
+    # déjà installé ci-dessus, d'où "ModuleNotFoundError: No module named
+    # 'torch'" sans --no-build-isolation).
+    .run_commands(
+        "pip install wheel setuptools",
+        "pip install --no-build-isolation /opt/gsplat-src",  # Apache 2.0, PAS graphdeco-inria/gaussian-splatting
+        "pip install --no-build-isolation "
+        "git+https://github.com/rahul-goel/fused-ssim@a7c48d6dd7ac6dc39a7958c7c4452e0b10418f38",
+        "pip install --no-build-isolation "
+        "git+https://github.com/harry7557558/fused-bilagrid@49f0ef06c9f81810fb9b5dd9027cf1844950cc16",
+    )
     .pip_install(
         # Dépendances de worker/pipeline.py lui-même.
         "requests", "pillow", "supabase", "fastapi[standard]",
         # Dépendances de examples/simple_trainer.py — liste reprise de
         # https://github.com/nerfstudio-project/gsplat/blob/main/examples/requirements.txt
-        # (torch/torchvision déjà installés ci-dessus, volontairement omis ici).
+        # (torch/torchvision/gsplat déjà installés ci-dessus, omis ici).
         "pycolmap>=3.10.0",
         "viser",
         "git+https://github.com/nerfstudio-project/nerfview@4538024fe0d15fd1a0e4d760f3695fc44ca72787",
@@ -70,29 +91,6 @@ image = (
         "pyyaml",
         "matplotlib",
         "splines",
-    )
-    # fused-ssim et fused-bilagrid sont des extensions CUDA qui font
-    # `import torch` dans leur propre setup.py — pip les construit par
-    # défaut dans un environnement isolé qui ne voit PAS le torch déjà
-    # installé ci-dessus ("ModuleNotFoundError: No module named 'torch'").
-    # --no-build-isolation force pip à utiliser l'environnement courant
-    # (où torch est déjà présent) plutôt que d'en créer un neuf. Ça implique
-    # aussi que ce même environnement doit fournir wheel/setuptools
-    # lui-même (l'isolation par défaut les apporte gratuitement,
-    # --no-build-isolation non) — d'où le `pip install wheel setuptools`
-    # explicite juste avant, sinon "error: invalid command 'bdist_wheel'".
-    .run_commands(
-        "pip install wheel setuptools",
-        "pip install --no-build-isolation "
-        "git+https://github.com/rahul-goel/fused-ssim@a7c48d6dd7ac6dc39a7958c7c4452e0b10418f38",
-        "pip install --no-build-isolation "
-        "git+https://github.com/harry7557558/fused-bilagrid@49f0ef06c9f81810fb9b5dd9027cf1844950cc16",
-    )
-    # simple_trainer.py n'est pas exposé par le package pip gsplat — on
-    # récupère la version du dépôt correspondant à la release installée.
-    .run_commands(
-        "pip show gsplat | grep Version",
-        "git clone --depth 1 https://github.com/nerfstudio-project/gsplat.git /opt/gsplat-src",
     )
 )
 
