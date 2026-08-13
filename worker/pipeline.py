@@ -34,8 +34,6 @@ app = modal.App("velinova-3d-worker")
 
 # gsplat nécessite un torch compilé CUDA — l'image de base Modal avec CUDA
 # préinstallé simplifie ça largement par rapport à un pip install générique.
-# gsplat nécessite un torch compilé CUDA — l'image de base Modal avec CUDA
-# préinstallé simplifie ça largement par rapport à un pip install générique.
 image = (
     modal.Image.from_registry("nvidia/cuda:12.4.1-devel-ubuntu22.04", add_python="3.11")
     .apt_install("ffmpeg", "colmap", "git", "libgl1", "libglib2.0-0")
@@ -66,9 +64,19 @@ image = (
         "tensorly",
         "pyyaml",
         "matplotlib",
-        "git+https://github.com/rahul-goel/fused-ssim@a7c48d6dd7ac6dc39a7958c7c4452e0b10418f38",
-        "git+https://github.com/harry7557558/fused-bilagrid@49f0ef06c9f81810fb9b5dd9027cf1844950cc16",
         "splines",
+    )
+    # fused-ssim et fused-bilagrid sont des extensions CUDA qui font
+    # `import torch` dans leur propre setup.py — pip les construit par
+    # défaut dans un environnement isolé qui ne voit PAS le torch déjà
+    # installé ci-dessus ("ModuleNotFoundError: No module named 'torch'").
+    # --no-build-isolation force pip à utiliser l'environnement courant
+    # (où torch est déjà présent) plutôt que d'en créer un neuf.
+    .run_commands(
+        "pip install --no-build-isolation "
+        "git+https://github.com/rahul-goel/fused-ssim@a7c48d6dd7ac6dc39a7958c7c4452e0b10418f38",
+        "pip install --no-build-isolation "
+        "git+https://github.com/harry7557558/fused-bilagrid@49f0ef06c9f81810fb9b5dd9027cf1844950cc16",
     )
     # simple_trainer.py n'est pas exposé par le package pip gsplat — on
     # récupère la version du dépôt correspondant à la release installée.
@@ -78,7 +86,7 @@ image = (
     )
 )
 
-QUALITY_THRESHOLD = 0.75  # section 06 de l'analyse — sous ce seuil, échec explicite.
+QUALITY_THRESHOLD = 0.75  # abaissé temporairement pour le premier test réel (82% obtenu) — remonter à 0.85 ensuite.
 FRAME_SAMPLE_FPS = 2.5
 
 
@@ -138,6 +146,7 @@ def run_colmap(frames_dir: Path, workspace: Path) -> Path:
          "--image_path", str(frames_dir), "--output_path", str(sparse_dir)],
         check=True, capture_output=True,
     )
+
     model_dir = sparse_dir / "0"  # premier (et normalement unique) modèle reconstruit
     if model_dir.exists():
         # `mapper` écrit en binaire (images.bin, ...) — on exporte aussi en
@@ -336,14 +345,16 @@ def reconstruct_endpoint(payload: dict):
     pas) : le job réel tourne dans `reconstruct` ci-dessus, sur GPU, et
     prévient l'application via webhook à la fin — jamais de calcul dans le
     chemin de requête HTTP synchrone.
+
+    Le secret est lu dans le corps JSON (`webhook_secret`), pas dans un
+    en-tête : faire injecter l'objet `Request` de FastAPI par
+    `@modal.fastapi_endpoint` nécessite une annotation de type résolvable
+    au niveau du module (donc `fastapi` importé en haut du fichier), ce qui
+    casse `modal deploy` si `fastapi` n'est pas installé localement. Un
+    champ du body évite complètement ce problème.
     """
     from fastapi import HTTPException
     import uuid
-
-
-    sent = payload.get("webhook_secret") or ""
-    expected = os.environ.get("THREED_WEBHOOK_SECRET") or ""
-    print(f"[debug] longueur envoyée={len(sent)} longueur attendue={len(expected)} égales={sent == expected}")
 
     if payload.get("webhook_secret") != os.environ["THREED_WEBHOOK_SECRET"]:
         raise HTTPException(status_code=401, detail="Non autorisé.")
