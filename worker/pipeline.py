@@ -99,10 +99,10 @@ image = (
         # Dépendances de examples/simple_trainer.py — liste reprise de
         # https://github.com/nerfstudio-project/gsplat/blob/v1.5.3/examples/requirements.txt
         # (torch/torchvision/gsplat déjà installés ci-dessus, omis ici).
-        # pycolmap non épinglé (PyPI standard, wheel prébuilt) plutôt que le
-        # fork git listé pour v1.5.3 — évite une compilation C++ de plus ;
-        # à revoir si simple_trainer.py se plaint d'une API pycolmap absente.
-        "pycolmap",
+        # PAS de "pycolmap" PyPI ici — le fork rmbrualla/pycolmap installé
+        # juste en dessous porte le même nom de paquet mais expose une API
+        # différente (classe SceneManager, requise par examples/datasets/
+        # colmap.py). Les deux "pycolmap" seraient en conflit si listés ici.
         "viser",
         "git+https://github.com/nerfstudio-project/nerfview@4538024fe0d15fd1a0e4d760f3695fc44ca72787",
         "imageio[ffmpeg]",
@@ -119,6 +119,11 @@ image = (
         "matplotlib",
         "splines",
     )
+    # Fork pur Python (pas de compilation, juste numpy/scipy) qui expose
+    # SceneManager — l'API attendue par examples/datasets/colmap.py, absente
+    # du paquet "pycolmap" officiel de PyPI (bindings C++ différents,
+    # même nom de paquet, code différent).
+    .pip_install("git+https://github.com/rmbrualla/pycolmap@cc7ea4b7301720ac29287dbe450952511b32125e")
 )
 
 QUALITY_THRESHOLD = 0.75  # abaissé temporairement pour le premier test réel (82% obtenu) — remonter à 0.85 ensuite.
