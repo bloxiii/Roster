@@ -34,18 +34,41 @@ app = modal.App("velinova-3d-worker")
 
 # gsplat nécessite un torch compilé CUDA — l'image de base Modal avec CUDA
 # préinstallé simplifie ça largement par rapport à un pip install générique.
+# gsplat nécessite un torch compilé CUDA — l'image de base Modal avec CUDA
+# préinstallé simplifie ça largement par rapport à un pip install générique.
 image = (
     modal.Image.from_registry("nvidia/cuda:12.4.1-devel-ubuntu22.04", add_python="3.11")
     .apt_install("ffmpeg", "colmap", "git", "libgl1", "libglib2.0-0")
+    # torch/torchvision épinglés en premier — simple_trainer.py (examples/
+    # requirements.txt du dépôt gsplat) exige ces versions précises pour
+    # éviter qu'une dépendance transitive ne les fasse changer silencieusement.
+    .pip_install("torch==2.9.1", "torchvision==0.24.1")
+    .pip_install("gsplat")  # nerfstudio-project/gsplat — Apache 2.0, PAS graphdeco-inria/gaussian-splatting
     .pip_install(
-        "torch",
-        "torchvision",
-        "gsplat",  # nerfstudio-project/gsplat — Apache 2.0, PAS graphdeco-inria/gaussian-splatting
-        "requests",
-        "numpy",
-        "pillow",
-        "supabase",
-        "fastapi[standard]",  
+        # Dépendances de worker/pipeline.py lui-même.
+        "requests", "pillow", "supabase", "fastapi[standard]",
+        # Dépendances de examples/simple_trainer.py — liste reprise de
+        # https://github.com/nerfstudio-project/gsplat/blob/main/examples/requirements.txt
+        # (torch/torchvision déjà installés ci-dessus, volontairement omis ici).
+        "pycolmap>=3.10.0",
+        "viser",
+        "git+https://github.com/nerfstudio-project/nerfview@4538024fe0d15fd1a0e4d760f3695fc44ca72787",
+        "imageio[ffmpeg]",
+        "numpy>=2.0,<3.0",
+        "scipy",
+        "scikit-learn",
+        "tqdm",
+        "torchmetrics==1.8.2",
+        "opencv-python-headless",
+        "tyro>=0.8.8,!=1.0.9,!=1.0.10",
+        "piexif",
+        "tensorboard",
+        "tensorly",
+        "pyyaml",
+        "matplotlib",
+        "git+https://github.com/rahul-goel/fused-ssim@a7c48d6dd7ac6dc39a7958c7c4452e0b10418f38",
+        "git+https://github.com/harry7557558/fused-bilagrid@49f0ef06c9f81810fb9b5dd9027cf1844950cc16",
+        "splines",
     )
     # simple_trainer.py n'est pas exposé par le package pip gsplat — on
     # récupère la version du dépôt correspondant à la release installée.
