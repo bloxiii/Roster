@@ -55,7 +55,7 @@ image = (
     )
 )
 
-QUALITY_THRESHOLD = 0.85  # section 06 de l'analyse — sous ce seuil, échec explicite.
+QUALITY_THRESHOLD = 0.75  # section 06 de l'analyse — sous ce seuil, échec explicite.
 FRAME_SAMPLE_FPS = 2.5
 
 
