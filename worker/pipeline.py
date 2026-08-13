@@ -45,6 +45,7 @@ image = (
         "numpy",
         "pillow",
         "supabase",
+        "fastapi[standard]",  
     )
     # simple_trainer.py n'est pas exposé par le package pip gsplat — on
     # récupère la version du dépôt correspondant à la release installée.
