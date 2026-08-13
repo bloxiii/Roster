@@ -36,7 +36,12 @@ app = modal.App("velinova-3d-worker")
 # préinstallé simplifie ça largement par rapport à un pip install générique.
 image = (
     modal.Image.from_registry("nvidia/cuda:12.4.1-devel-ubuntu22.04", add_python="3.11")
-    .apt_install("ffmpeg", "colmap", "git", "libgl1", "libglib2.0-0")
+    .apt_install("ffmpeg", "colmap", "git", "libgl1", "libglib2.0-0", "build-essential")
+    # Le compilateur par défaut de cette image pointe vers clang++, absent
+    # (et de toute façon incompatible avec le PyTorch précompilé, qui attend
+    # g++ — cf. avertissement "compiler ABI"). On force explicitement gcc/g++,
+    # nécessaires pour compiler fused-ssim/fused-bilagrid plus bas.
+    .env({"CC": "gcc", "CXX": "g++"})
     # torch/torchvision épinglés en premier — simple_trainer.py (examples/
     # requirements.txt du dépôt gsplat) exige ces versions précises pour
     # éviter qu'une dépendance transitive ne les fasse changer silencieusement.
