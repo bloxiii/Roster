@@ -339,18 +339,15 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
     output_dir.mkdir(parents=True, exist_ok=True)
     dataset_dir = sparse_model_dir.parent.parent  # attend <root>/images + <root>/sparse/0
 
-    # Test "à fond" demandé explicitement : entraînement complet (30 000
-    # itérations, standard du papier original 3DGS) et densification
-    # quasi sans limite (10 000, au lieu du défaut 15 000, par prudence
-    # après l'épisode à 1,19M gaussiennes). Objectif : voir si le rendu
-    # s'améliore vraiment ou si l'artefact "pics" vient de la vidéo source
-    # (pas assez d'angles de vue différents) plutôt que d'un manque
-    # d'entraînement — dans ce cas, plus de paramètres ne fera qu'empirer
-    # la densité des artefacts, pas la géométrie. Le fichier sera gros
-    # (peut-être plusieurs centaines de Mo) : sans conséquence pour le test
-    # local (copie sur Volume Modal, pas de limite Supabase à respecter ici).
-    max_steps = 30_000
-    refine_stop_iter = 10_000
+    # Le test "à fond" (30 000 itérations, refine_stop_iter=10 000) a donné
+    # un résultat PIRE, pas meilleur — preuve que le problème est la
+    # parallaxe de la vidéo source (pas assez d'angles de vue différents),
+    # pas un manque d'entraînement. Retour aux réglages raisonnables
+    # (397K gaussiennes, PSNR 28.2 mesuré) en attendant une vidéo test
+    # filmée en suivant les consignes de tournage (marche continue dans une
+    # vraie pièce, pas un plan fixe/rapproché sur des objets).
+    max_steps = 7000
+    refine_stop_iter = 2000
     _log(f"entraînement gsplat démarré ({max_steps} itérations, "
          f"densification coupée à {refine_stop_iter})…")
     _run(
@@ -413,12 +410,11 @@ def notify_webhook(webhook_url: str, secret: str, payload: dict) -> None:
 @app.function(
     image=image,
     gpu="L4",
-    # 120 min : entraînement porté à 30 000 itérations (~4x plus long que
-    # les tests précédents) pour le test "à fond" demandé — toujours un
-    # filet de sécurité généreux, pas une durée normale attendue.
+    # 90 min : généreux par rapport à ce qu'on attend réellement (quelques
+    # minutes) — filet de sécurité, pas une durée normale attendue.
     # Volontairement pas 6h : une boucle infinie non détectée coûterait
     # cher en GPU pour rien.
-    timeout=120 * 60,
+    timeout=90 * 60,
     secrets=[modal.Secret.from_name("velinova-3d")],
     volumes={"/debug-output": debug_volume},
 )
