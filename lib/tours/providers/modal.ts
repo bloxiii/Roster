@@ -34,16 +34,18 @@ export class ModalProvider implements ThreeDProvider {
     // qu'affichée par `modal deploy` (ex: https://<org>--velinova-3d-worker-
     // reconstruct-endpoint.modal.run) — pas de chemin à ajouter, cf.
     // worker/README.md.
+    //
+    // Le secret voyage dans le corps JSON (webhook_secret), pas dans un
+    // en-tête — voir le commentaire sur reconstruct_endpoint dans
+    // worker/pipeline.py pour la raison (contrainte FastAPI/Modal).
     const response = await fetch(workerUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Webhook-Secret": webhookSecret,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         tour_id: input.tourId,
         video_url: input.videoUrl,
         webhook_url: input.webhookUrl,
+        webhook_secret: webhookSecret,
       }),
     });
 
