@@ -339,17 +339,18 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
     output_dir.mkdir(parents=True, exist_ok=True)
     dataset_dir = sparse_model_dir.parent.parent  # attend <root>/images + <root>/sparse/0
 
-    # refine_stop_iter=2000 (397K gaussiennes) donnait de bonnes métriques
-    # (PSNR 28.2, SSIM 0.91) mais un .ply d'environ 90-100 Mo — refusé par
-    # Supabase Storage (413, limite globale du projet). Comme le pipeline
-    # écrit maintenant systématiquement une copie sur un Volume Modal (sans
-    # limite de taille, cf. plus bas) le temps de régler la qualité, on
-    # peut se permettre de revenir à ce réglage pour évaluer le rendu —
-    # la limite Supabase ne redeviendra un vrai sujet qu'une fois la
-    # qualité validée (à retravailler alors : degré SH réduit plutôt que
-    # moins de gaussiennes, pour ne pas perdre en géométrie).
-    max_steps = 7000
-    refine_stop_iter = 2000
+    # Test "à fond" demandé explicitement : entraînement complet (30 000
+    # itérations, standard du papier original 3DGS) et densification
+    # quasi sans limite (10 000, au lieu du défaut 15 000, par prudence
+    # après l'épisode à 1,19M gaussiennes). Objectif : voir si le rendu
+    # s'améliore vraiment ou si l'artefact "pics" vient de la vidéo source
+    # (pas assez d'angles de vue différents) plutôt que d'un manque
+    # d'entraînement — dans ce cas, plus de paramètres ne fera qu'empirer
+    # la densité des artefacts, pas la géométrie. Le fichier sera gros
+    # (peut-être plusieurs centaines de Mo) : sans conséquence pour le test
+    # local (copie sur Volume Modal, pas de limite Supabase à respecter ici).
+    max_steps = 30_000
+    refine_stop_iter = 10_000
     _log(f"entraînement gsplat démarré ({max_steps} itérations, "
          f"densification coupée à {refine_stop_iter})…")
     _run(
@@ -412,11 +413,12 @@ def notify_webhook(webhook_url: str, secret: str, payload: dict) -> None:
 @app.function(
     image=image,
     gpu="L4",
-    # 90 min : très généreux par rapport à ce qu'on attend réellement
-    # (quelques minutes, désormais mesuré) — sert de filet de sécurité en
-    # cas de vrai bug, pas une durée normale. Volontairement pas 6h : une
-    # boucle infinie non détectée coûterait cher en GPU pour rien.
-    timeout=90 * 60,
+    # 120 min : entraînement porté à 30 000 itérations (~4x plus long que
+    # les tests précédents) pour le test "à fond" demandé — toujours un
+    # filet de sécurité généreux, pas une durée normale attendue.
+    # Volontairement pas 6h : une boucle infinie non détectée coûterait
+    # cher en GPU pour rien.
+    timeout=120 * 60,
     secrets=[modal.Secret.from_name("velinova-3d")],
     volumes={"/debug-output": debug_volume},
 )
