@@ -115,7 +115,20 @@ def run_colmap(frames_dir: Path, workspace: Path) -> Path:
          "--image_path", str(frames_dir), "--output_path", str(sparse_dir)],
         check=True, capture_output=True,
     )
-    return sparse_dir / "0"  # premier (et normalement unique) modèle reconstruit
+    model_dir = sparse_dir / "0"  # premier (et normalement unique) modèle reconstruit
+    if model_dir.exists():
+        # `mapper` écrit en binaire (images.bin, ...) — on exporte aussi en
+        # texte pour que registered_frame_ratio()/read_camera_centers()
+        # puissent lire images.txt directement.
+        subprocess.run(
+            ["colmap", "model_converter", "--input_path", str(model_dir),
+             "--output_path", str(model_dir), "--output_type", "TXT"],
+            check=True, capture_output=True,
+        )
+    # Si model_dir n'existe pas : reconstruction réellement infructueuse
+    # (aucune image enregistrée) — registered_frame_ratio() le détecte déjà
+    # via `not images_txt.exists()` et remonte 0%, sans planter ici.
+    return model_dir
 
 
 def registered_frame_ratio(sparse_model_dir: Path, total_frames: int) -> float:
