@@ -331,22 +331,16 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
     output_dir.mkdir(parents=True, exist_ok=True)
     dataset_dir = sparse_model_dir.parent.parent  # attend <root>/images + <root>/sparse/0
 
-    # ⚠️ RÉGLAGES ULTRA-MINIMAUX TEMPORAIRES — objectif : prouver que le
-    # pipeline va au bout (export + upload + webhook), pas la qualité.
-    # refine_start_iter vaut 500 par défaut (la densification ne démarre
-    # jamais avant) ; en coupant refine_stop_iter juste après (550), la
-    # scène grossit à peine au-delà du nuage de points COLMAP initial
-    # (~8-9k points) au lieu d'exploser à plusieurs centaines de milliers —
-    # export quasi instantané. --disable_video/--disable_viewer sautent le
-    # rendu de trajectoire et le serveur viser, inutiles ici.
-    # À la première réussite de bout en bout : remonter progressivement
-    # max_steps et refine_stop_iter pour retrouver de la qualité (on avait
-    # de bons résultats à refine_stop_iter=2000/max_steps=7000, juste trop
-    # lent à exporter — donc pas besoin de revenir à 15000 par défaut).
-    max_steps = 1000
-    refine_stop_iter = 550
-    _log(f"entraînement gsplat démarré — réglages ultra-minimaux ({max_steps} itérations, "
-         f"densification coupée à {refine_stop_iter}) pour valider le pipeline de bout en bout…")
+    # Pipeline validé de bout en bout (upload → COLMAP → entraînement →
+    # export .ply → Supabase → webhook) avec des réglages ultra-minimaux.
+    # On repasse aux réglages "qualité" testés plus tôt : 397K gaussiennes,
+    # PSNR 28.2 / SSIM 0.91 en ~2 min d'entraînement — la lenteur observée
+    # avant venait de l'absence de --save_ply (aucun export ne se
+    # déclenchait jamais), pas du nombre de gaussiennes en tant que tel.
+    max_steps = 7000
+    refine_stop_iter = 2000
+    _log(f"entraînement gsplat démarré ({max_steps} itérations, "
+         f"densification coupée à {refine_stop_iter})…")
     _run(
         [
             "python", "/opt/gsplat-src/examples/simple_trainer.py", "default",
@@ -407,7 +401,11 @@ def notify_webhook(webhook_url: str, secret: str, payload: dict) -> None:
 @app.function(
     image=image,
     gpu="L4",
-    timeout=45 * 60,  # marge portée à 45 min (COLMAP en CPU + entraînement peuvent être lents sur un premier run)
+    # 90 min : très généreux par rapport à ce qu'on attend réellement
+    # (quelques minutes, désormais mesuré) — sert de filet de sécurité en
+    # cas de vrai bug, pas une durée normale. Volontairement pas 6h : une
+    # boucle infinie non détectée coûterait cher en GPU pour rien.
+    timeout=90 * 60,
     secrets=[modal.Secret.from_name("velinova-3d")],
 )
 def reconstruct(tour_id: str, video_url: str, webhook_url: str, provider_job_id: str) -> None:
