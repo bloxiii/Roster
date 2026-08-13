@@ -130,17 +130,30 @@ QUALITY_THRESHOLD = 0.75  # abaissé temporairement pour le premier test réel (
 FRAME_SAMPLE_FPS = 2.5
 
 
+def _log(msg: str) -> None:
+    """Checkpoint visible dans les logs Modal en direct — sans ça, ffmpeg/
+    COLMAP/l'entraînement tournent en silence total (capture_output=True)
+    et il est impossible de distinguer "ça travaille" de "c'est bloqué"
+    pendant de longues minutes."""
+    import time
+
+    print(f"[pipeline] {time.strftime('%H:%M:%S')} — {msg}", flush=True)
+
+
 def download_video(video_url: str, dest: Path) -> None:
     import requests
 
+    _log("téléchargement de la vidéo…")
     with requests.get(video_url, stream=True, timeout=120) as r:
         r.raise_for_status()
         with open(dest, "wb") as f:
             for chunk in r.iter_content(chunk_size=1 << 20):
                 f.write(chunk)
+    _log(f"vidéo téléchargée ({dest.stat().st_size / 1e6:.1f} Mo)")
 
 
 def extract_frames(video_path: Path, frames_dir: Path) -> int:
+    _log("extraction des frames (ffmpeg)…")
     frames_dir.mkdir(parents=True, exist_ok=True)
     subprocess.run(
         [
@@ -151,7 +164,9 @@ def extract_frames(video_path: Path, frames_dir: Path) -> int:
         ],
         check=True, capture_output=True,
     )
-    return len(list(frames_dir.glob("frame_*.jpg")))
+    count = len(list(frames_dir.glob("frame_*.jpg")))
+    _log(f"{count} frames extraites")
+    return count
 
 
 def run_colmap(frames_dir: Path, workspace: Path) -> Path:
@@ -170,22 +185,26 @@ def run_colmap(frames_dir: Path, workspace: Path) -> Path:
     sparse_dir = workspace / "sparse"
     sparse_dir.mkdir(parents=True, exist_ok=True)
 
+    _log("COLMAP — extraction des features (SIFT, CPU)…")
     subprocess.run(
         ["colmap", "feature_extractor", "--database_path", str(db_path),
          "--image_path", str(frames_dir), "--ImageReader.single_camera", "1",
          "--SiftExtraction.use_gpu", "0"],
         check=True, capture_output=True,
     )
+    _log("COLMAP — appariement séquentiel des frames…")
     subprocess.run(
         ["colmap", "sequential_matcher", "--database_path", str(db_path),
          "--SiftMatching.use_gpu", "0"],
         check=True, capture_output=True,
     )
+    _log("COLMAP — reconstruction (mapper) — étape la plus longue en CPU…")
     subprocess.run(
         ["colmap", "mapper", "--database_path", str(db_path),
          "--image_path", str(frames_dir), "--output_path", str(sparse_dir)],
         check=True, capture_output=True,
     )
+    _log("COLMAP — mapper terminé")
 
     model_dir = sparse_dir / "0"  # premier (et normalement unique) modèle reconstruit
     if model_dir.exists():
@@ -270,16 +289,23 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     dataset_dir = sparse_model_dir.parent.parent  # attend <root>/images + <root>/sparse/0
+    _log("entraînement gsplat démarré (7000 itérations — voir la barre de progression ci-dessous)…")
+    # PAS de capture_output ici, volontairement : la barre de progression
+    # tqdm de simple_trainer.py s'affiche en direct dans les logs Modal —
+    # c'est le signal le plus utile pour juger du temps restant. 7000
+    # itérations plutôt que 15000 pour un premier run plus court/moins
+    # coûteux ; qualité à revoir à la hausse une fois le pipeline validé.
     subprocess.run(
         [
             "python", "/opt/gsplat-src/examples/simple_trainer.py", "default",
             "--data_dir", str(dataset_dir),
             "--data_factor", "1",
             "--result_dir", str(output_dir),
-            "--max_steps", "15000",
+            "--max_steps", "7000",
         ],
-        check=True, capture_output=True,
+        check=True,
     )
+    _log("entraînement gsplat terminé")
     ply_candidates = list(output_dir.rglob("*.ply"))
     if not ply_candidates:
         raise RuntimeError("Entraînement terminé mais aucun .ply exporté — vérifier result_dir.")
@@ -312,11 +338,12 @@ def notify_webhook(webhook_url: str, secret: str, payload: dict) -> None:
 @app.function(
     image=image,
     gpu="L4",
-    timeout=30 * 60,
+    timeout=45 * 60,  # marge portée à 45 min (COLMAP en CPU + entraînement peuvent être lents sur un premier run)
     secrets=[modal.Secret.from_name("velinova-3d")],
 )
 def reconstruct(tour_id: str, video_url: str, webhook_url: str, provider_job_id: str) -> None:
     webhook_secret = os.environ["THREED_WEBHOOK_SECRET"]
+    _log(f"démarrage — tour_id={tour_id}")
 
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -330,6 +357,7 @@ def reconstruct(tour_id: str, video_url: str, webhook_url: str, provider_job_id:
             sparse_model_dir = run_colmap(frames_dir, workspace)
 
             ratio = registered_frame_ratio(sparse_model_dir, total_frames)
+            _log(f"qualité : {ratio:.0%} de frames enregistrées (seuil {QUALITY_THRESHOLD:.0%})")
             if ratio < QUALITY_THRESHOLD:
                 notify_webhook(webhook_url, webhook_secret, {
                     "tourId": tour_id,
@@ -349,7 +377,9 @@ def reconstruct(tour_id: str, video_url: str, webhook_url: str, provider_job_id:
 
             output_dir = root / "trained"
             ply_path = train_gaussian_splats(frames_dir, sparse_model_dir, output_dir)
+            _log("upload de la scène vers Supabase Storage…")
             scene_url = upload_scene(ply_path, tour_id)
+            _log(f"terminé — scene_url={scene_url}")
 
             notify_webhook(webhook_url, webhook_secret, {
                 "tourId": tour_id,
