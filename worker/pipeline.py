@@ -321,6 +321,17 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
     # c'est le signal le plus utile pour juger du temps restant. 7000
     # itérations plutôt que 15000 pour un premier run plus court/moins
     # coûteux ; qualité à revoir à la hausse une fois le pipeline validé.
+    #
+    # --strategy.refine_stop_iter 2000 : DefaultStrategy n'a AUCUN plafond
+    # sur le nombre de gaussiennes par défaut — la densification continue
+    # jusqu'à refine_stop_iter (15 000 par défaut, donc quasi tout
+    # l'entraînement chez nous). Sur le premier run réel, la scène a
+    # explosé à 1,19 million de gaussiennes pour seulement 97 photos,
+    # rendant l'export du .ply extrêmement lent (30+ min, silencieux).
+    # On coupe la densification à l'itération 2000 : la scène arrête de
+    # grossir puis optimise ce qu'elle a pour le reste du run — beaucoup
+    # moins de gaussiennes, export rapide, fichier bien plus léger pour
+    # le viewer web.
     _run(
         [
             "python", "/opt/gsplat-src/examples/simple_trainer.py", "default",
@@ -328,6 +339,7 @@ def train_gaussian_splats(frames_dir: Path, sparse_model_dir: Path, output_dir: 
             "--data_factor", "1",
             "--result_dir", str(output_dir),
             "--max_steps", "7000",
+            "--strategy.refine_stop_iter", "2000",
         ],
         label="entraînement gsplat (simple_trainer.py)", check=True,
     )
