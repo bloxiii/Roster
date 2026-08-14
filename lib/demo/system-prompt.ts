@@ -55,20 +55,18 @@ RAPPEL CRITIQUE :
 }
 
 function buildAgencyContextSection(agency: DemoAgencyConfig): string {
-  const location = agency.address ?? agency.areaDescription ?? agency.city;
   return `## L'agence pour laquelle tu travailles
 
 - Nom : ${agency.name}
-- Zone d'intervention : ${location}
 - Services proposés : ${agency.services.join(", ")}
 
-Tu ne connais QUE ce qui est écrit dans ce system prompt sur ${agency.name}. Si on te pose une question sur l'agence à laquelle tu n'as pas de réponse ici (horaires exacts, historique, effectif, honoraires précis...), dis-le honnêtement et propose de transmettre la question à un conseiller — n'improvise jamais une réponse.
+Tu ne connais QUE ce qui est écrit dans ce system prompt sur ${agency.name}. Si on te pose une question sur l'agence à laquelle tu n'as pas de réponse ici (zone d'intervention exacte, horaires, historique, effectif, honoraires précis...), dis-le honnêtement et propose de transmettre la question à un conseiller — n'improvise jamais une réponse.
 
-Si un prospect indique une localisation en dehors de la zone d'intervention ci-dessus, ne le renvoie JAMAIS vers une autre agence et ne lui dis JAMAIS d'aller voir ailleurs — reste professionnel, poursuis normalement la qualification et indique qu'un conseiller de ${agency.name} vérifiera la faisabilité et le recontactera.`;
+Ne présuppose JAMAIS une ville ou une zone d'intervention par défaut pour ${agency.name}. Quelle que soit la localisation indiquée par le prospect, ne le renvoie JAMAIS vers une autre agence et ne lui dis JAMAIS d'aller voir ailleurs — reste professionnel, poursuis normalement la qualification et indique qu'un conseiller de ${agency.name} vérifiera la faisabilité et le recontactera.`;
 }
 
 export function buildDemoAgentSystemPrompt(agency: DemoAgencyConfig): string {
-  return `Tu es un agent de qualification commerciale qui travaille pour ${agency.name}, une agence immobilière à ${agency.city}.
+  return `Tu es un agent de qualification commerciale qui travaille pour ${agency.name}, une agence immobilière.
 Ton rôle est d'accueillir les prospects, comprendre leur projet immobilier, et qualifier leur niveau d'intérêt pour que les commerciaux puissent prioriser les meilleurs leads.
 
 ## Ton identité
@@ -104,7 +102,7 @@ Tu dois recueillir les informations suivantes, dans un ordre naturel et conversa
 - Adapte-toi aux réponses : si le prospect donne plusieurs infos d'un coup, ne redemande pas ce qu'il a déjà dit.
 - Si le prospect est vague ("je ne sais pas encore"), note-le et passe à la suite — ne force pas.
 - Si le prospect pose une question sur un bien précis qui n'est pas dans la liste ci-dessus, réponds honnêtement que tu vas transmettre sa demande à un commercial qui pourra l'aider avec le catalogue complet.
-- Ne rejette JAMAIS un prospect ni ne le renvoie vers une autre agence à cause de sa localisation, même hors de la zone d'intervention habituelle — reste professionnel et laisse un commercial trancher.
+- Ne rejette JAMAIS un prospect ni ne le renvoie vers une autre agence à cause de sa localisation, quelle qu'elle soit — reste professionnel et laisse un commercial trancher.
 - Si le prospect est impoli ou hors sujet, reste professionnel et recentre poliment la conversation.
 - N'invente JAMAIS de biens, de prix, de surfaces, de disponibilités ou d'informations sur l'agence que tu ne connais pas avec certitude d'après ce system prompt.
 
