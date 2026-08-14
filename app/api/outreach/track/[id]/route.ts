@@ -35,11 +35,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   const { id } = await params;
 
   // Validation grossière d'UUID avant de toucher la DB — sans faire
-  // dépendre la réponse (toujours le pixel) de cette validation.
+  // dépendre la réponse (toujours le pixel) de cette validation. Journalisée
+  // (au lieu d'être ignorée en silence) pour pouvoir diagnostiquer un lien
+  // altéré par un client mail/webmail.
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
     recordOpen(id).catch((err) => {
       console.error("[outreach/track] Échec de l'enregistrement d'ouverture:", err);
     });
+  } else {
+    console.warn("[outreach/track] Id ignoré (format inattendu):", JSON.stringify(id));
   }
 
   return new NextResponse(PIXEL, { headers: PIXEL_HEADERS });
@@ -48,19 +52,30 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 async function recordOpen(id: string) {
   const service = createServiceClient();
 
-  const { data: target } = await service
+  // Les erreurs Supabase (id malformé rejeté par Postgres, RLS, cible
+  // absente...) étaient auparavant ignorées silencieusement (seul `data`
+  // était déstructuré) — l'échec d'enregistrement d'ouverture n'apparaissait
+  // donc JAMAIS dans les logs. On capture et remonte `error` explicitement.
+  const { data: target, error: selectError } = await service
     .from("outreach_targets")
     .select("opened_at, open_count")
     .eq("id", id)
     .single();
 
+  if (selectError) {
+    throw new Error(`lecture de la cible échouée: ${selectError.message}`);
+  }
   if (!target) return;
 
-  await service
+  const { error: updateError } = await service
     .from("outreach_targets")
     .update({
       opened_at: target.opened_at ?? new Date().toISOString(),
       open_count: (target.open_count ?? 0) + 1,
     })
     .eq("id", id);
+
+  if (updateError) {
+    throw new Error(`mise à jour de la cible échouée: ${updateError.message}`);
+  }
 }
