@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
 export type OutreachTarget = {
+  id: string;
   agency_name: string;
   contact_name: string | null;
   email: string;
@@ -69,15 +70,45 @@ const SENDER =
   "Velinova <contact@velinova.xyz>";
 const REPLY_TO = process.env.OUTREACH_EMAIL_REPLY_TO ?? "contact@velinova.xyz";
 
+function escapeHtml(text: string) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** Convertit le texte brut du template en HTML minimal (paragraphes + retours à la ligne). */
+function textToHtml(text: string) {
+  return text
+    .split(/\n{2,}/)
+    .map((para) => `<p>${escapeHtml(para).replace(/\n/g, "<br>")}</p>`)
+    .join("\n");
+}
+
+/**
+ * Construit le HTML de l'email avec le pixel de suivi d'ouverture (voir
+ * GET /api/outreach/track/[id]), sans altérer le rendu visuel (1×1,
+ * invisible). `baseUrl` doit être une URL absolue joignable depuis
+ * Internet — sans elle, l'email part en texte seul (pas de pixel cassé).
+ */
+function buildTrackedHtml(text: string, targetId: string, baseUrl: string | undefined) {
+  const html = textToHtml(text);
+  if (!baseUrl) return html;
+
+  const pixelUrl = `${baseUrl}/api/outreach/track/${targetId}`;
+  return `${html}\n<img src="${pixelUrl}" width="1" height="1" alt="" style="display:none" />`;
+}
+
 /**
  * Envoie un email de prospection à une cible outreach, en substituant les
  * balises du template fourni. Retourne { delivered: false, error } plutôt
  * que de lever, pour que l'appelant puisse journaliser l'échec sur la ligne
  * concernée sans interrompre un envoi en lot.
+ *
+ * `baseUrl` (ex: "https://velinova.xyz", sans slash final) sert à
+ * construire l'URL du pixel de suivi d'ouverture — voir buildTrackedHtml.
  */
 export async function sendOutreachEmail(
   target: OutreachTarget,
   template: OutreachTemplate = DEFAULT_OUTREACH_TEMPLATE,
+  baseUrl?: string,
 ): Promise<{ delivered: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -86,6 +117,7 @@ export async function sendOutreachEmail(
 
   const resend = new Resend(apiKey);
   const { subject, text } = substituteTemplate(template, target);
+  const html = buildTrackedHtml(text, target.id, baseUrl);
 
   try {
     const { error } = await resend.emails.send({
@@ -94,6 +126,7 @@ export async function sendOutreachEmail(
       replyTo: REPLY_TO,
       subject,
       text,
+      html,
     });
 
     if (error) {

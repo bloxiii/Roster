@@ -49,7 +49,11 @@ export async function POST(request: NextRequest) {
     .eq("id", "default")
     .single();
 
-  const result = await sendOutreachEmail(target, templateRow ?? DEFAULT_OUTREACH_TEMPLATE);
+  // Pour construire l'URL absolue du pixel de suivi d'ouverture (voir
+  // lib/outreach/email.ts). Même logique que app/api/tours/[id]/start.
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin;
+
+  const result = await sendOutreachEmail(target, templateRow ?? DEFAULT_OUTREACH_TEMPLATE, baseUrl);
 
   const { data: updated, error: updateError } = await service
     .from("outreach_targets")

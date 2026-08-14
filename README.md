@@ -42,7 +42,7 @@ npm run dev
 | `THREED_PROVIDER`     | Non         | Fournisseur de reconstruction 3D actif (Visites 3D) — défaut: `modal` |
 | `THREED_WORKER_URL`   | Non         | URL du worker de reconstruction 3D déployé sur Modal — voir `worker/README.md` |
 | `THREED_WEBHOOK_SECRET` | Non       | Secret partagé pour authentifier le webhook de fin de traitement 3D |
-| `NEXT_PUBLIC_APP_URL` | Non         | URL publique de l'app, pour construire l'URL de webhook envoyée au worker |
+| `NEXT_PUBLIC_APP_URL` | Non         | URL publique de l'app, pour construire l'URL de webhook envoyée au worker et l'URL du pixel de suivi d'ouverture des emails d'outreach |
 
 *Sans `RESEND_API_KEY`, le formulaire de contact fonctionne mais les demandes
 sont uniquement journalisées côté serveur (pas d'email envoyé). Pratique pour

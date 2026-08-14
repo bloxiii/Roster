@@ -17,6 +17,8 @@ type OutreachTarget = {
   status: "pending" | "sent" | "failed" | "replied";
   error: string | null;
   sent_at: string | null;
+  opened_at: string | null;
+  open_count: number;
   created_at: string;
 };
 
@@ -302,6 +304,14 @@ export function OutreachManager({
                   <span className={`inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest ${STATUS_STYLE[t.status]}`}>
                     {STATUS_LABEL[t.status]}
                   </span>
+                  {t.opened_at && (
+                    <span
+                      title={`Première ouverture détectée le ${new Date(t.opened_at).toLocaleString("fr-FR")} (${t.open_count} chargement${t.open_count > 1 ? "s" : ""} du pixel)`}
+                      className="ml-1.5 inline-flex items-center rounded-full border border-brass/30 bg-brass/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-brass-bright"
+                    >
+                      👁 Ouvert
+                    </span>
+                  )}
                   {t.status === "failed" && t.error && (
                     <div className="mt-1 max-w-[220px] text-xs text-red-400/80">{t.error}</div>
                   )}
