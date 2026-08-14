@@ -134,7 +134,11 @@ image = (
     .pip_install("git+https://github.com/rmbrualla/pycolmap@cc7ea4b7301720ac29287dbe450952511b32125e")
 )
 
+<<<<<<< HEAD
+QUALITY_THRESHOLD = 0.01 # abaissé temporairement pour le premier test réel (82% obtenu) — remonter à 0.85 ensuite.
+=======
 QUALITY_THRESHOLD = 0.75  # abaissé temporairement pour le premier test réel (82% obtenu) — remonter à 0.85 ensuite.
+>>>>>>> 5520af54fdc651900c24e63a77e9fb563be2e77b
 FRAME_SAMPLE_FPS = 2.5
 
 

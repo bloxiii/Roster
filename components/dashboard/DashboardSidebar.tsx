@@ -8,7 +8,9 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Vue d'ensemble", icon: "grid" },
   { href: "/dashboard/prospects", label: "Prospects", icon: "users" },
   { href: "/dashboard/conversations", label: "Conversations", icon: "chat" },
-  { href: "/dashboard/tours", label: "Visites 3D", icon: "cube" },
+  // Visites 3D masquée du menu (fonctionnalité pas prête à être montrée) —
+  // route /dashboard/tours conservée intacte, juste retirée de la nav.
+  // { href: "/dashboard/tours", label: "Visites 3D", icon: "cube" },
   { href: "/dashboard/agents", label: "Agents IA", icon: "bot" },
   { href: "/dashboard/settings", label: "Paramètres", icon: "settings" },
 ];

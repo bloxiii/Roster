@@ -8,31 +8,10 @@ import type { PublicTour } from "@/lib/tours/types";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Scène de démonstration synthétique (public/demo/sample-scene.splat) —
- * un nuage de points généré à la main, PAS une reconstruction réelle.
- * Sert uniquement à vérifier que le viewer (chargement + navigation
- * hybride) fonctionne de bout en bout avant d'avoir une vraie visite
- * traitée par le pipeline. Voir le résumé d'implémentation pour le détail.
- */
-const DEMO_TOUR: PublicTour = {
-  title: "Scène de démonstration (synthétique — pas un vrai bien)",
-  status: "ready",
-  scene_url: "/demo/sample-scene.splat",
-  thumbnail_url: null,
-  waypoints: [
-    { position: [0, 1.6, 3.2], lookAt: [0, 1.2, -1] },
-    { position: [-1.5, 1.6, 0.5], lookAt: [-1.5, 1, -2.4] },
-    { position: [1.2, 1.6, -1.2], lookAt: [0, 1, -2.5] },
-  ],
-};
-
 // cache() : évite d'interroger deux fois la base (generateMetadata + la
 // page elle-même appellent toutes les deux getPublicTour) et donc de
 // compter deux vues pour une seule visite du lien.
 const getPublicTour = cache(async (slug: string): Promise<PublicTour | null> => {
-  if (slug === "demo") return DEMO_TOUR;
-
   const supabase = createServiceClient();
   const { data: tour } = await supabase
     .from("tours")
