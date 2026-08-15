@@ -17,6 +17,22 @@ export function Hero() {
       {/* Grille de fond subtile */}
       <div aria-hidden className="absolute inset-0 bg-grid opacity-40" />
 
+      {/* Halos ambiants — profondeur du fond encre, dérive lente */}
+      <div aria-hidden className="absolute inset-0 overflow-hidden">
+        <div
+          className="aurora-blob -left-32 top-0 h-[32rem] w-[32rem] bg-brass/25"
+          style={{ animationDelay: "0s" }}
+        />
+        <div
+          className="aurora-blob -right-40 top-1/3 h-[28rem] w-[28rem] bg-status/15"
+          style={{ animationDelay: "-8s" }}
+        />
+        <div
+          className="aurora-blob left-1/3 -bottom-40 h-[26rem] w-[26rem] bg-slate/25"
+          style={{ animationDelay: "-14s" }}
+        />
+      </div>
+
       {/* 3D gérée par LaptopScene au niveau de la page */}
 
       {/* Contenu texte par-dessus la 3D */}
