@@ -20,6 +20,22 @@
   --color-slate: #3d5a6c;
   --color-status: #4ade80;
 
+  /* Texte garanti lisible sur un fond laiton, quel que soit le thème actif
+     (le bouton primaire bg-brass + ce token reste inchangé en clair comme
+     en sombre — voir Button.tsx). */
+  --color-on-brass: #0b0f1a;
+
+  /* Ligne de la grille de fond (.bg-grid), doit rester visible sur fond
+     clair comme sur fond sombre. */
+  --grid-line: rgba(245, 243, 238, 0.04);
+
+  /* Fond des sections "flottantes" (.canvas-veil, voir plus bas) : la scène
+     3D de LaptopScene est fixe et peint tout le fond de la page derrière
+     le contenu, du hero jusqu'au footer. En sombre on la laisse transparaître
+     (c'est l'ambiance voulue) ; en clair elle redevient opaque pour ne pas
+     laisser un fond spatial sombre percer sous un texte désormais foncé. */
+  --veil: transparent;
+
   /* Palette "étincelles" pour les effets de survol (cf. CursorFireworks) —
      dérivée de l'accent laiton, avec deux touches de couleur pour lire
      comme des feux d'artifice sans partir sur un dégradé violet/cyan cliché. */
@@ -30,6 +46,8 @@
   --spark-5: #4ade80;
   --spark-6: #f5f3ee;
 
+  color-scheme: dark;
+
   --font-display:
     "Söhne", "Inter", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;
@@ -39,6 +57,56 @@
   --font-mono:
     "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas,
     monospace;
+}
+
+/*
+ * Mode clair — activé en posant data-theme="light" sur <html> (voir
+ * ThemeToggle.tsx + le script anti-flash dans layout.tsx). Le laiton est
+ * assombri pour rester lisible en texte sur fond clair (AA), le statut et
+ * la grille de fond suivent.
+ */
+:root[data-theme="light"] {
+  --color-ink: #faf8f4;
+  --color-ink-soft: #f2ede3;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f7f2e8;
+  --color-border: #e4dfd2;
+
+  --color-paper: #1c2130;
+  --color-paper-dim: #5b6270;
+
+  --color-brass: #a9793a;
+  --color-brass-bright: #8f6530;
+  --color-slate: #3d5a6c;
+  --color-status: #16a34a;
+
+  --grid-line: rgba(20, 22, 30, 0.05);
+  --veil: var(--color-ink);
+
+  color-scheme: light;
+}
+
+/*
+ * Scope "chrome fixe" — le header et le hero flottent sur la scène 3D de
+ * LaptopScene (fond encre peint en WebGL, indépendant du CSS). Cette classe
+ * fige les tokens sur la palette sombre à l'intérieur de ces deux zones,
+ * quel que soit le thème choisi ailleurs sur le site, pour que le texte
+ * reste lisible sur ce fond qui, lui, ne change pas de thème.
+ */
+.theme-dark {
+  --color-ink: #0b0f1a;
+  --color-ink-soft: #10141f;
+  --color-surface: #131826;
+  --color-surface-hover: #171d2d;
+  --color-border: #232b3d;
+  --color-paper: #f5f3ee;
+  --color-paper-dim: #b7bccb;
+  --color-brass: #c9a66b;
+  --color-brass-bright: #ddc08a;
+  --color-slate: #3d5a6c;
+  --color-status: #4ade80;
+  --grid-line: rgba(245, 243, 238, 0.04);
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -53,6 +121,7 @@
   --color-brass-bright: var(--color-brass-bright);
   --color-slate: var(--color-slate);
   --color-status: var(--color-status);
+  --color-on-brass: var(--color-on-brass);
 
   --font-display: var(--font-display);
   --font-body: var(--font-body);
@@ -72,6 +141,7 @@ body {
   color: var(--color-paper);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 /* Respect des préférences de réduction de mouvement */
@@ -96,10 +166,16 @@ body {
   border-radius: 2px;
 }
 
+/* Voile opaque en thème clair uniquement (transparent en sombre) — voir
+   --veil ci-dessus. */
+.canvas-veil {
+  background-color: var(--veil);
+}
+
 .bg-grid {
   background-image:
-    linear-gradient(to right, rgba(245, 243, 238, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(245, 243, 238, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
@@ -227,8 +303,12 @@ html {
 
 /* ─── Verre dépoli premium ─────────────────────────────────── */
 .glass-panel {
-  background: linear-gradient(180deg, rgba(19, 24, 38, 0.7), rgba(19, 24, 38, 0.4));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-surface) 70%, transparent),
+    color-mix(in srgb, var(--color-surface) 40%, transparent)
+  );
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(245, 243, 238, 0.08);
+  border: 1px solid color-mix(in srgb, var(--color-paper) 8%, transparent);
 }

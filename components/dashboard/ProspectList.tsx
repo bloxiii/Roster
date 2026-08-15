@@ -68,7 +68,7 @@ export function ProspectList({
             href={f.key ? `/${locale}/dashboard?q=${f.key}` : `/${locale}/dashboard`}
             className={`rounded-full px-4 py-2 font-mono text-xs transition-colors ${
               activeFilter === f.key
-                ? "bg-brass text-ink"
+                ? "bg-brass text-on-brass"
                 : "border border-border text-paper-dim hover:border-brass/40 hover:text-paper"
             }`}
           >

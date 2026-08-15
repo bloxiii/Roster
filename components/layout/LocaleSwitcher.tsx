@@ -22,7 +22,7 @@ export function LocaleSwitcher() {
           aria-current={locale === loc}
           className={`rounded-full px-2.5 py-1 uppercase tracking-wide transition-colors ${
             locale === loc
-              ? "bg-brass text-ink"
+              ? "bg-brass text-on-brass"
               : "text-paper-dim hover:text-paper"
           }`}
         >

@@ -13,7 +13,12 @@ export function Hero() {
   const stats = t.raw("stats") as Stat[];
 
   return (
-    <section className="relative min-h-[100svh] flex items-center overflow-hidden">
+    <section
+      className="theme-dark relative min-h-[100svh] flex items-center overflow-hidden"
+    >
+      {/* theme-dark : le hero flotte sur la scène 3D de LaptopScene (fond
+          encre peint en WebGL, indépendant du thème CSS) — il garde donc
+          toujours la palette sombre, quel que soit le thème choisi. */}
       {/* Grille de fond subtile */}
       <div aria-hidden className="absolute inset-0 bg-grid opacity-40" />
 

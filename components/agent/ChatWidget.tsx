@@ -161,7 +161,7 @@ export function ChatWidget({ widgetKey }: { widgetKey?: string | null }) {
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                 msg.role === "user"
-                  ? "rounded-br-md bg-brass text-ink"
+                  ? "rounded-br-md bg-brass text-on-brass"
                   : "rounded-bl-md border border-border/60 bg-surface text-paper"
               }`}
               style={
@@ -220,7 +220,7 @@ export function ChatWidget({ widgetKey }: { widgetKey?: string | null }) {
           <button
             type="submit"
             disabled={!input.trim() || status === "loading"}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-brass text-ink transition-colors hover:bg-brass-bright disabled:opacity-40"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-brass text-on-brass transition-colors hover:bg-brass-bright disabled:opacity-40"
             style={colors ? { background: colors.user, color: "#1a110d" } : undefined}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

@@ -60,7 +60,7 @@ export default async function ToursPage({
         </div>
         <Link
           href={`/${locale}/dashboard/tours/new`}
-          className="shrink-0 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-bright"
+          className="shrink-0 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-on-brass transition-colors hover:bg-brass-bright"
         >
           + Créer une visite 3D
         </Link>

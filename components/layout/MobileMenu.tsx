@@ -78,7 +78,7 @@ export function MobileMenu() {
                 <a
                   href="#contact"
                   onClick={close}
-                  className="inline-flex items-center justify-center rounded-full bg-brass px-6 py-3 text-sm font-medium tracking-wide text-ink transition-colors hover:bg-brass-bright"
+                  className="inline-flex items-center justify-center rounded-full bg-brass px-6 py-3 text-sm font-medium tracking-wide text-on-brass transition-colors hover:bg-brass-bright"
                 >
                   {t("cta")}
                 </a>
