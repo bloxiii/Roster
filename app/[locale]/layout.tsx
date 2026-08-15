@@ -3,6 +3,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { CursorFireworks } from "@/components/ui/CursorFireworks";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -55,7 +56,10 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className="h-full">
       <body className="min-h-full flex flex-col bg-ink text-paper antialiased">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <CursorFireworks />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
