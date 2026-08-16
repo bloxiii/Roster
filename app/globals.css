@@ -36,16 +36,6 @@
      laisser un fond spatial sombre percer sous un texte désormais foncé. */
   --veil: transparent;
 
-  /* Palette "étincelles" pour les effets de survol (cf. CursorFireworks) —
-     dérivée de l'accent laiton, avec deux touches de couleur pour lire
-     comme des feux d'artifice sans partir sur un dégradé violet/cyan cliché. */
-  --spark-1: #c9a66b;
-  --spark-2: #ddc08a;
-  --spark-3: #f5c99b;
-  --spark-4: #ff9f6b;
-  --spark-5: #4ade80;
-  --spark-6: #f5f3ee;
-
   color-scheme: dark;
 
   --font-display:
