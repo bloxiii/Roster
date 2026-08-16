@@ -57,7 +57,7 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" className="section-glow-border py-36">
+    <section id="contact" className="canvas-veil section-glow-border py-36">
       <Container className="relative z-10 grid gap-14 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
           <Eyebrow>{t("eyebrow")}</Eyebrow>

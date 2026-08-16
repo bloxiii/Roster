@@ -21,7 +21,7 @@ const base =
   "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-wide transition-colors duration-200 disabled:opacity-50 disabled:pointer-events-none";
 
 const variantStyles = {
-  primary: "bg-brass text-ink hover:bg-brass-bright",
+  primary: "bg-brass text-on-brass hover:bg-brass-bright",
   secondary:
     "border border-border text-paper hover:border-brass/60 hover:text-brass-bright",
 };

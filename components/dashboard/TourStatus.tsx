@@ -82,7 +82,7 @@ export function TourStatus({ tour: initialTour, locale }: { tour: TourSnapshot; 
         </p>
         <a
           href={`/${locale}/dashboard/tours/new`}
-          className="mt-5 inline-block rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink hover:bg-brass-bright"
+          className="mt-5 inline-block rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-on-brass hover:bg-brass-bright"
         >
           Refaire une vidéo
         </a>
@@ -104,7 +104,7 @@ export function TourStatus({ tour: initialTour, locale }: { tour: TourSnapshot; 
         href={`/${locale}/v/${tour.public_slug}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-5 inline-block rounded-full bg-brass px-6 py-3 text-sm font-medium text-ink hover:bg-brass-bright"
+        className="mt-5 inline-block rounded-full bg-brass px-6 py-3 text-sm font-medium text-on-brass hover:bg-brass-bright"
       >
         Voir la visite
       </a>

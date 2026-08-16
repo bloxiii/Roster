@@ -54,8 +54,19 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className="h-full">
+    <html lang={locale} className="h-full" suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-ink text-paper antialiased">
+        {/* Pose data-theme sur <html> avant l'hydratation React, pour éviter
+            tout flash du mauvais thème au chargement (voir ThemeToggle.tsx).
+            Sombre par défaut (identité de marque) tant que l'utilisateur n'a
+            pas explicitement choisi le clair via le toggle — on ne suit pas
+            la préférence système ici, volontairement. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('velinova-theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){}})();",
+          }}
+        />
         <NextIntlClientProvider>
           <CursorFireworks />
           {children}

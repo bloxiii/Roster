@@ -183,7 +183,7 @@ export function TourUploadForm({ locale }: { locale: string }) {
       <button
         type="submit"
         disabled={!file || busy}
-        className="w-full rounded-full bg-brass px-6 py-3 text-sm font-medium text-ink transition-colors hover:bg-brass-bright disabled:opacity-50"
+        className="w-full rounded-full bg-brass px-6 py-3 text-sm font-medium text-on-brass transition-colors hover:bg-brass-bright disabled:opacity-50"
       >
         {busy ? busyLabel : "Lancer la génération de la visite 3D"}
       </button>

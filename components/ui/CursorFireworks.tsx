@@ -16,8 +16,12 @@ import { usePathname } from "next/navigation";
  */
 
 // Canvas fillStyle ne résout pas var(...) : on duplique ici les valeurs
-// hexadécimales des tokens --spark-* de globals.css.
-const SPARK_COLORS = ["#c9a66b", "#ddc08a", "#f5c99b", "#ff9f6b", "#4ade80", "#f5f3ee"];
+// hexadécimales des tokens --spark-* de globals.css. Deux palettes car le
+// rendu additif ("lighter", cf. tick()) qui fait le glow sur fond sombre
+// délaverait des teintes claires sur fond clair — palette plus saturée /
+// foncée là où le thème est clair, avec un mélange normal plutôt qu'additif.
+const SPARK_COLORS_DARK = ["#c9a66b", "#ddc08a", "#f5c99b", "#ff9f6b", "#4ade80", "#f5f3ee"];
+const SPARK_COLORS_LIGHT = ["#a9793a", "#c9a66b", "#c2703f", "#b3453c", "#15803d", "#3d5a6c"];
 
 const EXCLUDED_PREFIXES = ["/dashboard", "/outreach", "/embed"];
 
@@ -75,8 +79,15 @@ export function CursorFireworks() {
     const MAX_PARTICLES = 240;
     let particles: Particle[] = [];
 
+    let isLight = document.documentElement.getAttribute("data-theme") === "light";
+    const themeObserver = new MutationObserver(() => {
+      isLight = document.documentElement.getAttribute("data-theme") === "light";
+    });
+    themeObserver.observe(document.documentElement, { attributeFilter: ["data-theme"] });
+
     function pickColor() {
-      return SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)];
+      const palette = isLight ? SPARK_COLORS_LIGHT : SPARK_COLORS_DARK;
+      return palette[Math.floor(Math.random() * palette.length)];
     }
 
     function spawnTrail(x: number, y: number) {
@@ -153,7 +164,10 @@ export function CursorFireworks() {
     let raf = 0;
     function tick() {
       ctx!.clearRect(0, 0, width, height);
-      ctx!.globalCompositeOperation = "lighter";
+      // Additif sur fond sombre (vrai effet "braise" qui brille) ; mélange
+      // normal sur fond clair (l'additif délave vers le blanc et rend les
+      // étincelles invisibles sur une page claire).
+      ctx!.globalCompositeOperation = isLight ? "source-over" : "lighter";
 
       particles = particles.filter((p) => p.life < p.maxLife);
       for (const p of particles) {
@@ -170,7 +184,7 @@ export function CursorFireworks() {
 
         ctx!.beginPath();
         ctx!.fillStyle = p.color;
-        ctx!.globalAlpha = alpha;
+        ctx!.globalAlpha = isLight ? alpha * 0.85 : alpha;
         ctx!.shadowColor = p.color;
         ctx!.shadowBlur = p.trail ? 6 : 11;
         ctx!.arc(p.x, p.y, radius, 0, Math.PI * 2);
@@ -185,6 +199,7 @@ export function CursorFireworks() {
 
     return () => {
       cancelAnimationFrame(raf);
+      themeObserver.disconnect();
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", handleMove);
       window.removeEventListener("pointerdown", handleDown);

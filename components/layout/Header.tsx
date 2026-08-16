@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 import { MobileMenu } from "./MobileMenu";
 
@@ -16,7 +17,10 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-ink/85 backdrop-blur-md">
+    <header className="theme-dark sticky top-0 z-50 border-b border-border/60 bg-ink/85 backdrop-blur-md">
+      {/* theme-dark : le header flotte sur la scène 3D de LaptopScene (fond
+          encre peint en WebGL, indépendant du thème CSS) — il garde donc
+          toujours la palette sombre, quel que soit le thème choisi. */}
       <Container className="flex h-18 items-center justify-between py-4">
         <Link href="/" className="flex items-center gap-2.5">
           <img src="/images/velinova-logo.svg" alt="" width={28} height={28} className="h-7 w-7" />
@@ -38,6 +42,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <LocaleSwitcher />
           <Button href="#contact" className="hidden sm:inline-flex">
             {t("cta")}

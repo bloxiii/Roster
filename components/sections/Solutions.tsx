@@ -11,7 +11,7 @@ export function Solutions() {
   const agents = root.raw("Agents") as Agent[];
 
   return (
-    <section id="agents" className="section-glow-border py-36">
+    <section id="agents" className="canvas-veil section-glow-border py-36">
       <Container className="relative z-10">
         <Reveal animation="fade-scale" duration={1000}>
           <div className="max-w-2xl">
