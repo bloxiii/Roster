@@ -4,9 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 /**
- * Étincelles qui suivent le curseur + petite explosion au clic, façon feu
- * d'artifice (inspiré de hue-code.com). Canvas plein écran, pointer-events:
- * none — ne gêne jamais les interactions en dessous.
+ * Petite explosion d'étincelles au clic, façon feu d'artifice (inspiré de
+ * hue-code.com). Le suivi continu du curseur est porté par CursorGlow (un
+ * halo de couleur plus tape-à-l'œil) — cette couche-ci ne réagit qu'aux
+ * clics, pour ne pas dupliquer un effet de traînée en petits points.
+ * Canvas plein écran, pointer-events: none — ne gêne jamais les
+ * interactions en dessous.
  *
  * Désactivé automatiquement :
  * - si l'utilisateur préfère moins de mouvement (prefers-reduced-motion)
@@ -34,7 +37,6 @@ type Particle = {
   maxLife: number;
   size: number;
   color: string;
-  trail: boolean;
 };
 
 export function CursorFireworks() {
@@ -90,28 +92,6 @@ export function CursorFireworks() {
       return palette[Math.floor(Math.random() * palette.length)];
     }
 
-    function spawnTrail(x: number, y: number) {
-      const count = 1 + Math.floor(Math.random() * 2);
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 0.3 + Math.random() * 0.9;
-        particles.push({
-          x,
-          y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed - 0.5,
-          life: 0,
-          maxLife: 36 + Math.random() * 18,
-          size: 1 + Math.random() * 1.6,
-          color: pickColor(),
-          trail: true,
-        });
-      }
-      if (particles.length > MAX_PARTICLES) {
-        particles.splice(0, particles.length - MAX_PARTICLES);
-      }
-    }
-
     function spawnBurst(x: number, y: number) {
       const count = 26 + Math.floor(Math.random() * 16);
       for (let i = 0; i < count; i++) {
@@ -126,31 +106,10 @@ export function CursorFireworks() {
           maxLife: 46 + Math.random() * 28,
           size: 1.5 + Math.random() * 2.4,
           color: pickColor(),
-          trail: false,
         });
       }
       const cap = MAX_PARTICLES * 1.5;
       if (particles.length > cap) particles.splice(0, particles.length - cap);
-    }
-
-    let lastX = -1;
-    let lastY = -1;
-    let lastSpawn = 0;
-
-    function handleMove(e: PointerEvent) {
-      if (e.pointerType !== "mouse") return;
-      const now = performance.now();
-      if (lastX < 0) {
-        lastX = e.clientX;
-        lastY = e.clientY;
-      }
-      const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
-      if (dist > 6 && now - lastSpawn > 16) {
-        spawnTrail(e.clientX, e.clientY);
-        lastSpawn = now;
-        lastX = e.clientX;
-        lastY = e.clientY;
-      }
     }
 
     function handleDown(e: PointerEvent) {
@@ -158,7 +117,6 @@ export function CursorFireworks() {
       spawnBurst(e.clientX, e.clientY);
     }
 
-    window.addEventListener("pointermove", handleMove, { passive: true });
     window.addEventListener("pointerdown", handleDown, { passive: true });
 
     let raf = 0;
@@ -172,7 +130,7 @@ export function CursorFireworks() {
       particles = particles.filter((p) => p.life < p.maxLife);
       for (const p of particles) {
         p.life += 1;
-        p.vy += p.trail ? 0.012 : 0.05;
+        p.vy += 0.05;
         p.vx *= 0.98;
         p.vy *= 0.98;
         p.x += p.vx;
@@ -180,13 +138,13 @@ export function CursorFireworks() {
 
         const t = p.life / p.maxLife;
         const alpha = Math.max(1 - t, 0);
-        const radius = Math.max(p.size * (p.trail ? 1 - t * 0.4 : 1 - t * 0.15), 0);
+        const radius = Math.max(p.size * (1 - t * 0.15), 0);
 
         ctx!.beginPath();
         ctx!.fillStyle = p.color;
         ctx!.globalAlpha = isLight ? alpha * 0.85 : alpha;
         ctx!.shadowColor = p.color;
-        ctx!.shadowBlur = p.trail ? 6 : 11;
+        ctx!.shadowBlur = 11;
         ctx!.arc(p.x, p.y, radius, 0, Math.PI * 2);
         ctx!.fill();
       }
@@ -201,7 +159,6 @@ export function CursorFireworks() {
       cancelAnimationFrame(raf);
       themeObserver.disconnect();
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", handleMove);
       window.removeEventListener("pointerdown", handleDown);
     };
   }, [active]);
