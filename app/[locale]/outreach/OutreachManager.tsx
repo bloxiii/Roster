@@ -4,7 +4,7 @@ import { useState, useMemo, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { parseOutreachCsv } from "@/lib/outreach/csv";
 
-type OutreachTarget = {
+export type OutreachTarget = {
   id: string;
   agency_name: string;
   contact_name: string | null;

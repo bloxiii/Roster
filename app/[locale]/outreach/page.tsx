@@ -7,7 +7,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { DEFAULT_OUTREACH_TEMPLATE } from "@/lib/outreach/email";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { OutreachManager } from "./OutreachManager";
+import { OutreachManager, type OutreachTarget } from "./OutreachManager";
 
 export const metadata: Metadata = { title: "Outreach — Velinova", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -51,7 +51,7 @@ export default async function OutreachPage({
   // contacts qui "disparaissent" de l'affichage (ils restent en base).
   const service = createServiceClient();
   const [{ data: targets }, { data: template }] = await Promise.all([
-    fetchAllRows((from, to) =>
+    fetchAllRows<OutreachTarget>((from, to) =>
       service
         .from("outreach_targets")
         .select("*")
