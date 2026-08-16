@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { fetchAllRows } from "@/lib/supabase/pagination";
 import { isAdminEmail } from "@/lib/admin";
 import { outreachImportSchema, outreachImportRowSchema } from "@/lib/validations";
 
@@ -82,10 +83,13 @@ export async function POST(request: NextRequest) {
 
   const service = createServiceClient();
 
-  // Emails déjà en base, pour ne pas recréer un contact existant.
-  const { data: existing, error: existingError } = await service
-    .from("outreach_targets")
-    .select("email");
+  // Emails déjà en base, pour ne pas recréer un contact existant. Pagine
+  // au-delà de 1000 lignes (limite par défaut Supabase/PostgREST) : sans
+  // ça, passé 1000 contacts existants, la dédup ne "voit" plus les emails
+  // au-delà de cette limite et peut réinsérer des doublons.
+  const { data: existing, error: existingError } = await fetchAllRows<{ email: string }>((from, to) =>
+    service.from("outreach_targets").select("email").range(from, to),
+  );
 
   if (existingError) {
     console.error("[outreach/import] Fetch existing emails failed:", existingError);

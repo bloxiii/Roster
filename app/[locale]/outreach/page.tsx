@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { fetchAllRows } from "@/lib/supabase/pagination";
 import { isAdminEmail } from "@/lib/admin";
 import { DEFAULT_OUTREACH_TEMPLATE } from "@/lib/outreach/email";
 import { Container } from "@/components/ui/Container";
@@ -43,9 +44,20 @@ export default async function OutreachPage({
   }
 
   // Tables internes, RLS deny-by-default → lecture via le service role.
+  // fetchAllRows pagine au-delà de 1000 lignes (limite par défaut de
+  // Supabase/PostgREST) : sans ça, un `.select()` seul tronque
+  // silencieusement la liste une fois plus de 1000 contacts en base, et
+  // comme le tri est par date décroissante, ce sont les plus anciens
+  // contacts qui "disparaissent" de l'affichage (ils restent en base).
   const service = createServiceClient();
   const [{ data: targets }, { data: template }] = await Promise.all([
-    service.from("outreach_targets").select("*").order("created_at", { ascending: false }),
+    fetchAllRows((from, to) =>
+      service
+        .from("outreach_targets")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(from, to),
+    ),
     service.from("outreach_email_template").select("subject, body").eq("id", "default").single(),
   ]);
 
