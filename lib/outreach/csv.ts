@@ -1,15 +1,20 @@
 /**
  * Parseur CSV minimal pour l'import outreach en masse.
  *
- * Gère les champs entre guillemets (virgules/points-virgules et guillemets
- * échappés `""`), détecte automatiquement le séparateur (`,` ou `;` — les
- * exports Excel français utilisent généralement `;`), et recherche la
- * vraie ligne d'en-tête parmi les 10 premières lignes plutôt que de
- * supposer que c'est systématiquement la ligne 1 (certains exports ont une
- * ligne de titre du type "Coordonnées" avant les en-têtes de colonnes).
- * Suffisant pour ce cas d'usage ; ce n'est pas un parseur RFC 4180 complet
- * (pas de support des retours à la ligne à l'intérieur d'un champ entre
- * guillemets).
+ * Gère les champs entre guillemets (virgules/points-virgules, guillemets
+ * échappés `""` et retours à la ligne à l'intérieur d'un champ — ex: une
+ * adresse tenant sur deux lignes dans le fichier source), détecte
+ * automatiquement le séparateur (`,` ou `;` — les exports Excel français
+ * utilisent généralement `;`), et recherche la vraie ligne d'en-tête parmi
+ * les 10 premières lignes plutôt que de supposer que c'est systématiquement
+ * la ligne 1 (certains exports ont une ligne de titre du type "Coordonnées"
+ * avant les en-têtes de colonnes).
+ *
+ * Le fichier entier est tokenizé en une passe (et non ligne par ligne au
+ * préalable) : c'est nécessaire pour qu'un champ entre guillemets contenant
+ * un saut de ligne ne soit pas coupé en deux lignes CSV distinctes, ce qui
+ * décalerait les colonnes et ferait passer des lignes valides pour des
+ * lignes vides (nom/email manquants → ignorées à tort).
  */
 
 export type OutreachCsvRow = {
@@ -43,36 +48,64 @@ function detectDelimiter(headerLine: string): string {
   return semicolons > commas ? ";" : ",";
 }
 
-function parseLine(line: string, delimiter: string): string[] {
-  const fields: string[] = [];
-  let current = "";
+/**
+ * Tokenize tout le texte en lignes de champs, en respectant les guillemets
+ * (donc un `\n` à l'intérieur d'un champ entre guillemets ne termine pas la
+ * ligne CSV). Un retour à la ligne à l'intérieur d'un champ est normalisé
+ * en ", " (ex: adresse sur deux lignes -> "12 rue X, 75000 Paris").
+ */
+function tokenizeCsv(text: string, delimiter: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
   let inQuotes = false;
 
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
+  const pushField = () => {
+    row.push(field.replace(/\r\n|\r|\n/g, ", ").trim());
+    field = "";
+  };
+  // Une ligne vide (ou ne contenant que des espaces) est ignorée silencieusement,
+  // comme dans la version précédente du parseur.
+  const isBlankLine = () => row.length === 0 && field.trim() === "";
+  const pushRow = () => {
+    pushField();
+    rows.push(row);
+    row = [];
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
 
     if (inQuotes) {
       if (char === '"') {
-        if (line[i + 1] === '"') {
-          current += '"';
+        if (text[i + 1] === '"') {
+          field += '"';
           i++;
         } else {
           inQuotes = false;
         }
       } else {
-        current += char;
+        field += char;
       }
-    } else if (char === '"') {
+      continue;
+    }
+
+    if (char === '"') {
       inQuotes = true;
     } else if (char === delimiter) {
-      fields.push(current);
-      current = "";
+      pushField();
+    } else if (char === "\r" || char === "\n") {
+      if (char === "\r" && text[i + 1] === "\n") i++;
+      if (!isBlankLine()) pushRow();
+      else field = ""; // remet à zéro pour la ligne suivante
     } else {
-      current += char;
+      field += char;
     }
   }
-  fields.push(current);
-  return fields.map((f) => f.trim());
+  // dernière ligne si le fichier ne se termine pas par un saut de ligne
+  if (!isBlankLine()) pushRow();
+
+  return rows;
 }
 
 /** minuscules, sans accents, sans "*" final (ex: "CP*" -> "cp") */
@@ -87,16 +120,13 @@ function normalizeHeader(h: string): string {
 }
 
 /**
- * Essaie de lire `line` comme ligne d'en-tête avec `delimiter`. Renvoie
- * l'index de colonne par champ si le nom d'agence ET l'email sont trouvés
- * (les 2 champs obligatoires), sinon `null` — ce n'est probablement pas la
- * ligne d'en-tête (ex: une ligne de titre comme "Coordonnées").
+ * Essaie de lire `fields` comme ligne d'en-tête. Renvoie l'index de colonne
+ * par champ si le nom d'agence ET l'email sont trouvés (les 2 champs
+ * obligatoires), sinon `null` — ce n'est probablement pas la ligne d'en-tête
+ * (ex: une ligne de titre comme "Coordonnées").
  */
-function tryMatchHeader(
-  line: string,
-  delimiter: string,
-): Partial<Record<keyof OutreachCsvRow, number>> | null {
-  const headers = parseLine(line, delimiter).map(normalizeHeader);
+function matchHeaderFields(fields: string[]): Partial<Record<keyof OutreachCsvRow, number>> | null {
+  const headers = fields.map(normalizeHeader);
   const columnIndex: Partial<Record<keyof OutreachCsvRow, number>> = {};
   for (const [field, aliases] of Object.entries(HEADER_ALIASES) as [keyof OutreachCsvRow, string[]][]) {
     const idx = headers.findIndex((h) => aliases.includes(h));
@@ -119,25 +149,32 @@ function normalizePostalCode(cp: string): string {
 export function parseOutreachCsv(text: string): OutreachCsvParseResult {
   // Retire un éventuel BOM UTF-8 en tête de fichier (courant avec Excel).
   const clean = text.replace(/^﻿/, "");
-  const lines = clean.split(/\r\n|\r|\n/).filter((l) => l.trim() !== "");
-  if (lines.length === 0) {
+  if (clean.trim() === "") {
+    return { rows: [], skipped: 0, total: 0 };
+  }
+
+  // Le séparateur est détecté sur la première ligne non vide du fichier brut
+  // (l'en-tête ne contient normalement pas de champ entre guillemets avec
+  // saut de ligne, donc un simple split suffit ici).
+  const firstLine = clean.split(/\r\n|\r|\n/).find((l) => l.trim() !== "") ?? "";
+  const delimiter = detectDelimiter(firstLine);
+
+  const allRows = tokenizeCsv(clean, delimiter);
+  if (allRows.length === 0) {
     return { rows: [], skipped: 0, total: 0 };
   }
 
   // Cherche la vraie ligne d'en-tête parmi les 10 premières lignes (au lieu
   // de supposer que c'est systématiquement la ligne 1), pour tolérer une
   // ligne de titre ou des lignes vides en tête de fichier.
-  let delimiter = ",";
   let columnIndex: Partial<Record<keyof OutreachCsvRow, number>> | null = null;
-  let headerLineIndex = -1;
+  let headerRowIndex = -1;
 
-  for (let i = 0; i < Math.min(lines.length, 10); i++) {
-    const candidateDelimiter = detectDelimiter(lines[i]);
-    const match = tryMatchHeader(lines[i], candidateDelimiter);
+  for (let i = 0; i < Math.min(allRows.length, 10); i++) {
+    const match = matchHeaderFields(allRows[i]);
     if (match) {
-      delimiter = candidateDelimiter;
       columnIndex = match;
-      headerLineIndex = i;
+      headerRowIndex = i;
       break;
     }
   }
@@ -146,15 +183,14 @@ export function parseOutreachCsv(text: string): OutreachCsvParseResult {
     return { rows: [], skipped: 0, total: 0 };
   }
 
-  const dataLines = lines.slice(headerLineIndex + 1);
+  const dataRows = allRows.slice(headerRowIndex + 1);
   const rows: OutreachCsvRow[] = [];
   let skipped = 0;
 
-  for (const line of dataLines) {
-    const fields = parseLine(line, delimiter);
+  for (const fields of dataRows) {
     const get = (key: keyof OutreachCsvRow) => {
       const idx = columnIndex![key];
-      return idx !== undefined ? (fields[idx] ?? "").trim() : "";
+      return idx !== undefined ? (fields[idx] ?? "") : "";
     };
 
     const row: OutreachCsvRow = {
@@ -173,5 +209,5 @@ export function parseOutreachCsv(text: string): OutreachCsvParseResult {
     rows.push(row);
   }
 
-  return { rows, skipped, total: dataLines.length };
+  return { rows, skipped, total: dataRows.length };
 }
