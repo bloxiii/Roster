@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { CursorFireworks } from "@/components/ui/CursorFireworks";
+import { CursorGlow } from "@/components/ui/CursorGlow";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -68,6 +69,7 @@ export default async function LocaleLayout({
           }}
         />
         <NextIntlClientProvider>
+          <CursorGlow />
           <CursorFireworks />
           {children}
         </NextIntlClientProvider>
