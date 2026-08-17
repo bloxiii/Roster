@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
-import { DEFAULT_OUTREACH_TEMPLATE } from "@/lib/outreach/email";
+import { DEFAULT_OUTREACH_TEMPLATE, SENDER, REPLY_TO } from "@/lib/outreach/email";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { OutreachManager } from "./OutreachManager";
@@ -58,8 +58,8 @@ export default async function OutreachPage({
         </h1>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-paper-dim">
           Ajoutez une agence (nom, email, site web) puis envoyez l&apos;email de
-          prospection. Les emails partent de <strong className="text-paper">contact@velinova.xyz</strong> —
-          les réponses arrivent dans cette boîte.
+          prospection. Les emails partent de <strong className="text-paper">{SENDER}</strong> —
+          les réponses arrivent sur <strong className="text-paper">{REPLY_TO}</strong>.
         </p>
 
         <OutreachManager
