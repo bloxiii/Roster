@@ -56,19 +56,25 @@ export function substituteTemplate(template: OutreachTemplate, target: OutreachT
 /**
  * Contrairement à lib/email.ts (notifications transactionnelles, qui peut
  * rester sur le domaine sandbox Resend par défaut), l'outreach DOIT partir
- * de contact@velinova.xyz : c'est la seule boîte que Velinova relève, donc
- * la seule adresse où une réponse de prospect a une chance d'être vue.
+ * d'un domaine vérifié dans Resend (SPF/DKIM) sous peine d'échec d'envoi ou
+ * de filtrage spam côté destinataire — voir https://resend.com/domains.
  *
- * ⚠️ Pour que l'envoi FONCTIONNE (et n'atterrisse pas en spam), le domaine
- * velinova.xyz doit être vérifié dans Resend (SPF/DKIM) — voir
- * https://resend.com/domains. Sans ça, Resend refusera l'envoi ou l'email
- * sera très probablement filtré côté destinataire.
+ * Domaine configurable via OUTREACH_EMAIL_FROM (ex: un domaine dédié à la
+ * prospection, distinct du domaine produit, pour isoler la réputation
+ * d'envoi — voir la discussion delivrabilité en date du 17/08/2026).
+ * REPLY_TO peut rester sur une autre adresse : c'est juste la boîte
+ * effectivement relevée qui doit recevoir les réponses, peu importe le
+ * domaine d'envoi.
+ *
+ * Exportées (plutôt que privées au module) pour que l'UI admin
+ * (app/[locale]/outreach/page.tsx) affiche l'expéditeur réel au lieu d'une
+ * valeur possiblement obsolète recopiée en dur.
  */
-const SENDER =
+export const SENDER =
   process.env.OUTREACH_EMAIL_FROM ??
   process.env.CONTACT_EMAIL_FROM ??
   "Velinova <contact@velinova.xyz>";
-const REPLY_TO = process.env.OUTREACH_EMAIL_REPLY_TO ?? "contact@velinova.xyz";
+export const REPLY_TO = process.env.OUTREACH_EMAIL_REPLY_TO ?? "contact@velinova.xyz";
 
 function escapeHtml(text: string) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
