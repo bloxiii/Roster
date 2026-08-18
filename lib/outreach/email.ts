@@ -13,15 +13,25 @@ export type OutreachTemplate = {
   body: string;
 };
 
-/** Template par défaut, utilisé uniquement si la table outreach_email_template est vide (fallback défensif). */
+/**
+ * Template par défaut, utilisé uniquement si la table outreach_email_template
+ * est vide (fallback défensif).
+ *
+ * Ne s'appuie QUE sur {{agence}} (toujours renseignée) dans le corps du
+ * texte : {{contact}} et {{site}} restent disponibles comme balises (cf.
+ * OUTREACH_TEMPLATE_TAGS) pour les cibles créées manuellement, mais les
+ * cibles importées en masse (voir lib/outreach/csv.ts) n'ont ni nom de
+ * contact ni site — les utiliser ici produisait "Bonjour ," et "J'ai vu —
+ * beau catalogue de biens.", un tell visible de mailing automatisé qui a
+ * probablement contribué au 0 réponse sur 140 envois (voir discussion
+ * délivrabilité du 18/08/2026).
+ */
 export const DEFAULT_OUTREACH_TEMPLATE: OutreachTemplate = {
   subject: "Qualifiez vos prospects immobiliers automatiquement — {{agence}}",
   body: [
-    "Bonjour {{contact}},",
+    "Bonjour,",
     "",
     "Je me permets de vous contacter au sujet de {{agence}}.",
-    "",
-    "J'ai vu {{site}} — beau catalogue de biens.",
     "",
     "Velinova est un assistant IA qui qualifie automatiquement vos prospects",
     "immobiliers 24/7, directement depuis votre site : un visiteur discute avec",
@@ -42,13 +52,32 @@ export const DEFAULT_OUTREACH_TEMPLATE: OutreachTemplate = {
 /** Balises disponibles dans le template, affichées comme légende côté UI. */
 export const OUTREACH_TEMPLATE_TAGS = ["{{contact}}", "{{agence}}", "{{site}}"] as const;
 
+/**
+ * Nettoie les artefacts laissés par une balise remplacée par une chaîne
+ * vide (ex: "Bonjour {{contact}}," -> "Bonjour ," sur une cible sans nom de
+ * contact) : espace avant une ponctuation, espaces multiples, espace en fin
+ * de ligne. Filet de sécurité pour les templates personnalisés en base
+ * (édités via /outreach) qui utiliseraient {{contact}}/{{site}} sans que la
+ * cible ait ces informations — ça ne rend pas la phrase plus intelligente,
+ * mais ça évite au moins la ponctuation orpheline qui trahit un envoi
+ * automatisé.
+ */
+function cleanupBlanks(text: string) {
+  return text
+    .replace(/ +([,.;:!?])/g, "$1")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]+$/gm, "");
+}
+
 /** Remplace les balises {{contact}}, {{agence}}, {{site}} par les valeurs de la cible. */
 export function substituteTemplate(template: OutreachTemplate, target: OutreachTarget) {
   const replace = (text: string) =>
-    text
-      .replaceAll("{{contact}}", target.contact_name ?? "")
-      .replaceAll("{{agence}}", target.agency_name)
-      .replaceAll("{{site}}", target.website ?? "");
+    cleanupBlanks(
+      text
+        .replaceAll("{{contact}}", target.contact_name ?? "")
+        .replaceAll("{{agence}}", target.agency_name)
+        .replaceAll("{{site}}", target.website ?? ""),
+    );
 
   return { subject: replace(template.subject), text: replace(template.body) };
 }

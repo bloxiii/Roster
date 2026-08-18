@@ -281,7 +281,17 @@ export function OutreachManager({
             {filtered.map((t) => (
               <tr key={t.id} className="border-b border-border/60 last:border-0">
                 <td className="px-4 py-3">
-                  <div className="text-paper">{t.agency_name}</div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-paper">{t.agency_name}</span>
+                    {!t.contact_name && !t.website && (
+                      <span
+                        title="Ni nom de contact ni site connus pour cette cible : les balises {{contact}}/{{site}} du template seront vides à l'envoi."
+                        className="inline-flex items-center rounded-full border border-yellow-400/30 bg-yellow-400/10 px-1.5 py-0.5 text-[10px] text-yellow-400/90"
+                      >
+                        ⚠️
+                      </span>
+                    )}
+                  </div>
                   {t.website && (
                     <a
                       href={t.website}
