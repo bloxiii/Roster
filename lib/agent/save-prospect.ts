@@ -1,5 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import type { ProspectData, AgentMessage } from "./types";
+import type { ProspectData } from "./types";
 import { dispatchProspectNotifications } from "./notifications";
 
 /** Niveaux de qualification qui déclenchent une notification (email/WhatsApp/Notion). */
@@ -11,44 +11,28 @@ const NOTIFY_QUALIFICATIONS = ["HOT", "WARM"];
  *
  * Utilise le service client (pas de session user nécessaire —
  * c'est le widget public qui déclenche cette sauvegarde).
+ *
+ * La conversation elle-même n'est plus créée ici : elle est déjà persistée
+ * (à chaque tour, qualifiée ou non) par upsertConversation() dans
+ * lib/agent/save-conversation.ts, appelé avant ceci depuis /api/agent/chat.
+ * On se contente donc de créer le prospect et de le lier à la conversation
+ * existante via conversationId.
  */
 export async function saveProspect(params: {
   data: ProspectData;
   agentId?: string;
   companyId?: string;
-  conversation?: AgentMessage[];
-  conversationLength?: number;
+  conversationId?: string;
 }): Promise<{ id: string }> {
   const supabase = createServiceClient();
 
-  // 1. Créer la conversation
-  const { data: conversation, error: convError } = await supabase
-    .from("conversations")
-    .insert({
-      company_id: params.companyId,
-      agent_id: params.agentId,
-      status: "completed",
-      messages: (params.conversation ?? []).map((m) => ({
-        role: m.role,
-        content: m.content,
-        timestamp: new Date().toISOString(),
-      })),
-      ended_at: new Date().toISOString(),
-    })
-    .select("id")
-    .single();
-
-  if (convError) {
-    console.error("[save-prospect] Conversation insert failed:", convError);
-  }
-
-  // 2. Créer le prospect
+  // 1. Créer le prospect
   const { data: prospect, error: prospectError } = await supabase
     .from("prospects")
     .insert({
       company_id: params.companyId,
       agent_id: params.agentId,
-      conversation_id: conversation?.id ?? null,
+      conversation_id: params.conversationId ?? null,
       qualification: params.data.qualification,
       data: params.data,
       summary: params.data.resume,
@@ -62,12 +46,12 @@ export async function saveProspect(params: {
     throw new Error("Échec de la sauvegarde du prospect");
   }
 
-  // 3. Lier la conversation au prospect
-  if (conversation?.id) {
+  // 2. Lier la conversation existante au prospect
+  if (params.conversationId) {
     await supabase
       .from("conversations")
       .update({ prospect_id: prospect.id })
-      .eq("id", conversation.id);
+      .eq("id", params.conversationId);
   }
 
   // 4. Notifications multi-canal (email + WhatsApp + Notion) si HOT ou WARM

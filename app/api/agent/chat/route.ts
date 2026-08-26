@@ -6,6 +6,7 @@ import { handlePreflight, withCors } from "@/lib/cors";
 import { chatRequestSchema } from "@/lib/validations";
 import { rateLimiters } from "@/lib/rate-limit";
 import { saveProspect } from "@/lib/agent/save-prospect";
+import { upsertConversation } from "@/lib/agent/save-conversation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { DEMO_COMPANY_PLAN } from "@/lib/demo/agencies";
 
@@ -163,17 +164,29 @@ export async function POST(request: NextRequest) {
 
     const prospect = extractProspectData(rawReply);
     const cleanReply = cleanReplyForDisplay(rawReply);
+    const assistantMsg = { role: "assistant" as const, content: cleanReply };
+    const fullConversation = [...messages, assistantMsg];
+
+    // Persiste la conversation à CHAQUE tour, qualifiée ou non — évite de
+    // perdre l'historique d'une conversation abandonnée avant que l'agent
+    // n'ait extrait de prospect_data (voir lib/agent/save-conversation.ts).
+    await upsertConversation({
+      conversationId,
+      companyId: agent.companyId,
+      agentId: agent.agentId,
+      messages: fullConversation,
+      completed: Boolean(prospect),
+    }).catch((err) => {
+      console.error("[agent/chat] Conversation upsert failed:", err);
+    });
 
     let prospectSaved = false;
     if (prospect) {
-      const assistantMsg = { role: "assistant" as const, content: cleanReply };
-      const fullConversation = [...messages, assistantMsg];
       prospectSaved = await saveProspect({
         data: prospect,
         companyId: agent.companyId,
         agentId: agent.agentId,
-        conversation: fullConversation,
-        conversationLength: fullConversation.length,
+        conversationId,
       })
         .then(() => true)
         .catch((err) => {
