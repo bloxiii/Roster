@@ -51,13 +51,29 @@ function buildAgencyBlock(agency: (typeof DEMO_AGENCIES)[number], index: number)
   // contiennent une apostrophe, qui casserait un '...' classique.
   const quotedName = dollarQuote(agency.name, `${tag}nm`);
 
+  // v_company_id est résolu par SLUG en priorité (la company existe déjà
+  // dès le 2e run) et seulement via auth.users → memberships en fallback,
+  // pour la toute première création. Cible par slug plutôt que par
+  // l'utilisateur : la résolution par utilisateur s'est révélée fragile en
+  // pratique (compte auth supprimé/recréé après le provisioning initial —
+  // les lignes companies/agents restent, orphelines, mais le compte
+  // auth.users disparaît) et provoquait un no-op silencieux (0 ligne
+  // affectée) sans jamais lever d'erreur ni de warning.
   return `  -- ${agency.name} — /demo
-  select id into v_user_id from auth.users where email = '${email}';
-  if v_user_id is null then
-    raise notice 'Compte introuvable pour % — créez-le d''abord dans Authentication > Users, puis relancez ce script.', '${email}';
-  else
-    select company_id into v_company_id from public.memberships where user_id = v_user_id limit 1;
+  select id into v_company_id from public.companies where slug = '${agency.slug}';
 
+  if v_company_id is null then
+    -- Pas encore de company avec ce slug : 1er provisioning, on passe par
+    -- le compte auth (créé à la main, voir ÉTAPE 1 ci-dessus).
+    select id into v_user_id from auth.users where email = '${email}';
+    if v_user_id is null then
+      raise warning 'Compte introuvable pour % et aucune company avec slug=''${agency.slug}'' — créez le compte d''abord dans Authentication > Users, puis relancez ce script.', '${email}';
+    else
+      select company_id into v_company_id from public.memberships where user_id = v_user_id limit 1;
+    end if;
+  end if;
+
+  if v_company_id is not null then
     update public.companies
       set slug = '${agency.slug}',
           name = ${quotedName},
@@ -72,7 +88,16 @@ function buildAgencyBlock(agency: (typeof DEMO_AGENCIES)[number], index: number)
           system_prompt = ${dollarQuote(systemPrompt, `${tag}sp`)}
       where company_id = v_company_id;
 
-    raise notice 'OK — % personnalisé (company_id=%).', ${quotedName}, v_company_id;
+    get diagnostics v_rows = row_count;
+    if v_rows = 0 then
+      -- Ne jamais afficher "OK" sans avoir vérifié qu'une ligne a
+      -- réellement été modifiée — c'est exactement ce silence qui a fait
+      -- croire à un succès la première fois qu'aucune ligne n'était en
+      -- fait affectée.
+      raise warning 'AUCUN agent mis à jour pour % (company_id=%) — vérifier qu''un agent est bien rattaché à cette company.', ${quotedName}, v_company_id;
+    else
+      raise notice 'OK — % personnalisé (company_id=%, % ligne(s) agent mise(s) à jour).', ${quotedName}, v_company_id, v_rows;
+    end if;
   end if;
 `;
 }
@@ -103,6 +128,7 @@ do $$
 declare
   v_user_id uuid;
   v_company_id uuid;
+  v_rows int;
 begin
 ${DEMO_AGENCIES.map((a, i) => buildAgencyBlock(a, i)).join("\n")}end $$;
 `;
