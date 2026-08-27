@@ -63,6 +63,60 @@ indexée). Une scène de démonstration synthétique (pas un vrai bien) est
 disponible sur `/v/demo` pour vérifier que le viewer fonctionne avant
 d'avoir une première reconstruction réelle.
 
+## Démo publique (`/demo`) — agent IA showcase
+
+Pour un visiteur anonyme, `/demo` affiche une agence 100% fictive
+("Atrium Immobilier", voir `lib/demo/agencies.ts`) avec le vrai widget
+Velinova intégré (`public/widget/velinova-widget.js`). Le prompt de son
+agent IA ("Alex") est généré par `lib/demo/system-prompt.ts` — mais
+**modifier ce fichier ne suffit pas** : le prompt réellement utilisé en
+live est celui stocké dans `agents.system_prompt` en base Supabase, il
+faut l'y pousser explicitement après chaque modification.
+
+### Mettre à jour le prompt en prod
+
+1. Modifier `lib/demo/agencies.ts` et/ou `lib/demo/system-prompt.ts`.
+2. Régénérer le SQL : `npm run generate:demo-agencies-sql > supabase/seed/demo-agencies.sql`
+   (commiter ce fichier — ne jamais l'éditer à la main).
+3. Coller **tout** le contenu de `supabase/seed/demo-agencies.sql` dans
+   Supabase Dashboard → **SQL Editor** → Run. Cet environnement (session
+   Claude Code sur le web) n'a pas les identifiants Supabase de prod —
+   cette étape doit être faite à la main par quelqu'un qui y a accès.
+4. **Ne pas se fier au "Success. No rows returned"** affiché par
+   l'éditeur : c'est normal pour un bloc `do $$ ... end $$;` (il ne
+   `SELECT` jamais rien), que la mise à jour ait réellement eu lieu ou
+   non. Le vrai indicateur est le message `NOTICE`/`WARNING` émis par le
+   script (panneau "Logs"/"Messages" sous le résultat, parfois à
+   déplier) : `OK — ... personnalisé (... ligne(s) agent mise(s) à
+   jour)` = succès, `WARNING: AUCUN agent mis à jour` = échec silencieux
+   à investiguer.
+5. Vérifier dans tous les cas avec une requête qui renvoie une vraie
+   ligne (sans ambiguïté possible) :
+   ```sql
+   select a.system_prompt
+   from public.agents a
+   join public.companies c on c.id = a.company_id
+   where c.slug = 'atrium-immobilier';
+   ```
+
+### Piège déjà rencontré (résolu, mais à surveiller)
+
+Le compte auth (`demo@velinova.xyz`) associé à l'origine à cette démo a
+disparu du projet Supabase actuel (compte supprimé/recréé après le
+provisioning initial), alors que les lignes `companies`/`agents` créées
+à l'époque sont toujours là — orphelines. Le générateur SQL résolvait
+la company via `auth.users(email) → memberships`, donc ne retrouvait
+plus rien, ne mettait à jour aucune ligne, et affichait quand même un
+`NOTICE` de succès (aucune vérification du nombre de lignes affectées).
+Le générateur (`scripts/generate-demo-agencies-sql.ts`) résout
+désormais la company **directement par son slug** en priorité (ne
+retombe sur `auth.users` que s'il n'existe encore aucune company avec
+ce slug — tout premier provisioning) et lève un `WARNING` explicite si
+la mise à jour touche 0 ligne. Si un `WARNING` apparaît malgré ça,
+vérifier manuellement dans Supabase qu'une company avec
+`slug = 'atrium-immobilier'` existe bien et qu'un agent lui est
+rattaché, avant de creuser plus loin.
+
 ## Architecture
 
 ```
