@@ -1,5 +1,5 @@
 /**
- * Velinova Chat Widget v1.2
+ * Velinova Chat Widget v1.3
  *
  * Usage recommandé (couleurs pilotées depuis le dashboard Velinova) :
  *   <script src="https://VOTRE-DOMAINE/widget/velinova-widget.js"
@@ -26,6 +26,9 @@
  *   data-velinova-color       — Alias historique de data-velinova-user-color
  *   data-velinova-position    — "right" ou "left" (défaut: "right")
  *   data-velinova-greeting    — Message d'accueil personnalisé (optionnel)
+ *   data-velinova-auto-open   — "true" pour ouvrir le panneau automatiquement
+ *                                au chargement de la page (défaut: fermé,
+ *                                le visiteur clique sur la bulle)
  *
  * Un attribut de couleur explicite dans le HTML est toujours prioritaire sur
  * la config distante — utile pour un aperçu ponctuel différent du dashboard.
@@ -51,6 +54,7 @@
       "",
     position: scriptTag?.getAttribute("data-velinova-position") || "right",
     greeting: scriptTag?.getAttribute("data-velinova-greeting") || "",
+    autoOpen: scriptTag?.getAttribute("data-velinova-auto-open") === "true",
   };
 
   const DEFAULT_COLORS = { bg: "#1a110d", bot: "#2d1f17", user: "#7a2e26" };
@@ -365,6 +369,13 @@
 
       // Lancer le premier message de l'agent
       this.sendToAgent([{ role: "user", content: "Bonjour" }]);
+
+      // Ouverture automatique du panneau au chargement, si configurée —
+      // après le montage du DOM pour que la transition CSS (opacity/transform)
+      // s'anime correctement au lieu de s'afficher déjà ouvert.
+      if (CONFIG.autoOpen) {
+        requestAnimationFrame(() => this.toggle());
+      }
     }
 
     buildUI() {
