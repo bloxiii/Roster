@@ -21,10 +21,16 @@ export function VelinovaEmbed({
   slug,
   widgetKey,
   colors,
+  autoOpen,
 }: {
   slug: string;
   widgetKey: string | null;
   colors?: WidgetColors;
+  /** Ouvre le panneau de chat automatiquement au chargement de la page
+   * (voir data-velinova-auto-open dans velinova-widget.js) — utile sur la
+   * démo publique pour que le visiteur voie l'agent tout de suite au lieu
+   * de devoir cliquer sur la bulle flottante. */
+  autoOpen?: boolean;
 }) {
   return (
     <Script
@@ -36,6 +42,7 @@ export function VelinovaEmbed({
       data-velinova-bg-color={colors?.bg}
       data-velinova-bot-color={colors?.bot}
       data-velinova-user-color={colors?.user}
+      data-velinova-auto-open={autoOpen ? "true" : undefined}
     />
   );
 }

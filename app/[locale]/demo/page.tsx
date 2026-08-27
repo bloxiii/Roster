@@ -137,6 +137,7 @@ export default async function DemoPage({
           bot: agency.branding.primary,
           user: agency.branding.accent,
         }}
+        autoOpen
       />
     </div>
   );
