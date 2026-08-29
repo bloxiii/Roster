@@ -257,15 +257,15 @@ export function OutreachManager({
       </div>
 
       {/* Liste des cibles */}
-      <div className="overflow-hidden rounded-2xl border border-border">
+      <div className="overflow-x-auto rounded-2xl border border-border">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-surface">
+              <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim" />
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Agence</th>
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Coordonnées</th>
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">Statut</th>
               <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim">A répondu ?</th>
-              <th className="px-4 py-3 font-mono text-xs font-normal uppercase tracking-widest text-paper-dim" />
             </tr>
           </thead>
           <tbody className="text-paper-dim">
@@ -280,6 +280,26 @@ export function OutreachManager({
             )}
             {filtered.map((t) => (
               <tr key={t.id} className="border-b border-border/60 last:border-0">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleSend(t.id)}
+                      disabled={sendingId === t.id}
+                      className="rounded-full border border-brass/40 px-4 py-1.5 text-xs font-medium text-brass-bright transition-colors hover:bg-brass/10 disabled:opacity-40"
+                    >
+                      {sendingId === t.id ? "Envoi..." : t.status === "sent" ? "Renvoyer" : "Envoyer"}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(t.id)}
+                      disabled={busyId === t.id}
+                      aria-label="Supprimer"
+                      title="Supprimer"
+                      className="rounded-full border border-red-400/30 px-3 py-1.5 text-xs text-red-400 transition-colors hover:bg-red-400/10 disabled:opacity-40"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                </td>
                 <td className="px-4 py-3">
                   <div className="text-paper">{t.agency_name}</div>
                   {t.website && (
@@ -327,26 +347,6 @@ export function OutreachManager({
                     />
                     Répondu
                   </label>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => handleSend(t.id)}
-                      disabled={sendingId === t.id}
-                      className="rounded-full border border-brass/40 px-4 py-1.5 text-xs font-medium text-brass-bright transition-colors hover:bg-brass/10 disabled:opacity-40"
-                    >
-                      {sendingId === t.id ? "Envoi..." : t.status === "sent" ? "Renvoyer" : "Envoyer"}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(t.id)}
-                      disabled={busyId === t.id}
-                      aria-label="Supprimer"
-                      title="Supprimer"
-                      className="rounded-full border border-red-400/30 px-3 py-1.5 text-xs text-red-400 transition-colors hover:bg-red-400/10 disabled:opacity-40"
-                    >
-                      🗑
-                    </button>
-                  </div>
                 </td>
               </tr>
             ))}
