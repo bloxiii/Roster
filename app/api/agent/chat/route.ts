@@ -167,18 +167,29 @@ export async function POST(request: NextRequest) {
     const assistantMsg = { role: "assistant" as const, content: cleanReply };
     const fullConversation = [...messages, assistantMsg];
 
-    // Persiste la conversation à CHAQUE tour, qualifiée ou non — évite de
-    // perdre l'historique d'une conversation abandonnée avant que l'agent
-    // n'ait extrait de prospect_data (voir lib/agent/save-conversation.ts).
-    await upsertConversation({
-      conversationId,
-      companyId: agent.companyId,
-      agentId: agent.agentId,
-      messages: fullConversation,
-      completed: Boolean(prospect),
-    }).catch((err) => {
-      console.error("[agent/chat] Conversation upsert failed:", err);
-    });
+    // Persiste la conversation dès qu'elle va au-delà du simple chargement
+    // de la page. Le widget envoie automatiquement un "Bonjour" à l'ouverture
+    // pour déclencher le message d'accueil de l'agent (voir ChatWidget.tsx) —
+    // ce premier aller-retour (fullConversation.length === 2) se déclenche
+    // donc à chaque simple ping de la page /demo, y compris les scans
+    // automatiques de liens par les antivirus/passerelles email sur les
+    // liens envoyés en prospection (lib/outreach/email.ts), sans qu'aucun
+    // visiteur réel n'ait rien tapé. On ignore ce tour d'ouverture pour ne
+    // pas polluer l'historique de bots — sauf s'il a exceptionnellement
+    // suffi à qualifier le prospect, auquel cas on sauvegarde quand même
+    // (voir save-conversation.ts pour l'upsert lui-même).
+    const isJustOpeningPing = fullConversation.length <= 2;
+    if (!isJustOpeningPing || prospect) {
+      await upsertConversation({
+        conversationId,
+        companyId: agent.companyId,
+        agentId: agent.agentId,
+        messages: fullConversation,
+        completed: Boolean(prospect),
+      }).catch((err) => {
+        console.error("[agent/chat] Conversation upsert failed:", err);
+      });
+    }
 
     let prospectSaved = false;
     if (prospect) {
