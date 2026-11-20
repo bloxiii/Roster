@@ -99,6 +99,34 @@
   color-scheme: dark;
 }
 
+/*
+ * Palette de /cv (CV interactif d'Enzo) — scope local, n'affecte pas le
+ * reste du site. Volontairement plus vive que la palette "employé
+ * numérique" (encre + laiton) utilisée partout ailleurs : page perso, pas
+ * une page produit Velinova. Même mécanique que .theme-dark ci-dessus
+ * (override des tokens sur le conteneur) pour profiter des mêmes classes
+ * utilitaires (bg-ink, text-brass, bg-brass...) sans dupliquer de styles.
+ */
+.cv-theme {
+  --color-ink: #0a0e1f;
+  --color-ink-soft: #0f1430;
+  --color-surface: #141a3d;
+  --color-surface-hover: #192050;
+  --color-border: #2b3570;
+
+  --color-paper: #f3f5ff;
+  --color-paper-dim: #a9b1e0;
+
+  --color-brass: #22d3ee;
+  --color-brass-bright: #67e8f9;
+  --color-slate: #fb7185;
+  --color-status: #4ade80;
+  --color-on-brass: #06111f;
+
+  --grid-line: rgba(243, 245, 255, 0.05);
+  color-scheme: dark;
+}
+
 @theme inline {
   --color-ink: var(--color-ink);
   --color-ink-soft: var(--color-ink-soft);
