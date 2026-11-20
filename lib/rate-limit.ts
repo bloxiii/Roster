@@ -69,6 +69,11 @@ export const rateLimiters = {
     windowMs: 60 * 60 * 1000,
     maxRequests: 10,
   }),
+  /** /api/cv/chat — 40 requêtes par 10 minutes par IP (page perso, trafic faible attendu). */
+  cvChat: createRateLimiter("cv-chat", {
+    windowMs: 10 * 60 * 1000,
+    maxRequests: 40,
+  }),
   /** /api/tours/public/[slug] — 120 vues par 10 minutes par IP (visiteurs anonymes). */
   publicTourView: createRateLimiter("public-tour-view", {
     windowMs: 10 * 60 * 1000,
